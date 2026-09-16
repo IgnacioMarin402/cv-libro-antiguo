@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+  html,body{margin:0;height:100%;background:radial-gradient(ellipse at 58% 62%, #6b4a24 0%, #2a1c0e 55%, #150d06 100%);overflow:hidden}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+</style>
+<script type="importmap">
+{"imports":{
+  "three":"https://unpkg.com/three@0.160.0/build/three.module.js",
+  "three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"
+}}
+</script>
+</helmet>
+<div ref="{{ wrapRef }}" style="position:relative;width:100vw;height:100vh;background:radial-gradient(ellipse at 58% 62%, #6b4a24 0%, #2a1c0e 55%, #150d06 100%);overflow:hidden">
+  <canvas ref="{{ canvasRef }}" style="display:block;width:100%;height:100%;animation:fadeIn 1.2s ease"></canvas>
+  <div style="position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 58%, transparent 62%, rgba(0,0,0,0.26) 100%)"></div>
+  <div style="position:absolute;left:0;right:0;bottom:22px;text-align:center;pointer-events:none;font:400 11px/1.4 Georgia, 'Times New Roman', serif;letter-spacing:0.12em;color:rgba(214,190,150,0.38);text-transform:uppercase">Arrastra para observar el manuscrito</div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  canvasRef = React.createRef();
+  wrapRef = React.createRef();
+
+  componentDidMount() {
+    this._alive = true;
+    this.initThree();
+  }
+
+  componentWillUnmount() {
+    this._alive = false;
+    if (this._ro) this._ro.disconnect();
+    if (this._raf) cancelAnimationFrame(this._raf);
+    if (this._renderer) this._renderer.dispose();
+  }
+
+  renderVals() {
+    return { canvasRef: this.canvasRef, wrapRef: this.wrapRef };
+  }
+
+  async initThree() {
+    const THREE = await import('three');
+    const { OrbitControls } = await import('three/addons/controls/OrbitControls.js');
+    if (!this._alive) return;
+
+    const canvas = this.canvasRef.current;
+    const wrap = this.wrapRef.current;
+
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.4;
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this._renderer = renderer;
+
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x2a2015, 0.022);
+
+    const camera = new THREE.PerspectiveCamera(38, 1, 0.05, 50);
+    const startPos = new THREE.Vector3(0.15, 1.9, 2.5);
+    const startTarget = new THREE.Vector3(0, 0.3, 0);
+    camera.position.copy(startPos);
+    camera.lookAt(startTarget);
+
+    // ---------- helpers ----------
+    const rand = (a, b) => a + Math.random() * (b - a);
+
+    function wornRect(w, h, opts) {
+      const { segs = 12, jitter = 0, spineJitter = 0 } = opts || {};
+      const halfW = w / 2, halfH = h / 2;
+      const pts = [];
+      function edge(x0, y0, x1, y1, n, jit) {
+        for (let i = 1; i <= n; i++) {
+          const t = i / n;
+          let x = x0 + (x1 - x0) * t, y = y0 + (y1 - y0) * t;
+          if (jit > 0) {
+            const dx = x1 - x0, dy = y1 - y0, len = Math.hypot(dx, dy) || 1;
+            const nx = -dy / len, ny = dx / len;
+            const j = rand(-jit, jit);
+            x += nx * j; y += ny * j;
+          }
+          pts.push(x, y);
+        }
+      }
+      pts.push(-halfW, -halfH);
+      edge(-halfW, -halfH, halfW, -halfH, segs, jitter * 0.55);
+      edge(halfW, -halfH, halfW, halfH, segs, jitter);
+      edge(halfW, halfH, -halfW, halfH, segs, jitter * 0.55);
+      edge(-halfW, halfH, -halfW, -halfH, segs, spineJitter);
+      const shape = new THREE.Shape();
+      shape.moveTo(pts[0], pts[1]);
+      for (let i = 2; i < pts.length; i += 2) shape.lineTo(pts[i], pts[i + 1]);
+      shape.closePath();
+      return shape;
+    }
+
+    function canvasTexture(draw, size) {
+      const c = document.createElement('canvas');
+      c.width = c.height = size;
+      const ctx = c.getContext('2d');
+      draw(ctx, size);
+      const tex = new THREE.CanvasTexture(c);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      return tex;
+    }
+
+    // leather cover texture: mottled worn brown with corner rubbing
+    const coverTex = canvasTexture((ctx, s) => {
+      ctx.fillStyle = '#b08e60';
+      ctx.fillRect(0, 0, s, s);
+      for (let i = 0; i < 900; i++) {
+        const x = Math.random() * s, y = Math.random() * s;
+        const r = rand(2, 22);
+        const shade = Math.random() > 0.5 ? 'rgba(30,18,10,' : 'rgba(150,110,70,';
+        ctx.fillStyle = shade + rand(0.03, 0.12) + ')';
+        ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+      }
+      // corner + edge wear (lighter, rubbed)
+      const g = ctx.createRadialGradient(s * 0.02, s * 0.02, 2, s * 0.02, s * 0.02, s * 0.4);
+      g.addColorStop(0, 'rgba(190,150,100,0.35)'); g.addColorStop(1, 'rgba(190,150,100,0)');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, s, s);
+      ctx.fillStyle = g; ctx.save(); ctx.translate(s, s); ctx.scale(-1, -1); ctx.fillRect(0, 0, s, s); ctx.restore();
+      // fine scratches
+      ctx.strokeStyle = 'rgba(20,12,6,0.15)';
+      for (let i = 0; i < 60; i++) {
+        ctx.beginPath();
+        const x = Math.random() * s, y = Math.random() * s;
+        const a = Math.random() * Math.PI * 2, len = rand(10, 60);
+        ctx.moveTo(x, y); ctx.lineTo(x + Math.cos(a) * len, y + Math.sin(a) * len);
+        ctx.lineWidth = rand(0.5, 1.5); ctx.stroke();
+      }
+    }, 512);
+    coverTex.wrapS = coverTex.wrapT = THREE.RepeatWrapping;
+
+    const coverBump = canvasTexture((ctx, s) => {
+      ctx.fillStyle = '#808080'; ctx.fillRect(0, 0, s, s);
+      for (let i = 0; i < 4000; i++) {
+        const v = rand(-30, 30);
+        ctx.fillStyle = `rgba(${128 + v},${128 + v},${128 + v},0.5)`;
+        ctx.fillRect(Math.random() * s, Math.random() * s, 1.2, 1.2);
+      }
+    }, 512);
+
+    // page-block edge texture: fine horizontal strata, foxed/aged tones, frayed
+    const pagesTex = canvasTexture((ctx, s) => {
+      ctx.fillStyle = '#e2cd9c'; ctx.fillRect(0, 0, s, s);
+      for (let y = 0; y < s; y += rand(2, 4)) {
+        ctx.strokeStyle = `rgba(90,65,35,${rand(0.06, 0.22)})`;
+        ctx.lineWidth = rand(0.5, 1.4);
+        ctx.beginPath(); ctx.moveTo(0, y + rand(-1, 1)); ctx.lineTo(s, y + rand(-1, 1)); ctx.stroke();
+      }
+      for (let i = 0; i < 260; i++) {
+        const x = Math.random() * s, y = Math.random() * s, r = rand(3, 16);
+        ctx.fillStyle = `rgba(120,80,30,${rand(0.05, 0.18)})`;
+        ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+      }
+    }, 512);
+    pagesTex.wrapS = pagesTex.wrapT = THREE.RepeatWrapping;
+    pagesTex.repeat.set(1, 3);
+
+    // wood table texture
+    const woodTex = canvasTexture((ctx, s) => {
+      ctx.fillStyle = '#241408'; ctx.fillRect(0, 0, s, s);
+      for (let y = 0; y < s; y += rand(4, 10)) {
+        ctx.strokeStyle = `rgba(60,32,14,${rand(0.2, 0.5)})`;
+        ctx.lineWidth = rand(1, 3);
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        for (let x = 0; x <= s; x += 40) ctx.lineTo(x, y + Math.sin(x * 0.02 + y) * 6);
+        ctx.stroke();
+      }
+    }, 512);
+    woodTex.wrapS = woodTex.wrapT = THREE.RepeatWrapping;
+    woodTex.repeat.set(6, 6);
+
+    // ---------- book group ----------
+    const book = new THREE.Group();
+    const coverW = 0.46, coverH = 0.62, coverT = 0.014;
+    const pagesT = 0.09;
+
+    const coverMat = new THREE.MeshStandardMaterial({ map: coverTex, bumpMap: coverBump, bumpScale: 0.006, roughness: 0.92, metalness: 0.02, color: 0xffffff });
+    const pagesMat = new THREE.MeshStandardMaterial({ map: pagesTex, roughness: 0.95, metalness: 0, color: 0xffffff });
+    const brassMat = new THREE.MeshStandardMaterial({ color: 0x6b4a24, roughness: 0.5, metalness: 0.55 });
+    const darkGrooveMat = new THREE.MeshStandardMaterial({ color: 0x2c1c0f, roughness: 0.9, metalness: 0.1 });
+
+    function extrudeFlat(shape, depth) {
+      const geo = new THREE.ExtrudeGeometry(shape, { depth, bevelEnabled: false, curveSegments: 1 });
+      geo.rotateX(-Math.PI / 2);
+      return geo;
+    }
+
+    const topCoverGeo = extrudeFlat(wornRect(coverW, coverH, { jitter: 0.0018, spineJitter: 0.0004, segs: 8 }), coverT);
+    const topCover = new THREE.Mesh(topCoverGeo, coverMat);
+    const topSurfaceY = coverT + pagesT + coverT;
+    topCover.position.y = coverT + pagesT;
+    topCover.castShadow = topCover.receiveShadow = true;
+    book.add(topCover);
+
+    const bottomCoverGeo = extrudeFlat(wornRect(coverW, coverH, { jitter: 0.0018, spineJitter: 0.0004, segs: 8 }), coverT);
+    const bottomCover = new THREE.Mesh(bottomCoverGeo, coverMat);
+    bottomCover.position.y = 0;
+    bottomCover.receiveShadow = true;
+    book.add(bottomCover);
+
+    const pagesGeo = extrudeFlat(wornRect(coverW * 0.985, coverH * 0.98, { jitter: 0.005, spineJitter: 0.0004, segs: 9 }), pagesT);
+    const pages = new THREE.Mesh(pagesGeo, pagesMat);
+    pages.position.y = coverT;
+    pages.castShadow = pages.receiveShadow = true;
+    book.add(pages);
+
+    // spine: half-circle cross-section (in local XY), extruded along Z (book length) — no rotation needed
+    const spineR = (2 * coverT + pagesT) / 2 + 0.0003;
+    const spineSegs = 20;
+    const spineShape = new THREE.Shape();
+    spineShape.moveTo(0, 2 * spineR);
+    for (let i = 1; i <= spineSegs; i++) {
+      const t = i / spineSegs;
+      const angle = Math.PI / 2 + Math.PI * t;
+      spineShape.lineTo(spineR * Math.cos(angle), spineR + spineR * Math.sin(angle));
+    }
+    spineShape.lineTo(0, 2 * spineR);
+    spineShape.closePath();
+    const spineDepth = coverH * 1.0;
+    const spineGeo = new THREE.ExtrudeGeometry(spineShape, { depth: spineDepth, bevelEnabled: false, curveSegments: 1 });
+    spineGeo.translate(0, 0, -spineDepth / 2);
+    const spine = new THREE.Mesh(spineGeo, coverMat);
+    spine.position.set(-coverW / 2 + 0.003, 0, 0);
+    spine.castShadow = true;
+    book.add(spine);
+
+    // emblem: raised boss + ring + roman numeral I
+    const emblem = new THREE.Group();
+    const bossR = coverW * 0.16;
+    const groove = new THREE.Mesh(new THREE.CylinderGeometry(bossR * 1.16, bossR * 1.2, 0.004, 40), darkGrooveMat);
+    groove.position.y = topSurfaceY + 0.001;
+    emblem.add(groove);
+    const boss = new THREE.Mesh(new THREE.CylinderGeometry(bossR, bossR * 1.04, 0.014, 40), brassMat);
+    boss.position.y = topSurfaceY + 0.008;
+    boss.castShadow = true;
+    emblem.add(boss);
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(bossR * 0.88, 0.006, 10, 48), darkGrooveMat);
+    ring.rotation.x = Math.PI / 2;
+    ring.position.y = topSurfaceY + 0.017;
+    emblem.add(ring);
+    const barH = bossR * 1.1;
+    const bar = new THREE.Mesh(new THREE.BoxGeometry(bossR * 0.22, 0.02, barH), darkGrooveMat);
+    bar.position.y = topSurfaceY + 0.017;
+    emblem.add(bar);
+    [1, -1].forEach((s) => {
+      const serif = new THREE.Mesh(new THREE.BoxGeometry(bossR * 0.55, 0.02, bossR * 0.18), darkGrooveMat);
+      serif.position.set(0, topSurfaceY + 0.017, s * barH / 2);
+      emblem.add(serif);
+    });
+    emblem.position.set(0, 0, -coverH * 0.16);
+    emblem.children.forEach((m) => (m.castShadow = true));
+    book.add(emblem);
+
+    book.rotation.y = 0.06;
+    scene.add(book);
+
+    // ---------- table ----------
+    const table = new THREE.Mesh(
+      new THREE.CylinderGeometry(2.6, 2.9, 0.12, 48),
+      new THREE.MeshStandardMaterial({ map: woodTex, roughness: 0.85, metalness: 0.05 })
+    );
+    table.position.y = -0.06;
+    table.receiveShadow = true;
+    scene.add(table);
+
+    // ---------- candle ----------
+    const candleGroup = new THREE.Group();
+    const waxMat = new THREE.MeshStandardMaterial({ color: 0xe9dcb8, roughness: 0.6 });
+    const wax = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.05, 0.32, 20), waxMat);
+    wax.position.y = 0.16;
+    wax.castShadow = true;
+    candleGroup.add(wax);
+    const wick = new THREE.Mesh(new THREE.CylinderGeometry(0.004, 0.004, 0.03, 6), new THREE.MeshStandardMaterial({ color: 0x1a1208 }));
+    wick.position.y = 0.335;
+    candleGroup.add(wick);
+    const flameGroup = new THREE.Group();
+    const flameOuter = new THREE.Mesh(
+      new THREE.ConeGeometry(0.014, 0.042, 12),
+      new THREE.MeshBasicMaterial({ color: 0xff7a1e, transparent: true, opacity: 0.85 })
+    );
+    flameOuter.position.y = 0.021;
+    flameGroup.add(flameOuter);
+    const flameInner = new THREE.Mesh(
+      new THREE.ConeGeometry(0.007, 0.022, 12),
+      new THREE.MeshBasicMaterial({ color: 0xfff0b0 })
+    );
+    flameInner.position.y = 0.013;
+    flameGroup.add(flameInner);
+    const glowTex = canvasTexture((ctx, s) => {
+      const g = ctx.createRadialGradient(s / 2, s / 2, 0, s / 2, s / 2, s / 2);
+      g.addColorStop(0, 'rgba(255,180,90,0.9)'); g.addColorStop(1, 'rgba(255,140,60,0)');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, s, s);
+    }, 64);
+    const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }));
+    glow.scale.set(0.11, 0.11, 1);
+    glow.position.y = 0.03;
+    flameGroup.add(glow);
+    flameGroup.position.y = 0.35;
+    candleGroup.add(flameGroup);
+    candleGroup.position.set(0.34, 0, 0.42);
+    scene.add(candleGroup);
+
+    const candleLight = new THREE.PointLight(0xffb066, 7.5, 9, 1.8);
+    candleLight.position.set(0.34, 0.4, 0.42);
+    candleLight.castShadow = true;
+    candleLight.shadow.mapSize.set(1024, 1024);
+    scene.add(candleLight);
+
+    const ambient = new THREE.AmbientLight(0x8a734e, 4.6);
+    scene.add(ambient);
+    const rim = new THREE.PointLight(0x4d5a78, 0.8, 8);
+    rim.position.set(-1.4, 0.9, -1.2);
+    scene.add(rim);
+    const fillLight = new THREE.DirectionalLight(0xfff0d2, 1.5);
+    fillLight.position.set(-1, 2.4, 1.6);
+    scene.add(fillLight);
+
+    // ---------- dust particles ----------
+    const dustCount = 260;
+    const dustGeo = new THREE.BufferGeometry();
+    const dustPos = new Float32Array(dustCount * 3);
+    const dustVel = new Float32Array(dustCount * 3);
+    for (let i = 0; i < dustCount; i++) {
+      dustPos[i * 3] = rand(-1.4, 1.4);
+      dustPos[i * 3 + 1] = rand(0.02, 1.6);
+      dustPos[i * 3 + 2] = rand(-1.4, 1.4);
+      dustVel[i * 3] = rand(-0.004, 0.004);
+      dustVel[i * 3 + 1] = rand(0.006, 0.02);
+      dustVel[i * 3 + 2] = rand(-0.004, 0.004);
+    }
+    dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPos, 3));
+    const dustTex = canvasTexture((ctx, s) => {
+      const g = ctx.createRadialGradient(s / 2, s / 2, 0, s / 2, s / 2, s / 2);
+      g.addColorStop(0, 'rgba(255,220,160,0.9)'); g.addColorStop(1, 'rgba(255,220,160,0)');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, s, s);
+    }, 64);
+    const dustMat = new THREE.PointsMaterial({ size: 0.012, map: dustTex, transparent: true, opacity: 0.55, depthWrite: false, blending: THREE.AdditiveBlending });
+    const dust = new THREE.Points(dustGeo, dustMat);
+    scene.add(dust);
+
+    // ---------- resize ----------
+    const resize = () => {
+      const w = wrap.clientWidth, h = wrap.clientHeight;
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+    };
+    this._ro = new ResizeObserver(resize);
+    this._ro.observe(wrap);
+    resize();
+
+    // ---------- controls (enabled after intro) ----------
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enabled = false;
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
+    controls.target.set(0, topSurfaceY, -coverH * 0.05);
+    controls.minDistance = 0.55;
+    controls.maxDistance = 2.4;
+    controls.minPolarAngle = 0.35;
+    controls.maxPolarAngle = 1.45;
+    controls.enablePan = false;
+
+    const finalPos = new THREE.Vector3(0.35, 0.62, 0.95);
+    const finalTarget = controls.target.clone();
+
+    const introDuration = 2000;
+    const introStart = performance.now();
+    const easeInOutCubic = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+
+    const clock = new THREE.Clock();
+    const tmpTarget = new THREE.Vector3();
+
+    const animate = () => {
+      this._raf = requestAnimationFrame(animate);
+      const t = clock.getElapsedTime();
+
+      // candle flicker
+      const flicker = 6.5 + Math.sin(t * 9.3) * 0.5 + Math.sin(t * 23.1) * 0.3 + (Math.random() - 0.5) * 0.6;
+      candleLight.intensity = Math.max(4.5, flicker);
+      flameGroup.scale.y = 1 + Math.sin(t * 14) * 0.08 + Math.sin(t * 31) * 0.04;
+      flameGroup.rotation.z = Math.sin(t * 6) * 0.05;
+
+      // dust drift
+      const pos = dustGeo.attributes.position.array;
+      for (let i = 0; i < dustCount; i++) {
+        pos[i * 3] += dustVel[i * 3];
+        pos[i * 3 + 1] += dustVel[i * 3 + 1];
+        pos[i * 3 + 2] += dustVel[i * 3 + 2];
+        if (pos[i * 3 + 1] > 1.7) pos[i * 3 + 1] = 0.02;
+      }
+      dustGeo.attributes.position.needsUpdate = true;
+
+      const now = performance.now();
+      if (now - introStart < introDuration) {
+        const p = easeInOutCubic(Math.min(1, (now - introStart) / introDuration));
+        camera.position.lerpVectors(startPos, finalPos, p);
+        tmpTarget.lerpVectors(startTarget, finalTarget, p);
+        camera.lookAt(tmpTarget);
+        controls.target.copy(tmpTarget);
+      } else if (!controls.enabled) {
+        controls.enabled = true;
+        camera.position.copy(finalPos);
+        controls.target.copy(finalTarget);
+      }
+
+      controls.update();
+      renderer.render(scene, camera);
+    };
+    animate();
+  }
+}
+
+</script>
+</body>
+</html>

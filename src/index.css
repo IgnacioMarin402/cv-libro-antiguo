@@ -1,0 +1,49 @@
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: radial-gradient(ellipse at 58% 62%, #6b4a24 0%, #2a1c0e 55%, #150d06 100%);
+  overflow: hidden;
+}
+
+#root {
+  width: 100vw;
+  height: 100vh;
+}
+
+.scene-wrap {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  background: radial-gradient(ellipse at 58% 62%, #6b4a24 0%, #2a1c0e 55%, #150d06 100%);
+  overflow: hidden;
+}
+
+.vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 50% 58%, transparent 62%, rgba(0, 0, 0, 0.26) 100%);
+}
+
+.hint {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 22px;
+  text-align: center;
+  pointer-events: none;
+  font: 400 11px/1.4 Georgia, 'Times New Roman', serif;
+  letter-spacing: 0.12em;
+  color: rgba(214, 190, 150, 0.38);
+  text-transform: uppercase;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
