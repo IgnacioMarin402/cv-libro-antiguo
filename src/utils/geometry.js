@@ -42,8 +42,37 @@ export function wornRect(w, h, opts = {}) {
 }
 
 // Extrudes a flat XY shape along Z, then lays it down on the XZ plane.
-export function extrudeFlat(shape, depth) {
-  const geo = new THREE.ExtrudeGeometry(shape, { depth, bevelEnabled: false, curveSegments: 1 })
+//
+// When `uv` ({ width, height }) is given, top/bottom face UVs are remapped
+// to a standard 0..1 box spanning that size instead of three.js's default
+// (which uses the shape's raw local coordinates as UV, so a centered shape
+// samples the texture around its wrap seam rather than corner-to-corner).
+// This lets a texture be authored as a normal "(0,0) = one corner, (1,1) =
+// the opposite corner" image.
+export function extrudeFlat(shape, depth, { uv } = {}) {
+  const uvGenerator = uv && {
+    generateTopUV(geometry, vertices, a, b, c) {
+      return [a, b, c].map((i) => {
+        const x = vertices[i * 3]
+        const y = vertices[i * 3 + 1]
+        return new THREE.Vector2(x / uv.width + 0.5, y / uv.height + 0.5)
+      })
+    },
+    generateSideWallUV(geometry, vertices, a, b, c, d) {
+      const alongX = Math.abs(vertices[a * 3 + 1] - vertices[b * 3 + 1]) < Math.abs(vertices[a * 3] - vertices[b * 3])
+      return [a, b, c, d].map((i) => {
+        const u = alongX ? vertices[i * 3] / uv.width + 0.5 : vertices[i * 3 + 1] / uv.height + 0.5
+        return new THREE.Vector2(u, 1 - vertices[i * 3 + 2] / depth)
+      })
+    },
+  }
+
+  const geo = new THREE.ExtrudeGeometry(shape, {
+    depth,
+    bevelEnabled: false,
+    curveSegments: 1,
+    ...(uvGenerator ? { UVGenerator: uvGenerator } : {}),
+  })
   geo.rotateX(-Math.PI / 2)
   return geo
 }

@@ -1,6 +1,7 @@
 import { Canvas } from '@react-three/fiber'
 import * as THREE from 'three'
 import Scene from './Scene'
+import { createEnvironmentTexture } from './utils/textures'
 
 export default function App() {
   return (
@@ -16,6 +17,7 @@ export default function App() {
           gl.toneMappingExposure = 1.4
           gl.outputColorSpace = THREE.SRGBColorSpace
           scene.fog = new THREE.FogExp2(0x2a2015, 0.022)
+          scene.environment = createEnvironmentTexture()
         }}
       >
         <Scene />

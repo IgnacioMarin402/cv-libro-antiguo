@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import * as THREE from 'three'
 import { wornRect, extrudeFlat } from '../utils/geometry'
 import { createCoverTexture, createCoverBumpTexture, createPagesTexture } from '../utils/textures'
-import { BOOK, topSurfaceY } from '../utils/constants'
+import { BOOK } from '../utils/constants'
 
 export default function Book() {
   const { coverW, coverH, coverT, pagesT } = BOOK
@@ -16,7 +16,7 @@ export default function Book() {
       new THREE.MeshStandardMaterial({
         map: coverTex,
         bumpMap: coverBump,
-        bumpScale: 0.006,
+        bumpScale: 0.005,
         roughness: 0.92,
         metalness: 0.02,
         color: 0xffffff,
@@ -27,22 +27,20 @@ export default function Book() {
     () => new THREE.MeshStandardMaterial({ map: pagesTex, roughness: 0.95, metalness: 0, color: 0xffffff }),
     [pagesTex]
   )
-  const brassMat = useMemo(
-    () => new THREE.MeshStandardMaterial({ color: 0x6b4a24, roughness: 0.5, metalness: 0.55 }),
-    []
-  )
-  const darkGrooveMat = useMemo(
-    () => new THREE.MeshStandardMaterial({ color: 0x2c1c0f, roughness: 0.9, metalness: 0.1 }),
-    []
-  )
+  // Plain leather tone (no map) rather than reusing coverMat: the spine's
+  // extrusion isn't UV-normalized like the cover faces, so sampling the
+  // gilt-covered coverTex there would smear a stray fragment of border or
+  // corner ornament onto the spine edge.
+  const spineMat = useMemo(() => new THREE.MeshStandardMaterial({ color: 0x6b4423, roughness: 0.9, metalness: 0.03 }), [])
 
+  const coverUV = useMemo(() => ({ width: coverW, height: coverH }), [coverW, coverH])
   const topCoverGeo = useMemo(
-    () => extrudeFlat(wornRect(coverW, coverH, { jitter: 0.0018, spineJitter: 0.0004, segs: 8 }), coverT),
-    [coverW, coverH, coverT]
+    () => extrudeFlat(wornRect(coverW, coverH, { jitter: 0.0018, spineJitter: 0.0004, segs: 8 }), coverT, { uv: coverUV }),
+    [coverW, coverH, coverT, coverUV]
   )
   const bottomCoverGeo = useMemo(
-    () => extrudeFlat(wornRect(coverW, coverH, { jitter: 0.0018, spineJitter: 0.0004, segs: 8 }), coverT),
-    [coverW, coverH, coverT]
+    () => extrudeFlat(wornRect(coverW, coverH, { jitter: 0.0018, spineJitter: 0.0004, segs: 8 }), coverT, { uv: coverUV }),
+    [coverW, coverH, coverT, coverUV]
   )
   const pagesGeo = useMemo(
     () =>
@@ -69,36 +67,12 @@ export default function Book() {
     return geo
   }, [coverT, pagesT, coverH])
 
-  const bossR = coverW * 0.16
-  const barH = bossR * 1.1
-
   return (
     <group rotation-y={0.06}>
       <mesh geometry={topCoverGeo} material={coverMat} position-y={coverT + pagesT} castShadow receiveShadow />
       <mesh geometry={bottomCoverGeo} material={coverMat} receiveShadow />
       <mesh geometry={pagesGeo} material={pagesMat} position-y={coverT} castShadow receiveShadow />
-      <mesh geometry={spineGeo} material={coverMat} position={[-coverW / 2 + 0.003, 0, 0]} castShadow />
-
-      {/* emblem: raised brass boss + ring + roman numeral I */}
-      <group position={[0, 0, -coverH * 0.16]}>
-        <mesh material={darkGrooveMat} position-y={topSurfaceY + 0.001} castShadow>
-          <cylinderGeometry args={[bossR * 1.16, bossR * 1.2, 0.004, 40]} />
-        </mesh>
-        <mesh material={brassMat} position-y={topSurfaceY + 0.008} castShadow>
-          <cylinderGeometry args={[bossR, bossR * 1.04, 0.014, 40]} />
-        </mesh>
-        <mesh material={darkGrooveMat} position-y={topSurfaceY + 0.017} rotation-x={Math.PI / 2} castShadow>
-          <torusGeometry args={[bossR * 0.88, 0.006, 10, 48]} />
-        </mesh>
-        <mesh material={darkGrooveMat} position-y={topSurfaceY + 0.017} castShadow>
-          <boxGeometry args={[bossR * 0.22, 0.02, barH]} />
-        </mesh>
-        {[1, -1].map((s) => (
-          <mesh key={s} material={darkGrooveMat} position={[0, topSurfaceY + 0.017, (s * barH) / 2]} castShadow>
-            <boxGeometry args={[bossR * 0.55, 0.02, bossR * 0.18]} />
-          </mesh>
-        ))}
-      </group>
+      <mesh geometry={spineGeo} material={spineMat} position={[-coverW / 2 + 0.003, 0, 0]} castShadow />
     </group>
   )
 }
