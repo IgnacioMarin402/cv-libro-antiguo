@@ -257,6 +257,33 @@ export function createCoverBumpTexture() {
   return tex
 }
 
+// Inside cover: plain smooth leather, same family of brown as the outer
+// cover but with no gilt tooling and only soft mottling — a bare doublure
+// rather than the decorated face.
+export function createCoverInnerTexture() {
+  const tex = canvasTexture((ctx, s) => {
+    ctx.fillStyle = '#5c3a21'
+    ctx.fillRect(0, 0, s, s)
+    for (let i = 0; i < 1200; i++) {
+      const x = Math.random() * s
+      const y = Math.random() * s
+      const r = rand(8, 46)
+      const shade = Math.random() > 0.5 ? 'rgba(30,18,10,' : 'rgba(140,100,65,'
+      ctx.fillStyle = shade + rand(0.02, 0.07) + ')'
+      ctx.beginPath()
+      ctx.arc(x, y, r, 0, Math.PI * 2)
+      ctx.fill()
+    }
+    const g = ctx.createRadialGradient(s * 0.5, s * 0.5, s * 0.08, s * 0.5, s * 0.5, s * 0.72)
+    g.addColorStop(0, 'rgba(150,110,70,0.16)')
+    g.addColorStop(1, 'rgba(15,9,5,0.3)')
+    ctx.fillStyle = g
+    ctx.fillRect(0, 0, s, s)
+  }, 512)
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping
+  return tex
+}
+
 // Page-block edge: fine horizontal strata with foxed/aged tone spots.
 export function createPagesTexture() {
   const tex = canvasTexture((ctx, s) => {

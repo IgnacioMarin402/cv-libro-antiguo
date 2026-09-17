@@ -23,7 +23,7 @@ export default function App() {
         <Scene />
       </Canvas>
       <div className="vignette" />
-      <div className="hint">Arrastra para observar el manuscrito</div>
+      <div className="hint">Arrastra para observar · Haz clic en la tapa para abrir el manuscrito</div>
     </div>
   )
 }

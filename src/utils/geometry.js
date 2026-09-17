@@ -49,7 +49,15 @@ export function wornRect(w, h, opts = {}) {
 // samples the texture around its wrap seam rather than corner-to-corner).
 // This lets a texture be authored as a normal "(0,0) = one corner, (1,1) =
 // the opposite corner" image.
-export function extrudeFlat(shape, depth, { uv } = {}) {
+//
+// When `splitCaps` is set, the geometry gets three material groups instead
+// of ExtrudeGeometry's default two (lid faces combined + sides): 0 = bottom
+// cap (the face at local Y 0 after the rotate below — i.e. the underside,
+// facing the hinge), 1 = side walls, 2 = top cap (the outward-facing side).
+// This lets a hinged panel (e.g. a book cover) use a different material for
+// its inside vs. outside face. Safe because three.js emits the bottom cap's
+// triangles first and the top cap's second, in equal counts.
+export function extrudeFlat(shape, depth, { uv, splitCaps = false } = {}) {
   const uvGenerator = uv && {
     generateTopUV(geometry, vertices, a, b, c) {
       return [a, b, c].map((i) => {
@@ -74,5 +82,16 @@ export function extrudeFlat(shape, depth, { uv } = {}) {
     ...(uvGenerator ? { UVGenerator: uvGenerator } : {}),
   })
   geo.rotateX(-Math.PI / 2)
+
+  if (splitCaps) {
+    const [lid, sides] = geo.groups
+    const half = lid.count / 2
+    geo.groups = [
+      { start: lid.start, count: half, materialIndex: 0 },
+      { start: sides.start, count: sides.count, materialIndex: 1 },
+      { start: lid.start + half, count: half, materialIndex: 2 },
+    ]
+  }
+
   return geo
 }
