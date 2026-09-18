@@ -5,10 +5,10 @@
 // opening.js and pageStack.js.
 
 export const BOOK = {
-  coverW: 0.46,
-  coverH: 0.62,
-  coverT: 0.014,
-  pagesT: 0.09,
+  coverW: 0.39,
+  coverH: 0.527,
+  coverT: 0.0119,
+  pagesT: 0.0765,
 }
 
 // Height of the closed book's top face — the reference the camera frames
