@@ -1,5 +1,5 @@
 import PageLeaf from './PageLeaf'
-import { MAX_PAGES, PAGE_WIDTH, PAGE_THICKNESS, SPINE_RADIUS } from '../domain/binding'
+import { MAX_PAGES, PAGE_WIDTH, PAGE_THICKNESS, SPINE_HALF_HEIGHT } from '../domain/binding'
 import { unreadLeafY, readPileOffset, restTilt } from '../domain/pageStack'
 import { PAGE_CURL_AMPLITUDE } from '../domain/flipMotion'
 
@@ -41,7 +41,7 @@ export default function PageBlock({
         restBend={restBend}
         curlAmplitude={PAGE_CURL_AMPLITUDE}
         parentAngleRef={spineAngleRef}
-        pivotYOffset={SPINE_RADIUS}
+        pivotYOffset={SPINE_HALF_HEIGHT}
         onClick={flipped ? onClose : onTurn}
         onPointerOver={onPointerOver}
         onPointerOut={onPointerOut}

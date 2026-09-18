@@ -1,4 +1,4 @@
-import { BOOK } from './binding'
+import { BOOK, PAGE_WIDTH } from './binding'
 
 // How the book opens: the angles its three moving parts settle at, as pure
 // functions of reading state (is it open, how many leaves have been turned).
@@ -19,7 +19,7 @@ export const COVER_MAX_ANGLE = Math.PI - Math.PI * (65 / 180)
 // open, it settles at 90° minus this, i.e. ~54° — partway toward lying on
 // its rounded side rather than staying rigidly vertical while everything
 // around it opens.
-export const SPINE_TILT_ANGLE = Math.PI * 0.2
+export const SPINE_TILT_ANGLE = Math.PI * 0.35
 
 // The front cover leads: it swings to the resting angle the moment the book
 // is opened and stays there, bearing the read pile from then on.
@@ -36,8 +36,14 @@ export const backCoverAngle = (open, pagesTurned, totalPages) =>
 // with them rather than after them.
 export const spineTiltAngle = (open) => (open ? SPINE_TILT_ANGLE : 0)
 
-// Height of the front cover's far edge at a given opening angle — the shelf
-// the read pile stacks up from. A function of the live angle, not a fixed
-// number, because that cover keeps lowering as more pages are turned, and
-// the pile has to keep riding it down (see pageStack).
-export const coverShelfY = (angle) => BOOK.coverT + BOOK.pagesT + BOOK.coverW * Math.sin(angle)
+// Height of a read leaf's own far edge at a given opening angle — the shelf
+// the read pile stacks up from. Measured by the leaf's own reach
+// (PAGE_WIDTH), not the cover's (BOOK.coverW): a page hinges at the same
+// point and angle as the front cover but is shorter, so its far edge lands
+// short of the cover's — using the cover's own length here left every
+// flipped leaf floating off of that shelf by the gap between the two
+// widths (worse the wider the book opens), instead of landing flush on the
+// spine bridge like the unread pile does. A function of the live angle,
+// not a fixed number, because that cover keeps lowering as more pages are
+// turned, and the pile has to keep riding it down (see pageStack).
+export const coverShelfY = (angle) => BOOK.coverT + BOOK.pagesT + PAGE_WIDTH * Math.sin(angle)

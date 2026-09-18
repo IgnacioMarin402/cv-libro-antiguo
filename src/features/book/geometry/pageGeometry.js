@@ -1,5 +1,5 @@
 import { buildPageGrid, pageSpineBend, pageGridGeometry } from './pageSheet'
-import { PAGE_WIDTH, PAGE_HEIGHT, PAGE_THICKNESS, SPINE_RADIUS } from '../domain/binding'
+import { PAGE_WIDTH, PAGE_HEIGHT, PAGE_THICKNESS, SPINE_HALF_HEIGHT } from '../domain/binding'
 
 // This book's leaf, built out of the generic bendable-sheet math in
 // pageSheet.js with the binding's own measurements.
@@ -22,7 +22,7 @@ export function createPageGrid() {
 // run out doesn't risk poking through it; it only makes the curve gentler
 // per unit length.
 export function createPageRestBend() {
-  return pageSpineBend(SPINE_RADIUS * 0.15, SPINE_RADIUS * 0.18, PAGE_WIDTH * 0.3)
+  return pageSpineBend(SPINE_HALF_HEIGHT * 0.15, SPINE_HALF_HEIGHT * 0.18, PAGE_WIDTH * 0.3)
 }
 
 // The shared, static geometry every leaf renders with at rest. Leaves only

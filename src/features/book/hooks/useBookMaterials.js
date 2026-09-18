@@ -42,8 +42,14 @@ export function useBookMaterials() {
   // Plain leather tone (no map) rather than reusing coverMat: the spine's
   // extrusion isn't UV-normalized like the cover faces, so sampling the
   // gilt-covered coverTex there would smear a stray fragment of border or
-  // corner ornament onto the spine edge.
-  const spineMat = useMemo(() => new THREE.MeshStandardMaterial({ color: 0x6b4423, roughness: 0.9, metalness: 0.03 }), [])
+  // corner ornament onto the spine edge. DoubleSide because the spine is a
+  // zero-thickness bridge strip (see geometry/spineGeometry) rather than a
+  // solid cap — a single-sided sheet would vanish when its curve turns it
+  // away from the camera, e.g. viewed from inside the open book.
+  const spineMat = useMemo(
+    () => new THREE.MeshStandardMaterial({ color: 0x6b4423, roughness: 0.9, metalness: 0.03, side: THREE.DoubleSide }),
+    []
+  )
   // Front cover: underside (facing the pages when closed) is the plain
   // doublure, outward face is the gilt-tooled leather.
   const topCoverMaterials = useMemo(() => [coverInnerMat, coverMat, coverMat], [coverInnerMat, coverMat])

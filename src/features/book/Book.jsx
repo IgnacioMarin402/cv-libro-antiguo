@@ -44,7 +44,14 @@ export default function Book({ open = false, onOpenChange }) {
 
   return (
     <group rotation-y={0.06}>
-      <Spine geometry={spineGeo} material={spineMat} open={open} angleRef={hinges.spineAngleRef}>
+      <Spine
+        geometry={spineGeo}
+        material={spineMat}
+        open={open}
+        angleRef={hinges.spineAngleRef}
+        frontAngleRef={hinges.frontAngleRef}
+        backAngleRef={hinges.backAngleRef}
+      >
         <PageBlock
           geometry={pageGeo}
           material={pagesMat}

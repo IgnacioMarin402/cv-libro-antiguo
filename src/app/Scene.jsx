@@ -6,7 +6,14 @@ import { Helmet } from '@/features/helmet'
 import { DustParticles } from '@/features/dust'
 import { Lighting } from '@/features/lighting'
 import { CameraRig } from '@/features/camera'
-import { CANDLE_HOLDER_POSITION, CANDLE_POSITION, FLAME_POSITION, HELMET_POSITION } from './scene/layout'
+import { PageCurlBook } from '@/features/pageCurlBook'
+import {
+  CANDLE_HOLDER_POSITION,
+  CANDLE_POSITION,
+  FLAME_POSITION,
+  HELMET_POSITION,
+  PAGE_CURL_BOOK_POSITION,
+} from './scene/layout'
 
 // The scene assembled from its features. The one piece of state that
 // crosses a feature boundary lives here: whether the book is open, which
@@ -23,6 +30,7 @@ export default function Scene() {
       <Candle position={CANDLE_POSITION} />
       <FireAudio position={FLAME_POSITION} />
       <Helmet position={HELMET_POSITION} />
+      <PageCurlBook position={PAGE_CURL_BOOK_POSITION} />
       <DustParticles />
       <CameraRig open={isOpen} />
     </>

@@ -2,7 +2,6 @@ import { useEffect, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { computeBentPositions } from '../geometry/pageSheet'
 import { HINGE_X } from '../domain/binding'
-import { faceNormal, STACK_LIFT_SCALE } from '../domain/pageStack'
 import { leafFlipStyle, arcLift, travelingCurl } from '../domain/flipMotion'
 
 // Animates a page leaf's hinge. Unlike a cover, a page's resting spot
@@ -138,20 +137,22 @@ export function usePageFlip(
       // that group — still physically swings along with the spine instead
       // of staying anchored to a point the spine has rotated away from.
       const parentAngle = parentAngleRef ? parentAngleRef.current : 0
-      g.rotation.z = angleRef.current - parentAngle
-      // stackRef lifts a settled leaf off of whatever it's piled on *along
-      // the leaf's own face* (faceNormal), not straight up in world Y. A
-      // Y-only lift only clears the surface it's resting on while that
-      // surface is still close to horizontal; once open, the front cover
-      // rests well past vertical (see COVER_MAX_ANGLE), where a Y-only
-      // nudge barely separates a leaf from its face — and can even settle
-      // it fractionally *behind*, since the leaf shares the cover's exact
-      // rotation. Projecting the offset onto the face normal instead keeps
-      // it visibly clear of whatever it's stacked on at any opening angle.
-      const n = faceNormal(angleRef.current)
-      const verticalLift = -Math.abs(stackRef.current) * STACK_LIFT_SCALE
-      g.position.x = HINGE_X + stackRef.current * n.x
-      g.position.y = farYRef.current - sweepRadius * Math.sin(angleRef.current) - pivotYOffset + stackRef.current * n.y + verticalLift
+      // stackRef used to translate the whole pivot off of whatever the leaf
+      // rests on, which separated it from the pile below but also dragged
+      // its near/hinge edge away from the spine bridge by the same amount —
+      // a settled leaf several sheets deep in the read pile would visibly
+      // float clear of the gutter instead of growing out of it. A real
+      // riffled stack doesn't slide its bound edge away from the spine
+      // either: each sheet stays pinned at the same point and just opens a
+      // hair wider than the one under it. Turning the offset into a small
+      // extra rotation around the *same* fixed pivot reproduces that: the
+      // near edge never moves (rotation doesn't displace its own origin),
+      // while the far edge still swings clear by approximately stackRef
+      // (arc length ≈ radius × angle for a small angle).
+      const stackTilt = -stackRef.current / sweepRadius
+      g.rotation.z = angleRef.current - parentAngle + stackTilt
+      g.position.x = HINGE_X
+      g.position.y = farYRef.current - sweepRadius * Math.sin(angleRef.current) - pivotYOffset
     }
   })
 }

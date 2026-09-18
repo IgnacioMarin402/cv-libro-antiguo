@@ -43,11 +43,10 @@ export function buildPageGrid(width, height, opts = {}) {
 
 // A permanent hook near the hinge that wraps a leaf toward the spine
 // (-X) and up (+Y) before releasing it flat, instead of just lifting it —
-// the spine's own rounded bulk stays hidden behind the closed front cover,
-// but once that cover swings away the bulk is exposed, and a leaf that
-// only rose in Y still ends its flat run short of it, reading as a
-// separate floating slab rather than paper that grows out of the spine.
-// Both the wrap (`wrapShape`) and the lift (`ease`) are zero-value/zero-
+// once a cover swings open, a leaf that only rose in Y still ends its flat
+// run short of the spine strip standing behind the hinge, reading as a
+// separate floating slab rather than paper that grows out of it. Both
+// the wrap (`wrapShape`) and the lift (`ease`) are zero-value/zero-
 // slope at u = 0 (tangent to the flat hinge) and the wrap is *also*
 // zero-slope at u = transition (so it releases into the flat continuation
 // without a crease); the lift's ease has zero slope there too, so what's
