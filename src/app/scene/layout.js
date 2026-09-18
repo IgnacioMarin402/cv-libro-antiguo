@@ -1,5 +1,5 @@
 import { HOLDER_CUP_Y, FLAME_OFFSET_Y } from '@/features/candle'
-import { PAGE_HEIGHT } from '@/features/pageCurlBook'
+import { STACK_CLEARANCE_Y } from '@/features/pageCurlBook'
 
 // Where each prop stands on the table. The book holds the origin — it's what
 // the scene is about and what the camera frames against — and everything
@@ -21,8 +21,7 @@ export const FLAME_POSITION = [CANDLE_X, HOLDER_CUP_Y + FLAME_OFFSET_Y, CANDLE_Z
 // enough to stay in frame at the default camera distance.
 export const HELMET_POSITION = [0.5, 0, -0.18]
 
-// West of the book: the bone-chain comparison book (see features/pageCurlBook),
-// stood up on its spine like a book propped on a stand rather than laid
-// flat — it hinges around a different local axis than ours, so standing it
-// up reads naturally without reworking that borrowed rotation math.
-export const PAGE_CURL_BOOK_POSITION = [-0.62, PAGE_HEIGHT / 2, 0.05]
+// West of the book: the bone-chain comparison book (see
+// features/pageCurlBook), lying flat on the table like ours — lifted just
+// enough to clear its own closed-stack thickness.
+export const PAGE_CURL_BOOK_POSITION = [-0.62, STACK_CLEARANCE_Y, 0.05]

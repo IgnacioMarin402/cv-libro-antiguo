@@ -1,2 +1,2 @@
 export { default as PageCurlBook } from './PageCurlBook'
-export { PAGE_HEIGHT } from './domain/pageCurl'
+export { STACK_CLEARANCE_Y } from './domain/pageCurl'

@@ -18,6 +18,11 @@ export const PAGE_SEGMENTS = 30
 export const SEGMENT_WIDTH = PAGE_WIDTH / PAGE_SEGMENTS
 export const PAGE_COUNT = 10
 
+// Half the closed stack's thickness — lifts the book so its bottom face
+// rests on the table instead of poking through it (see PageCurlBook's
+// rotation, which turns the stacking axis vertical).
+export const STACK_CLEARANCE_Y = (PAGE_COUNT * PAGE_DEPTH) / 2
+
 // How long a turn's extra mid-flex lasts, in ms — the tutorial's own value.
 export const TURN_DURATION = 400
 
