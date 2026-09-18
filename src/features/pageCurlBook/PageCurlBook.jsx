@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import Page from './components/Page'
 import { usePageMaterials } from './hooks/usePageMaterials'
+import { useTurnQueue } from './hooks/useTurnQueue'
+import { useTableLift } from './hooks/useTableLift'
 import { PAGE_COUNT } from './domain/pageCurl'
 
 // A second book, built with the bone-chain "page-curl" technique from the
@@ -19,7 +21,13 @@ import { PAGE_COUNT } from './domain/pageCurl'
 // already baked into that mapping — verified live, not just derived).
 export default function PageCurlBook(props) {
   const [page, setPage] = useState(0)
-  const materials = usePageMaterials()
+  // What the book is showing trails what the reader asked for: a jump of
+  // several sheets turns them one after another (see useTurnQueue).
+  const shownPage = useTurnQueue(page)
+  const { paper, cover } = usePageMaterials()
+  const closedBook = shownPage === 0 || shownPage === PAGE_COUNT
+  // Open leaves hang below the hinge, so the book rides up while it's open.
+  const lift = useTableLift(closedBook)
 
   const handlePointerOver = (e) => {
     e.stopPropagation()
@@ -31,26 +39,31 @@ export default function PageCurlBook(props) {
 
   return (
     <group {...props}>
-      <group rotation-y={Math.PI / 2} rotation-z={Math.PI / 2}>
-        {Array.from({ length: PAGE_COUNT }, (_, number) => {
-          const opened = page > number
-          return (
-            <Page
-              key={number}
-              number={number}
-              page={page}
-              opened={opened}
-              closedBook={page === 0 || page === PAGE_COUNT}
-              materials={materials}
-              onClick={(e) => {
-                e.stopPropagation()
-                setPage(opened ? number : number + 1)
-              }}
-              onPointerOver={handlePointerOver}
-              onPointerOut={handlePointerOut}
-            />
-          )
-        })}
+      <group ref={lift}>
+        <group rotation-y={Math.PI / 2} rotation-z={Math.PI / 2}>
+          {Array.from({ length: PAGE_COUNT }, (_, number) => {
+            const opened = shownPage > number
+            // The outermost leaf on each side is a cover: the tilt puts leaf
+            // 0 on top of the closed stack and the last one underneath it.
+            const isCover = number === 0 || number === PAGE_COUNT - 1
+            return (
+              <Page
+                key={number}
+                number={number}
+                page={shownPage}
+                opened={opened}
+                closedBook={closedBook}
+                materials={isCover ? cover : paper}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setPage(opened ? number : number + 1)
+                }}
+                onPointerOver={handlePointerOver}
+                onPointerOut={handlePointerOut}
+              />
+            )
+          })}
+        </group>
       </group>
     </group>
   )

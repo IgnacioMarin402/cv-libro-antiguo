@@ -1,5 +1,5 @@
 import { HOLDER_CUP_Y, FLAME_OFFSET_Y } from '@/features/candle'
-import { STACK_CLEARANCE_Y } from '@/features/pageCurlBook'
+import { TABLE_CLEARANCE_Y } from '@/features/pageCurlBook'
 
 // Where each prop stands on the table. The book holds the origin — it's what
 // the scene is about and what the camera frames against — and everything
@@ -23,5 +23,6 @@ export const HELMET_POSITION = [0.5, 0, -0.18]
 
 // West of the book: the bone-chain comparison book (see
 // features/pageCurlBook), lying flat on the table like ours — lifted just
-// enough to clear its own closed-stack thickness.
-export const PAGE_CURL_BOOK_POSITION = [-0.62, STACK_CLEARANCE_Y, 0.05]
+// enough that the curl of an open leaf clears the table instead of sinking
+// through it.
+export const PAGE_CURL_BOOK_POSITION = [-0.62, TABLE_CLEARANCE_Y, 0.05]

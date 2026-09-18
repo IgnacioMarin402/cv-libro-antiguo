@@ -1,13 +1,16 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
+import { smoothDampAngle } from '@/shared/math/easing'
 import {
+  PAGE_SEGMENTS,
   TURN_DURATION,
   INSIDE_CURVE_STRENGTH,
   OUTSIDE_CURVE_STRENGTH,
   TURNING_CURVE_STRENGTH,
-  ROTATION_DAMPING,
-  FOLD_DAMPING,
+  ROTATION_SMOOTH_TIME,
+  FOLD_SMOOTH_TIME,
+  FAN_STEP,
 } from '../domain/pageCurl'
 
 // Bends a page's bone chain toward its flat-open or flat-closed pose, plus
@@ -19,9 +22,15 @@ import {
 // instead of snapping between two flat poses. `opened` sets which flat
 // pose is the target; `closedBook` (true only at the very first/last page)
 // collapses the whole chain flat against the cover instead of curving it.
-export function usePageCurl(groupRef, skinnedMeshRef, opened, closedBook) {
+export function usePageCurl(groupRef, skinnedMeshRef, number, opened, closedBook) {
   const turnedAt = useRef(0)
   const lastOpened = useRef(opened)
+  // smoothDamp carries velocity between frames and the caller owns it, so
+  // every bone needs its own holder per axis (see shared/math/easing).
+  const velocities = useMemo(
+    () => Array.from({ length: PAGE_SEGMENTS + 1 }, () => ({ spin: { value: 0 }, fold: { value: 0 } })),
+    []
+  )
 
   useEffect(() => {
     if (opened !== lastOpened.current) {
@@ -37,7 +46,12 @@ export function usePageCurl(groupRef, skinnedMeshRef, opened, closedBook) {
     let turningTime = Math.min(TURN_DURATION, performance.now() - turnedAt.current) / TURN_DURATION
     turningTime = Math.sin(turningTime * Math.PI)
 
-    const targetRotation = opened ? -Math.PI / 2 : Math.PI / 2
+    let targetRotation = opened ? -Math.PI / 2 : Math.PI / 2
+    // Once the book is open every sheet stops a little short of flat, one
+    // step further per sheet, so the turned half rests fanned out above the
+    // cover instead of every leaf lying in the same plane.
+    if (!closedBook) targetRotation += number * FAN_STEP
+
     const bones = mesh.skeleton.bones
 
     for (let i = 0; i < bones.length; i++) {
@@ -60,8 +74,21 @@ export function usePageCurl(groupRef, skinnedMeshRef, opened, closedBook) {
         foldRotationAngle = 0
       }
 
-      target.rotation.y = THREE.MathUtils.damp(target.rotation.y, rotationAngle, ROTATION_DAMPING, delta)
-      target.rotation.x = THREE.MathUtils.damp(target.rotation.x, foldRotationAngle * foldIntensity, FOLD_DAMPING, delta)
+      const velocity = velocities[i]
+      target.rotation.y = smoothDampAngle(
+        target.rotation.y,
+        rotationAngle,
+        velocity.spin,
+        ROTATION_SMOOTH_TIME,
+        delta
+      )
+      target.rotation.x = smoothDampAngle(
+        target.rotation.x,
+        foldRotationAngle * foldIntensity,
+        velocity.fold,
+        FOLD_SMOOTH_TIME,
+        delta
+      )
     }
   })
 }

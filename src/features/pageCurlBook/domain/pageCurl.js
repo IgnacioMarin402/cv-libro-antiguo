@@ -5,7 +5,9 @@
 // color, no photographs — since the point of this object is to compare
 // that BENDING motion against our own book's from-scratch vertex-
 // displacement curl (see features/book/geometry/pageSheet.js), not to look
-// like a finished prop.
+// like a finished prop. The curl's own numbers are the tutorial's; the
+// ones about where leaves sit in a pile are ours, because the tutorial's
+// book stands upright in the air and this one lies on a table.
 
 export const PAGE_WIDTH = 0.32
 export const PAGE_HEIGHT = 0.43
@@ -18,10 +20,73 @@ export const PAGE_SEGMENTS = 30
 export const SEGMENT_WIDTH = PAGE_WIDTH / PAGE_SEGMENTS
 export const PAGE_COUNT = 10
 
-// Half the closed stack's thickness — lifts the book so its bottom face
-// rests on the table instead of poking through it (see PageCurlBook's
-// rotation, which turns the stacking axis vertical).
-export const STACK_CLEARANCE_Y = (PAGE_COUNT * PAGE_DEPTH) / 2
+// WHERE A LEAF SITS IN ITS PILE.
+//
+// The tutorial offsets each leaf along its own local z and lets its 0.8°
+// fan do the rest. That cannot keep leaves apart here: a leaf's normal
+// swings 99° between the spine and the fore-edge, so any single offset
+// direction stops separating somewhere along the way. Measured on the
+// settled pose, the tutorial's direction collapses to 0.0mm in the MIDDLE
+// of the page (leaves 3mm thick) — which is why the cover showed through
+// the leaf lying on it. Straight up collapses at the spine instead.
+//
+// The best compromise direction leans STACK_LEAN off vertical, back toward
+// the spine, and never keeps less than ~52% of the pitch as real
+// separation (found by scanning every direction against the whole chain).
+// So an open pile needs a pitch of about twice the leaf thickness; closed,
+// where every leaf lies flat and the normals all point up, the thickness
+// itself is enough — plus a hair, so no two faces end up coplanar and
+// z-fighting.
+export const STACK_LEAN = (27.5 * Math.PI) / 180
+export const OPEN_PITCH = PAGE_DEPTH * 2
+export const CLOSED_PITCH = PAGE_DEPTH * 1.05
+
+// A leaf's offset from the bottom of its own pile, as [up, towardSpine] in
+// the book's tilted frame (see PageCurlBook: its x is the table's up and
+// its z runs from spine to fore-edge). Both piles rest on the table and
+// grow upward — the turned one from the front cover, the unturned one from
+// the back — so a leaf that turns travels from the top of one pile to the
+// top of the other, which for the front cover is the whole block. Pure
+// function of the reading state, symmetric across the spine by
+// construction: neither side can behave differently from the other.
+export const stackOffset = (number, page) => {
+  const closedBook = page === 0 || page === PAGE_COUNT
+  const opened = page > number
+  const depth = opened ? number : PAGE_COUNT - 1 - number
+  const pitch = closedBook ? CLOSED_PITCH : OPEN_PITCH
+  const lean = closedBook ? 0 : STACK_LEAN
+  return [depth * pitch * Math.cos(lean), depth * pitch * Math.sin(lean) * (opened ? -1 : 1)]
+}
+
+// How fast a leaf glides to its new height, in seconds (smoothDamp's
+// smooth time). Close to the turn itself, so the leaf settles onto its
+// pile as it lands rather than after.
+export const STACK_SMOOTH_TIME = 0.55
+
+// How high the book's hinge line has to sit for nothing to sink into the
+// table (see PageCurlBook's rotation, which turns the stacking axis
+// vertical). Closed, the block rests on its bottom leaf, so half a leaf's
+// thickness is all it needs. Open, a leaf hangs well below its own hinge:
+// the chain arches up at the spine and then rolls its fore-edge down past
+// horizontal, and THAT is what sets the height. CURL_DIP is the deepest a
+// leaf ever reaches — the bottom leaf of a pile, hinged lowest — measured
+// over a full open-and-close cycle, plus a couple of millimetres so it
+// clears rather than grazes. The tutorial never has to care; the price of
+// lying flat is that the book rides up while it is open.
+const CURL_DIP = 0.044
+const CLEARANCE_MARGIN = 0.0025
+
+// Where the layout stands it: closed, on the table.
+export const TABLE_CLEARANCE_Y = PAGE_DEPTH / 2
+// And how much higher it rides once it's open.
+export const OPEN_LIFT = CURL_DIP + CLEARANCE_MARGIN - TABLE_CLEARANCE_Y
+// Going up it has to beat the very first turn: the front cover starts
+// swinging the moment the book stops being closed, and if the book is
+// still low when that leaf lands, its curl goes through the table. Coming
+// back down it is slow instead — it waits for the leaves to flatten, or
+// one that is still curled drags its fore-edge through the wood.
+export const LIFT_SMOOTH_TIME = 0.35
+export const LIFT_FALL_SMOOTH_TIME = 1.6
 
 // How long a turn's extra mid-flex lasts, in ms — the tutorial's own value.
 export const TURN_DURATION = 400
@@ -34,8 +99,27 @@ export const INSIDE_CURVE_STRENGTH = 0.18
 export const OUTSIDE_CURVE_STRENGTH = 0.05
 export const TURNING_CURVE_STRENGTH = 0.09
 
-// Damping rates for THREE.MathUtils.damp — how fast each bone's rotation
-// chases its target, in 1/s. Higher = snappier. Starting points to tune by
-// eye; ROTATION is the main curl, FOLD the small secondary crease.
-export const ROTATION_DAMPING = 12
-export const FOLD_DAMPING = 8
+// Roughly how long a bone takes to settle onto its target angle, in seconds
+// — the "smooth time" of shared/math/easing's smoothDamp, i.e. the
+// tutorial's easingFactor / easingFactorFold. Half a second is what makes
+// a turn read as a slow, heavy sheet of paper instead of a snap; ROTATION
+// is the main curl, FOLD the small secondary crease.
+export const ROTATION_SMOOTH_TIME = 0.5
+export const FOLD_SMOOTH_TIME = 0.3
+
+// Each sheet comes to rest a notch further round than the one below it, so
+// the turned half fans out ABOVE the cover instead of every leaf collapsing
+// into the same plane — which is also what keeps two leaves that opened
+// together from z-fighting. Only applies while the book is open: a closed
+// book stacks its sheets flat. The tutorial's 0.8° per sheet.
+export const FAN_STEP = (0.8 * Math.PI) / 180
+
+// A jump of several sheets doesn't turn as one block: they leave the stack
+// one at a time, this many ms apart — closer together when there are more
+// of them to get through, so a long jump doesn't crawl.
+const STEP_DELAY = 150
+const STEP_DELAY_RUSHED = 50
+const RUSHED_JUMP = 2
+
+export const turnStepDelay = (sheetsLeft) =>
+  Math.abs(sheetsLeft) > RUSHED_JUMP ? STEP_DELAY_RUSHED : STEP_DELAY
