@@ -23,12 +23,17 @@ const FLOOR_Y = 0
 // of the column breaks into three edges with a third of the motes on each
 // rather than one solid lid.
 //
-// Spread around the old 0.55 rather than under it, so the reach is kept:
-// the tallest tier still stops about a forearm above the block, which is as
-// far as the candle picks a mote out at all. The lowest tier recycles its
-// motes roughly twice as often as the tallest — which is why the column
-// also ends up denser near the paper it comes off, for free.
-const CEILING_TIERS = [0.3, 0.45, 0.62]
+// Halved from [0.3, 0.45, 0.62]: only the reach came down, so the three
+// tiers keep their proportions and the top still breaks into three edges
+// rather than one lid. The lowest tier recycles its motes roughly twice as
+// often as the tallest — which is why the column also ends up denser near
+// the paper it comes off, for free.
+//
+// MOTE_COUNT stayed at 140, so the same motes now share half the height:
+// over ten simulated minutes 92 of them sit in the lowest 15 cm (was 46) and
+// the column recycles 2203 a minute (was 1090). Halving MOTE_COUNT gives the
+// old density back.
+const CEILING_TIERS = [0.15, 0.225, 0.31]
 
 // A mote knows where it stops from the moment it exists, and recycling one
 // IS a birth — so it draws again down at the floor rather than keeping its

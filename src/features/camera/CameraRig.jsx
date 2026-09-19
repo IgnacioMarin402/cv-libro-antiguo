@@ -3,14 +3,22 @@ import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { easeInOutCubic } from '@/shared/math/easing'
 import { useOrbitControls } from './hooks/useOrbitControls'
-import { SHOTS, shotFor, INTRO_DURATION, OPEN_ZOOM_DURATION } from './domain/shots'
+import { useKeyboardPan } from './hooks/useKeyboardPan'
+import { SHOTS, shotFor, INTRO_DURATION, OPEN_ZOOM_DURATION, ORBIT_LIMITS } from './domain/shots'
 
 // Orbits the book once idle. Opens on a slow dolly-in from a wide shot, then
 // dollies to a closer, frontal framing whenever the book is opened, and back
 // out again when it's closed.
+//
+// An open book also hands the visitor the keyboard: WASD slides the frame
+// over the spread, and the lens is allowed much closer in. Both are the
+// same gesture really — pick a corner, then go and read it — and both
+// belong to the open book only, which is why they live here next to the
+// phase that knows.
 export default function CameraRig({ open = false }) {
   const { camera } = useThree()
   const controlsRef = useOrbitControls(SHOTS.rest.target)
+  const panStep = useKeyboardPan()
   const introStart = useRef(performance.now())
   const tmpTarget = useMemo(() => new THREE.Vector3(), [])
 
@@ -27,7 +35,7 @@ export default function CameraRig({ open = false }) {
     wasOpenRef.current = open
   }, [open])
 
-  useFrame(() => {
+  useFrame((state, delta) => {
     const controls = controlsRef.current
     if (!controls) return
 
@@ -69,6 +77,19 @@ export default function CameraRig({ open = false }) {
         phaseRef.current = 'idle'
       }
     }
+    // Everything below hands the camera over to the visitor, so it reads
+    // the phase the block above may have just changed.
+    const idle = phaseRef.current === 'idle'
+    // Only an open book, and only between the rig's own moves: a scripted
+    // dolly and a held key must never write the camera on the same frame.
+    panStep(controls, delta, open && idle)
+    // How close the lens may get is the book's state too: a closed book is
+    // one object and is read whole, an open one is a page you want your
+    // nose in (see ORBIT_LIMITS). No floor at all while the rig itself is
+    // moving the camera — update() clamps the distance even with the
+    // controls disabled, and would pop a dolly that leaves from closer in
+    // than the floor it is arriving at.
+    controls.minDistance = !idle ? 0 : open ? ORBIT_LIMITS.openMinDistance : ORBIT_LIMITS.minDistance
     controls.update()
   })
 

@@ -8,7 +8,14 @@ import { topSurfaceY, PAGE_WIDTH, PAGE_HEIGHT } from '@/features/pageCurlBook'
 
 // The lens itself — the scene's only camera, configured where the canvas is
 // created but owned by this feature.
-export const CAMERA = { fov: 38, near: 0.05, far: 50 }
+//
+// near is 2 cm rather than the usual 5 because an open book may be read
+// from 18 cm away (see ORBIT_LIMITS): at that range a curled fore-edge can
+// easily come within 5 cm of the lens and get sliced open. Swept over
+// every orbit angle the visitor can reach, 5 cm clipped a leaf in 70% of
+// them and 2 cm in 17%. The depth buffer pays about 4 microns of precision
+// at reading distance for it, against leaves 3 mm apart — no contest.
+export const CAMERA = { fov: 38, near: 0.02, far: 50 }
 
 export const SHOTS = {
   // The wide establishing shot the visit opens on, looking down at the table.
@@ -60,9 +67,21 @@ export const OPEN_ZOOM_DURATION = 1700
 // its own epsilon, so 0 is the vertical without the gimbal flip. From up
 // there the whole open book (0.654 x 0.527 m, measured) needs about 1 m of
 // distance to fit the 38 deg lens — well inside the roaming range.
+//
+// How close in depends on what is being looked at, so there are two floors.
+// A closed book is one object and is read whole: 35 cm frames it with room
+// to spare. An open one is a PAGE, and the visitor picks which part of it
+// with WASD (see domain/keyboardPan), so the lens is let down to 18 cm —
+// 12.4 cm of table in frame, a quarter of the page's height. That is as
+// close as it can go before the book starts slicing itself on the near
+// plane: measured over every reachable angle and aim, a leaf comes inside
+// the near plane in 8.8% of them at 18 cm, against 11.4% at today's 35 cm
+// with the aim nailed to the centre. Closer than that and the number
+// climbs fast (12.2% at 15 cm, 17.3% at 12 cm).
 export const ORBIT_LIMITS = {
   dampingFactor: 0.08,
   minDistance: 0.35,
+  openMinDistance: 0.18,
   maxDistance: 3.6,
   minPolarAngle: 0,
   maxPolarAngle: 1.45,

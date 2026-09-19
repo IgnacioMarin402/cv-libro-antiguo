@@ -7,10 +7,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Escena 3D de un libro antiguo sobre una mesa, a la luz de una vela. React Three Fiber
 sobre three.js, con Vite.
 
-**Todo es procedural.** No hay modelos GLTF ni imágenes: cada malla se construye en
-código y cada textura se pinta en un canvas 2D. El único asset del repo es
-`public/audio/fire-ambience.mp3`. Antes de buscar un archivo de modelo o de textura,
-asume que no existe y que hay que generarlo.
+**Todo es procedural.** No se usarán assets (modelos GLTF, imágenes) a menos que se
+soliciten: cada malla se construye en código y cada textura se pinta en un canvas 2D.
+El único asset del repo es `public/audio/fire-ambience.mp3`. Antes de buscar un
+archivo de modelo o de textura, asume que no existe y que hay que generarlo.
 
 Hay **dos implementaciones de libro**. La que se monta es `src/features/pageCurlBook/`:
 hojas con esqueleto de huesos, tomada del tutorial wass08/r3f-animated-book-slider.
