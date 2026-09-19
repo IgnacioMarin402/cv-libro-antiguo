@@ -12,23 +12,35 @@ código y cada textura se pinta en un canvas 2D. El único asset del repo es
 `public/audio/fire-ambience.mp3`. Antes de buscar un archivo de modelo o de textura,
 asume que no existe y que hay que generarlo.
 
+Hay **dos implementaciones de libro**. La que se monta es `src/features/pageCurlBook/`:
+hojas con esqueleto de huesos, tomada del tutorial wass08/r3f-animated-book-slider.
+`src/features/book/` es la original, de deformación por vértices; ya no entra en la
+escena, pero su cuero de tapa es con el que se encuaderna la que sí.
+
+Cuidado al copiar de esa referencia: el libro del tutorial flota vertical en el aire y
+éste está apoyado en una mesa. Casi todos los fallos de esta escena han salido de dar
+por buena una mecánica suya sin volver a derivar lo que dependía de que aquí hay un
+suelo — la curva de la hoja cae por debajo de la bisagra, el apilado apunta donde no
+debe, el abanico hunde una de las dos pilas.
+
 `legacy-canvas-artifact/` es el prototipo original en un solo archivo, guardado como
 referencia. No entra en el build.
 
 ## Comandos
 
 ```bash
-npm run dev      # Vite en $PORT (.env) o 5173
+npm run dev             # Vite en $PORT (.env) o 5173
 npm run build
 npm run preview
+node scripts/probe.mjs  # mide el libro sin navegador (ver Medir antes de tocar)
 ```
 
-No hay tests, linter ni type-checking. La verificación de un cambio es: `npm run build`
-limpio, consola del navegador sin errores, y **el usuario mirando la escena** (ver
-Verificación, abajo).
+No hay tests, linter ni type-checking, y **`npm run build` no vale como verificación**
+(ver Verificación, abajo).
 
-`.env` (copiar de `.env.example`): `PORT` y `VITE_MAX_PAGES` (hojas individualmente
-pasables del libro; es la palanca de rendimiento principal).
+`.env` (copiar de `.env.example`): `PORT`. `VITE_MAX_PAGES` sólo alimenta
+`features/book`, que ya no se monta — hoy no hace nada. La palanca de hojas es
+`PAGE_COUNT` en `pageCurlBook/domain/pageCurl.js`.
 
 ## Arquitectura
 
@@ -58,7 +70,10 @@ Cada feature se ordena igual — `Book.jsx` + `index.js` + `domain/` + `geometry
 Criterio: si un número tiene una razón física ("las tapas vuelan sobre el bloque de
 páginas"), es dominio. Si es un detalle de three.js, no lo es.
 
-`src/features/book/` es el ejemplo completo y el modelo a seguir.
+`src/features/book/` es la feature más completa y el modelo a seguir para la
+estructura, aunque ya no se monte. `src/features/pageCurlBook/` es la que está viva, y
+la que más medida está: sus constantes de holgura y apilado son números medidos, no
+elegidos (ver Medir antes de tocar).
 
 ### Añadir un objeto a la escena
 
@@ -103,8 +118,9 @@ que estableció esta estructura.
   grupos (interior / canto / exterior) para darle material distinto a cada cara.
 - **Iluminación y render** se tocan en `app/scene/renderer.js` (tone mapping, fog,
   environment) y `features/lighting/domain/lightingRig.js`, no en los materiales.
-- **Palancas de rendimiento:** `VITE_MAX_PAGES`, `DUST_COUNT`, el `shadow-mapSize` de
-  la vela, el `dpr` del canvas.
+- **Palancas de rendimiento:** `PAGE_COUNT` (cada hoja del libro es una cadena de 31
+  huesos), `MOTE_COUNT`, `DUST_COUNT`, el `shadow-mapSize` de la vela, el `dpr` del
+  canvas.
 
 ## Estilo
 
@@ -115,8 +131,61 @@ que estableció esta estructura.
 - Entre features se importa sólo por el barrel (`@/features/book`); dentro de una
   feature, rutas relativas. `@` es `src/`.
 
+## Medir antes de tocar
+
+Ante cualquier duda geométrica o de animación, no estimes: reconstruye el objeto en
+Node y mídelo. `domain/` es puro precisamente para esto — las mismas funciones que usa
+la escena corren sin navegador. `scripts/probe.mjs` ya monta el libro entero y lo mide;
+`node scripts/probe.mjs` comprueba de una vez las tres cosas que sus constantes tienen
+que cumplir (que dos hojas vecinas no se atraviesen, que nada toque la mesa ni en
+reposo ni a mitad de giro, que el libro cerrado apoye). Para otro objeto, el patrón es
+el mismo: misma jerarquía de `Object3D`, posada con las funciones del dominio, avanzada
+a 60 fps con el mismo amortiguado, y leída con `getWorldPosition`.
+
+Tres casos de esta escena donde el ojo y la pose estática se equivocaron:
+
+- La hoja abierta cuelga 5,35 cm bajo su bisagra. La pose teórica decía 16: el
+  amortiguado nunca llega al objetivo instantáneo. Medir sin la dinámica levanta el
+  libro tres veces de más.
+- Dos hojas vecinas se atravesaban 3 mm. En vertical la medida parecía correcta —
+  cerca del lomo las hojas están casi verticales y ahí esa medida no dice nada. La
+  distancia real 3D entre las dos polilíneas dio 0,0 mm y señaló la causa.
+- La dirección de apilado (27,5° de la vertical) salió de barrer todas las direcciones
+  contra la cadena de huesos, no de probar dos y quedarse con la mejor.
+
+Deja el número medido en el comentario de su constante, y si tocas el grosor de hoja,
+la curva, el tamaño de página o el apilado, **vuelve a medir**: la caída escala con el
+ancho de página y la separación entre hojas no.
+
 ## Verificación
 
-Claude no puede juzgar si algo "se ve bien". Tras cualquier cambio visual o 3D: build
-limpio, consola sin errores, y **pedirle al usuario que lo mire** — describir qué
-debería verse y qué gesto probar, sin afirmar que funciona.
+Tres pasos, y ninguno sustituye al siguiente.
+
+1. **`npm run build` no prueba nada.** Empaqueta sin analizar ámbitos: en esta escena
+   ha pasado verde con `ReferenceError: boards is not defined` y con una zona muerta
+   temporal (`Cannot access 'TABLE_CLEARANCE_Y' before initialization`). Un build
+   limpio sólo dice que el bundle se escribió.
+2. **Abrir la escena y leer la consola.** Ahí salen esos dos y cualquier `undefined` de
+   three. Si acabas de renombrar o mover un export, **reinicia Vite antes de mirar**:
+   su HMR se queda atascado en el error anterior y sigue sirviendo módulos viejos —
+   estarías verificando código que ya no existe.
+3. **Pedirle al usuario que lo mire**, describiendo qué debería verse y qué gesto
+   probar, sin afirmar que funciona.
+
+El reparto entre 2 y 3: el navegador es para **hechos** (¿carga?, ¿existe la malla?,
+¿responde el clic?, ¿atraviesa la mesa?), el usuario es para el **gusto**. Comprobar un
+hecho no es juzgar la escena.
+
+Un detalle práctico: un clic sintético sobre el canvas necesita stubear
+`setPointerCapture` y despachar pointermove → pointerdown → pointerup → click. Los
+clics normales del navegador los interpreta OrbitControls como arrastre y no llegan al
+raycast, así que no sirven para abrir el libro desde una prueba.
+
+> **Pendiente de anotar bien (no rompe nada hoy, pero cuesta tres intentos):** esa
+> receta está incompleta. R3F calcula la posición del puntero con `offsetX`/`offsetY`,
+> que el constructor de `PointerEvent`/`MouseEvent` no acepta y quedan en 0 — así que
+> el clic aterriza siempre en la esquina superior izquierda y no pega en nada. Hay que
+> definirlos a mano sobre cada evento antes de despacharlo:
+> `Object.defineProperty(e, 'offsetX', { get: () => ox })`, con `ox`/`oy` relativos al
+> canvas. Y el `click` final es un `MouseEvent` aparte: sin él `onClick` no dispara,
+> porque los `pointer*` solos no abren el libro.

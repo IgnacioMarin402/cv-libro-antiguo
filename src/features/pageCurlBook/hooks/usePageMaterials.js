@@ -21,7 +21,10 @@ import { createCoverTexture, createCoverBumpTexture, createCoverInnerTexture } f
 // border along the cut.
 const PAPER_COLOR = 0xffffff
 const GUTTER_COLOR = 0x111111
-const LEATHER_COLOR = 0x6b4423
+// The flat leather on the boards' cut edges. It has no map, so it has to be
+// the green the cover texture is painted at — otherwise the four edges give
+// the binding away as brown from every angle but straight on.
+const LEATHER_COLOR = 0x1f342e
 
 export function usePageMaterials() {
   return useMemo(() => {

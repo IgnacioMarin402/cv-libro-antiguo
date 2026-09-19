@@ -38,10 +38,19 @@ export const OPEN_ZOOM_DURATION = 1700
 // How far the visitor may roam once the camera hands control over: close
 // enough to inspect the tooling, never far enough to leave the table or
 // drop below its surface.
+//
+// maxDistance is what lets the table's pedestal read. The camera always
+// aims at the book and can't dip below the table's plane, so everything
+// under the top projects into a thin wedge pinned against the bottom of
+// the frame. At 2.4 that wedge was 6.5 deg of screen and the foot landed
+// 0.76 deg above the frame's edge — about 9 px of dark wood on black, i.e.
+// invisible. Backing off to 3.6 opens the wedge to ~12 deg and the column
+// reads whole. Measured, not guessed; re-measure if the fov, the table
+// radius or the pedestal's height change.
 export const ORBIT_LIMITS = {
   dampingFactor: 0.08,
   minDistance: 0.35,
-  maxDistance: 2.4,
+  maxDistance: 3.6,
   minPolarAngle: 0.25,
   maxPolarAngle: 1.45,
 }

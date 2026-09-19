@@ -24,6 +24,21 @@ export const PAGE_SEGMENTS = 30
 export const SEGMENT_WIDTH = PAGE_WIDTH / PAGE_SEGMENTS
 export const PAGE_COUNT = 10
 
+// How the book lies on the table, and the frame every measurement below is
+// written in. The tutorial's rig stands its book up (hinge = local Y) and
+// swings pages in the local XZ plane; this one lies flat, so the whole rig
+// is tilted 90° in Y and 90° in Z, which cycles thickness onto world up and
+// the width/height pair onto the horizontal plane without touching any of
+// the borrowed per-bone math. The extra half turn is which way the book
+// faces: without it the spine ends up on the wrong side and leaves turn
+// away from the reader.
+//
+// What this frame gives the rest of the file: its x is the table's up, and
+// its z runs from the spine out to the fore-edge. Change the tilt and
+// those two sentences stop being true — with them, every clearance and
+// every stacking number here.
+export const TILT_ROTATION = [0, Math.PI / 2 + Math.PI, Math.PI / 2]
+
 // WHERE A LEAF SITS IN ITS PILE.
 //
 // The tutorial offsets each leaf along its own local z and lets its 0.8°

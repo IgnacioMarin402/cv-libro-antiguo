@@ -3,7 +3,7 @@ import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { createGlowTexture } from './textures/glowTexture'
 import { flameVertexShader, flameFragmentShader } from './shaders/flameShader'
-import { CANDLE, FLAME_OFFSET_Y } from './domain/candle'
+import { CANDLE, CANDLE_SCALE, FLAME_OFFSET_Y } from './domain/candle'
 import { flicker, lightIntensity, flameStretch, flameBrightness } from './domain/flame'
 
 // The candle and its fire: a wax cylinder, a wick, and a flame made of a
@@ -33,7 +33,7 @@ export default function Candle({ position = [0, 0, 0] }) {
   })
 
   return (
-    <group position={position}>
+    <group position={position} scale={CANDLE_SCALE}>
       <mesh position-y={CANDLE.height / 2} castShadow>
         <cylinderGeometry args={[CANDLE.radius, CANDLE.radius, CANDLE.height, 20]} />
         <meshStandardMaterial color={0xe9dcb8} roughness={0.6} />

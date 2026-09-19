@@ -4,22 +4,18 @@ import MagicMotes from './components/MagicMotes'
 import { usePageMaterials } from './hooks/usePageMaterials'
 import { useTurnQueue } from './hooks/useTurnQueue'
 import { useTableLift } from './hooks/useTableLift'
-import { PAGE_COUNT } from './domain/pageCurl'
+import { PAGE_COUNT, TILT_ROTATION } from './domain/pageCurl'
 
-// A second book, built with the bone-chain "page-curl" technique from the
-// wass08/r3f-animated-book-slider tutorial instead of our own book's
-// vertex-displacement curl (see features/book) — placed alongside it so
-// the two bending techniques can be compared directly. Blank pages, no
-// photographs: the comparison is about the motion, not the finish.
+// The book of the scene: leaves skinned to a chain of bones, so each one
+// curls as it turns instead of swinging as a rigid card. The technique is
+// the wass08/r3f-animated-book-slider tutorial's; it arrived here as a
+// second book to compare against the scene's original vertex-displacement
+// one (features/book, no longer mounted) and stayed.
 //
-// The tutorial's own rig stands the book up (hinge = local Y, i.e. the
-// page's own "up") and swings pages open in the local XZ plane. Ours lies
-// flat on the table instead, hinge along a horizontal line, cover lifting
-// up as it opens — so the whole rig is wrapped in a fixed 90°-Y-then-90°-Z
-// tilt, which cycles thickness onto world-up and the width/height pair
-// onto the horizontal plane, without touching any of the borrowed
-// per-bone rotation math (the closed pose's own 90° hinge rotation is
-// already baked into that mapping — verified live, not just derived).
+// How it lies on the table, and why its axes are the way they are, is
+// TILT_ROTATION in domain/pageCurl — the frame every measurement in that
+// file is written in, which is also why scripts/probe.mjs can rebuild this
+// hierarchy and measure it without a browser.
 export default function PageCurlBook({ onOpenChange, ...props }) {
   const [page, setPage] = useState(0)
   // What the book is showing trails what the reader asked for: a jump of
@@ -49,7 +45,7 @@ export default function PageCurlBook({ onOpenChange, ...props }) {
     <group {...props}>
       <MagicMotes active={!closedBook} />
       <group ref={lift}>
-        <group rotation-y={Math.PI / 2} rotation-z={Math.PI / 2}>
+        <group rotation={TILT_ROTATION}>
           {Array.from({ length: PAGE_COUNT }, (_, number) => {
             const opened = shownPage > number
             // The outermost leaf on each side is a board: the tilt puts

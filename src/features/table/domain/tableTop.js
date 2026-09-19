@@ -1,9 +1,19 @@
 // The table everything else stands on: a thick, slightly tapered round top
 // whose surface sits at y = 0, so every prop in the scene can be placed
 // from the floor up rather than against an arbitrary offset.
+//
+// Sized against what it actually holds. The farthest thing from the centre
+// is the helmet — 0.53 m out plus its 0.1 m rim, so the props reach 0.63 m
+// (the open book reaches 0.47, the candle 0.52). A 1 m top leaves that a
+// 1.6x margin and, more to the point, brings the far edge back INTO the
+// resting shot: from that camera (0.62 m up, 0.95 m back) the rear edge
+// sits 17.6 deg below the horizon, well inside the 19 deg half-frame. It
+// used to be 2.6 m, which put the edge at 9.9 deg — above the top of the
+// frame, so the table read as an infinite floor instead of a table with
+// black behind it. Both radii scale together to keep the tapered profile.
 export const TABLE = {
-  topRadius: 2.6,
-  bottomRadius: 2.9,
+  topRadius: 1.0,
+  bottomRadius: 1.115,
   thickness: 0.12,
   segments: 48,
 }
