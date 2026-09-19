@@ -9,9 +9,9 @@ export default function DustParticles() {
   const dustTex = useMemo(() => createDustTexture(), [])
   const { positions, velocities } = useMemo(() => createDustField(), [])
 
-  useFrame(() => {
+  useFrame((_, delta) => {
     const attr = pointsRef.current.geometry.attributes.position
-    driftDust(attr.array, velocities)
+    driftDust(attr.array, velocities, delta)
     attr.needsUpdate = true
   })
 

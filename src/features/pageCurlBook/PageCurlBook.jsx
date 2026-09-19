@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import Page from './components/Page'
+import MagicMotes from './components/MagicMotes'
 import { usePageMaterials } from './hooks/usePageMaterials'
 import { useTurnQueue } from './hooks/useTurnQueue'
 import { useTableLift } from './hooks/useTableLift'
@@ -46,6 +47,7 @@ export default function PageCurlBook({ onOpenChange, ...props }) {
 
   return (
     <group {...props}>
+      <MagicMotes active={!closedBook} />
       <group ref={lift}>
         <group rotation-y={Math.PI / 2} rotation-z={Math.PI / 2}>
           {Array.from({ length: PAGE_COUNT }, (_, number) => {

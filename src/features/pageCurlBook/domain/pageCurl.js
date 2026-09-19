@@ -9,8 +9,12 @@
 // ones about where leaves sit in a pile are ours, because the tutorial's
 // book stands upright in the air and this one lies on a table.
 
-export const PAGE_WIDTH = 0.32
-export const PAGE_HEIGHT = 0.43
+// The boards' own cut, which is the whole book's footprint: this binding
+// has no boards overhanging its text block, every leaf is the same
+// rectangle. Matches the first book of this scene (features/book, 0.39 x
+// 0.527 covers), so swapping one for the other didn't shrink the table.
+export const PAGE_WIDTH = 0.39
+export const PAGE_HEIGHT = 0.527
 export const PAGE_DEPTH = 0.003
 // Bone count along the width — the curl's resolution. 30 is the tutorial's
 // own number; the skinning math elsewhere assumes bones sit at segment
@@ -73,7 +77,7 @@ export const STACK_SMOOTH_TIME = 0.55
 // over a full open-and-close cycle, plus a couple of millimetres so it
 // clears rather than grazes. The tutorial never has to care; the price of
 // lying flat is that the book rides up while it is open.
-const CURL_DIP = 0.044
+const CURL_DIP = 0.0578
 const CLEARANCE_MARGIN = 0.0025
 
 // Where the layout stands it: closed, on the table.
@@ -89,11 +93,24 @@ export const OPEN_LIFT = CURL_DIP + CLEARANCE_MARGIN - TABLE_CLEARANCE_Y
 export const topSurfaceY = TABLE_CLEARANCE_Y + (PAGE_COUNT - 1) * CLOSED_PITCH + PAGE_DEPTH / 2
 // Going up it has to beat the very first turn: the front cover starts
 // swinging the moment the book stops being closed, and if the book is
-// still low when that leaf lands, its curl goes through the table. Coming
-// back down it is slow instead — it waits for the leaves to flatten, or
-// one that is still curled drags its fore-edge through the wood.
+// still low when that leaf lands, its curl goes through the table
+// (measured: slowing this down puts it back). Coming down is slower only
+// because it looks better — the book settles onto the table instead of
+// dropping onto it; the clearance doesn't depend on it.
 export const LIFT_SMOOTH_TIME = 0.35
 export const LIFT_FALL_SMOOTH_TIME = 1.6
+
+// And once it is up there, it breathes. A raised cosine, so it leaves from
+// zero and comes back to zero and is never negative in between: the float
+// can only ADD to the clearance the lift already measured out, which is
+// what keeps it from ever finding the table again. Time is counted from
+// the moment the book opened (see useTableLift), so it always starts at
+// the bottom of the breath rather than jumping into the middle of one.
+export const LEVITATION_RISE = 0.035
+export const LEVITATION_PERIOD = 6
+
+export const levitationRise = (seconds) =>
+  (LEVITATION_RISE * (1 - Math.cos((2 * Math.PI * seconds) / LEVITATION_PERIOD))) / 2
 
 // How long a turn's extra mid-flex lasts, in ms — the tutorial's own value.
 export const TURN_DURATION = 400
