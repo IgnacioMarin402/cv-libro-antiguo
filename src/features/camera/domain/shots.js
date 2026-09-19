@@ -17,16 +17,23 @@ export const SHOTS = {
     target: new THREE.Vector3(0, 0.3, 0),
   },
   // Closed book, seen from a comfortable reading distance and slightly off
-  // to one side.
+  // to one side. Aimed at the middle of the board, not at the spine: this
+  // binding hinges AT the book's origin and its leaves run out to +x, so a
+  // closed book occupies x [0, PAGE_WIDTH] — measured — and half its width
+  // is the centre. (The scene's first book, features/book, straddled the
+  // origin instead; targeting x=0 was that book's centre, and pointed at
+  // this one's edge, throwing it 8% of a half-width right of frame.)
   rest: {
     position: new THREE.Vector3(0.35, 0.62, 0.95),
-    target: new THREE.Vector3(0, topSurfaceY, -PAGE_HEIGHT * 0.05),
+    target: new THREE.Vector3(PAGE_WIDTH / 2, topSurfaceY, -PAGE_HEIGHT * 0.05),
   },
-  // Open book: closer and more frontal, re-centered onto the left-hand
-  // (read) side where the turned pages pile up.
+  // Open book: closer and more frontal, centred on the spine — which IS
+  // the open spread's middle, since the two piles are symmetric across it
+  // by construction (see stackOffset). Measured on the settled pose, the
+  // spread spans x [-0.333, +0.321]: 6mm off centre, i.e. centred.
   open: {
     position: new THREE.Vector3(0.05, 0.78, 1.05),
-    target: new THREE.Vector3(-PAGE_WIDTH * 0.45, topSurfaceY + 0.05, 0.03),
+    target: new THREE.Vector3(0, topSurfaceY + 0.05, 0.03),
   },
 }
 
@@ -47,10 +54,16 @@ export const OPEN_ZOOM_DURATION = 1700
 // invisible. Backing off to 3.6 opens the wedge to ~12 deg and the column
 // reads whole. Measured, not guessed; re-measure if the fov, the table
 // radius or the pedestal's height change.
+//
+// minPolarAngle is 0 so the visitor can come all the way overhead and read
+// the open spread flat, straight down. OrbitControls clamps the pole to
+// its own epsilon, so 0 is the vertical without the gimbal flip. From up
+// there the whole open book (0.654 x 0.527 m, measured) needs about 1 m of
+// distance to fit the 38 deg lens — well inside the roaming range.
 export const ORBIT_LIMITS = {
   dampingFactor: 0.08,
   minDistance: 0.35,
   maxDistance: 3.6,
-  minPolarAngle: 0.25,
+  minPolarAngle: 0,
   maxPolarAngle: 1.45,
 }

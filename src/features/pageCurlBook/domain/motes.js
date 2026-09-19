@@ -14,10 +14,26 @@ export const MOTE_COUNT = 140
 const MARGIN = 0.08
 const SPREAD_X = PAGE_WIDTH / 2 + MARGIN
 const SPREAD_Z = PAGE_HEIGHT / 2 + MARGIN
-// From the block itself up to about a forearm above it, which is as far as
-// the candle still picks them out.
 const FLOOR_Y = 0
-const CEILING_Y = 0.55
+
+// Where the column stops. This used to be one height for every mote, and
+// that is what drew the box: 140 motes all winking out on the same plane IS
+// that plane, and the rectangle they are sown over gives it its four
+// corners. So a mote draws its own ceiling instead, from three, and the top
+// of the column breaks into three edges with a third of the motes on each
+// rather than one solid lid.
+//
+// Spread around the old 0.55 rather than under it, so the reach is kept:
+// the tallest tier still stops about a forearm above the block, which is as
+// far as the candle picks a mote out at all. The lowest tier recycles its
+// motes roughly twice as often as the tallest — which is why the column
+// also ends up denser near the paper it comes off, for free.
+const CEILING_TIERS = [0.3, 0.45, 0.62]
+
+// A mote knows where it stops from the moment it exists, and recycling one
+// IS a birth — so it draws again down at the floor rather than keeping its
+// first tier for the whole scene and retracing the same climb all night.
+const pickCeiling = () => CEILING_TIERS[Math.floor(Math.random() * CEILING_TIERS.length)]
 
 // The spiral: how fast a mote wanders sideways and how long one turn takes.
 // Its own phase is what keeps the column from moving as one body.
@@ -42,9 +58,14 @@ export function createMoteField() {
   const velocities = new Float32Array(MOTE_COUNT * 3)
   const phases = new Float32Array(MOTE_COUNT)
   const tints = new Float32Array(MOTE_COUNT * 3)
+  const ceilings = new Float32Array(MOTE_COUNT)
   for (let i = 0; i < MOTE_COUNT; i++) {
+    // Its ceiling first: the height it starts at has to be under its own
+    // ceiling, or the column would spend its first second raining the motes
+    // that were sown above theirs back down to the floor.
+    ceilings[i] = pickCeiling()
     positions[i * 3] = rand(-SPREAD_X, SPREAD_X)
-    positions[i * 3 + 1] = rand(FLOOR_Y, CEILING_Y)
+    positions[i * 3 + 1] = rand(FLOOR_Y, ceilings[i])
     positions[i * 3 + 2] = rand(-SPREAD_Z, SPREAD_Z)
     velocities[i * 3] = rand(-0.008, 0.008)
     velocities[i * 3 + 1] = rand(0.03, 0.09)
@@ -53,7 +74,7 @@ export function createMoteField() {
     const mix = Math.random()
     for (let c = 0; c < 3; c++) tints[i * 3 + c] = ICE[c] + (VIOLET[c] - ICE[c]) * mix
   }
-  return { positions, colors, velocities, phases, tints }
+  return { positions, colors, velocities, phases, tints, ceilings }
 }
 
 // Advances the whole column one frame, in place: the rise, the spiral
@@ -61,7 +82,7 @@ export function createMoteField() {
 // the same however fast the machine runs. A mote that reaches the top
 // drops back to the block somewhere else over it, so the column never
 // thins out on one side.
-export function driftMotes({ positions, colors, velocities, phases, tints }, seconds, delta) {
+export function driftMotes({ positions, colors, velocities, phases, tints, ceilings }, seconds, delta) {
   const swayAngle = (Math.PI * 2 * seconds) / SWAY_PERIOD
   const twinkleAngle = (Math.PI * 2 * seconds) / TWINKLE_PERIOD
   for (let i = 0; i < MOTE_COUNT; i++) {
@@ -69,10 +90,13 @@ export function driftMotes({ positions, colors, velocities, phases, tints }, sec
     positions[i * 3] += (velocities[i * 3] + SWAY_SPEED * Math.sin(swayAngle + phase)) * delta
     positions[i * 3 + 1] += velocities[i * 3 + 1] * delta
     positions[i * 3 + 2] += (velocities[i * 3 + 2] + SWAY_SPEED * Math.cos(swayAngle + phase)) * delta
-    if (positions[i * 3 + 1] > CEILING_Y) {
+    if (positions[i * 3 + 1] > ceilings[i]) {
       positions[i * 3] = rand(-SPREAD_X, SPREAD_X)
       positions[i * 3 + 1] = FLOOR_Y
       positions[i * 3 + 2] = rand(-SPREAD_Z, SPREAD_Z)
+      // Reborn, so it draws again rather than carrying its first tier for
+      // the whole scene and retracing the same line up the column.
+      ceilings[i] = pickCeiling()
     }
     const lit = TWINKLE_FLOOR + (1 - TWINKLE_FLOOR) * (0.5 + 0.5 * Math.sin(twinkleAngle + phase))
     colors[i * 3] = tints[i * 3] * lit
