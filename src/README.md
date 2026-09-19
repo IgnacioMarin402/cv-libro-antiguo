@@ -44,9 +44,15 @@ su propio objeto (`coverGeometry`, `spineGeometry`, `pageGeometry`).
 `@` es `src/`. Una feature se importa por lo que es y siempre por su barrel:
 
 ```js
-import { Book } from '@/features/book'
+import { PageCurlBook } from '@/features/pageCurlBook'
 ```
 
 Dentro de una feature, rutas relativas. Entre features, sólo lo que el
-`index.js` de la otra exporta — hoy: la altura del libro cerrado que encuadra
-la cámara, y la altura de la copa del candelabro que usa el layout.
+`index.js` de la otra exporta — hoy: la altura y la huella del libro cerrado
+que encuadra la cámara, la altura de la copa del candelabro que usa el
+layout, y el cuero de tapa de `features/book`, con el que el libro de la
+escena se encuaderna.
+
+`features/book` es el libro de deformación por vértices con el que arrancó la
+escena. Ya no se monta — el libro de la escena es `features/pageCurlBook` —
+pero sigue en el repo y sus texturas de tapa siguen en uso.

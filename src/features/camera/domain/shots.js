@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { BOOK, topSurfaceY } from '@/features/book'
+import { topSurfaceY, PAGE_WIDTH, PAGE_HEIGHT } from '@/features/pageCurlBook'
 
 // The camera's framings, as data: where it stands and what it looks at at
 // each moment of the visit. Every target is derived from the book's own
@@ -20,13 +20,13 @@ export const SHOTS = {
   // to one side.
   rest: {
     position: new THREE.Vector3(0.35, 0.62, 0.95),
-    target: new THREE.Vector3(0, topSurfaceY, -BOOK.coverH * 0.05),
+    target: new THREE.Vector3(0, topSurfaceY, -PAGE_HEIGHT * 0.05),
   },
   // Open book: closer and more frontal, re-centered onto the left-hand
   // (read) side where the turned pages pile up.
   open: {
     position: new THREE.Vector3(0.05, 0.78, 1.05),
-    target: new THREE.Vector3(-BOOK.coverW * 0.45, topSurfaceY + 0.05, 0.03),
+    target: new THREE.Vector3(-PAGE_WIDTH * 0.45, topSurfaceY + 0.05, 0.03),
   },
 }
 

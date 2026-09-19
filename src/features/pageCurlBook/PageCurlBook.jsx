@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Page from './components/Page'
 import { usePageMaterials } from './hooks/usePageMaterials'
 import { useTurnQueue } from './hooks/useTurnQueue'
@@ -19,15 +19,22 @@ import { PAGE_COUNT } from './domain/pageCurl'
 // onto the horizontal plane, without touching any of the borrowed
 // per-bone rotation math (the closed pose's own 90° hinge rotation is
 // already baked into that mapping — verified live, not just derived).
-export default function PageCurlBook(props) {
+export default function PageCurlBook({ onOpenChange, ...props }) {
   const [page, setPage] = useState(0)
   // What the book is showing trails what the reader asked for: a jump of
   // several sheets turns them one after another (see useTurnQueue).
   const shownPage = useTurnQueue(page)
-  const { paper, cover } = usePageMaterials()
+  const { paper, frontCover, backCover } = usePageMaterials()
   const closedBook = shownPage === 0 || shownPage === PAGE_COUNT
   // Open leaves hang below the hinge, so the book rides up while it's open.
   const lift = useTableLift(closedBook)
+
+  // The camera re-aims when the book opens (see features/camera), so the
+  // book is what says so: open is anything between the two covers, which
+  // includes neither the untouched block nor the fully turned one.
+  useEffect(() => {
+    onOpenChange?.(!closedBook)
+  }, [closedBook, onOpenChange])
 
   const handlePointerOver = (e) => {
     e.stopPropagation()
@@ -43,9 +50,11 @@ export default function PageCurlBook(props) {
         <group rotation-y={Math.PI / 2} rotation-z={Math.PI / 2}>
           {Array.from({ length: PAGE_COUNT }, (_, number) => {
             const opened = shownPage > number
-            // The outermost leaf on each side is a cover: the tilt puts leaf
-            // 0 on top of the closed stack and the last one underneath it.
-            const isCover = number === 0 || number === PAGE_COUNT - 1
+            // The outermost leaf on each side is a board: the tilt puts
+            // leaf 0 on top of the closed stack and the last one under it,
+            // so they are the front and back covers and their tooled face
+            // looks the opposite way.
+            const boards = number === 0 ? frontCover : number === PAGE_COUNT - 1 ? backCover : null
             return (
               <Page
                 key={number}
@@ -53,7 +62,7 @@ export default function PageCurlBook(props) {
                 page={shownPage}
                 opened={opened}
                 closedBook={closedBook}
-                materials={isCover ? cover : paper}
+                materials={boards || paper}
                 onClick={(e) => {
                   e.stopPropagation()
                   setPage(opened ? number : number + 1)

@@ -80,6 +80,13 @@ const CLEARANCE_MARGIN = 0.0025
 export const TABLE_CLEARANCE_Y = PAGE_DEPTH / 2
 // And how much higher it rides once it's open.
 export const OPEN_LIFT = CURL_DIP + CLEARANCE_MARGIN - TABLE_CLEARANCE_Y
+
+// Height of the closed book's top face: the bottom leaf resting on the
+// table, the rest of the block stacked on it. This book has no boards
+// overhanging its text block — every leaf is the same cut, covers
+// included — so its footprint is PAGE_WIDTH x PAGE_HEIGHT flat. The camera
+// frames against both (see features/camera/domain/shots).
+export const topSurfaceY = TABLE_CLEARANCE_Y + (PAGE_COUNT - 1) * CLOSED_PITCH + PAGE_DEPTH / 2
 // Going up it has to beat the very first turn: the front cover starts
 // swinging the moment the book stops being closed, and if the book is
 // still low when that leaf lands, its curl goes through the table. Coming
