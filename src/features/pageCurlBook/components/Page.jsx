@@ -1,6 +1,6 @@
 import { useMemo, useRef } from 'react'
 import * as THREE from 'three'
-import { createPageGeometry, createPageSkeleton } from '../geometry/pageGeometry'
+import { createPageGeometry, createPageSkeleton, BOARD_CUT, PAPER_CUT } from '../geometry/pageGeometry'
 import { usePageCurl } from '../hooks/usePageCurl'
 import { useStackOffset } from '../hooks/useStackOffset'
 
@@ -9,13 +9,23 @@ import { useStackOffset } from '../hooks/useStackOffset'
 // were the first bone, so the whole leaf swings at the hinge while the
 // rest of the chain curls inside it, and useStackOffset rides that same
 // group to its place in its pile.
-export default function Page({ number, page, opened, closedBook, materials, onClick, onPointerOver, onPointerOut }) {
-  const geometry = useMemo(() => createPageGeometry(), [])
-  const group = useRef()
+//
+// `board` picks the cut: the two boards keep the book's full footprint and
+// the paper is trimmed by the square (see SQUARE), so the paper's edge
+// never lands on the board's.
+//
+// `hingeRef` is how the two boards hand their live pose to the spine, which
+// has to be glued to them every frame (see components/Spine). A leaf that
+// nothing else reads keeps its own ref and nobody is the wiser.
+export default function Page({ number, page, opened, closedBook, board, hingeRef, materials, onClick, onPointerOver, onPointerOut }) {
+  const cut = board ? BOARD_CUT : PAPER_CUT
+  const geometry = useMemo(() => createPageGeometry(cut.width, cut.height), [cut])
+  const ownGroup = useRef()
+  const group = hingeRef || ownGroup
   const skinnedMeshRef = useRef()
 
   const skinnedMesh = useMemo(() => {
-    const skeleton = createPageSkeleton()
+    const skeleton = createPageSkeleton(cut.segmentWidth)
     const mesh = new THREE.SkinnedMesh(geometry, materials)
     mesh.castShadow = true
     mesh.receiveShadow = true
@@ -23,7 +33,7 @@ export default function Page({ number, page, opened, closedBook, materials, onCl
     mesh.add(skeleton.bones[0])
     mesh.bind(skeleton)
     return mesh
-  }, [geometry, materials])
+  }, [geometry, materials, cut])
 
   usePageCurl(group, skinnedMeshRef, number, opened, closedBook)
   useStackOffset(group, number, page)

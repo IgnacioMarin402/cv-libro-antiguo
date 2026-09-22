@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Page from './components/Page'
+import Spine from './components/Spine'
 import MagicMotes from './components/MagicMotes'
 import { usePageMaterials } from './hooks/usePageMaterials'
 import { useTurnQueue } from './hooks/useTurnQueue'
@@ -21,7 +22,12 @@ export default function PageCurlBook({ onOpenChange, ...props }) {
   // What the book is showing trails what the reader asked for: a jump of
   // several sheets turns them one after another (see useTurnQueue).
   const shownPage = useTurnQueue(page)
-  const { paper, frontCover, backCover } = usePageMaterials()
+  const { paper, frontCover, backCover, spine } = usePageMaterials()
+  // The two boards' live poses, which the spine's leather is glued to.
+  // A ref and not state: the spine re-lays itself every frame, and the
+  // boards curl continuously (see components/Spine).
+  const frontBoard = useRef()
+  const backBoard = useRef()
   const closedBook = shownPage === 0 || shownPage === PAGE_COUNT
   // Open leaves hang below the hinge, so the book rides up while it's open.
   const lift = useTableLift(closedBook)
@@ -60,6 +66,8 @@ export default function PageCurlBook({ onOpenChange, ...props }) {
                 page={shownPage}
                 opened={opened}
                 closedBook={closedBook}
+                board={!!boards}
+                hingeRef={number === 0 ? frontBoard : number === PAGE_COUNT - 1 ? backBoard : undefined}
                 materials={boards || paper}
                 onClick={(e) => {
                   e.stopPropagation()
@@ -70,6 +78,9 @@ export default function PageCurlBook({ onOpenChange, ...props }) {
               />
             )
           })}
+          {/* After the leaves, so its per-frame pass reads bones this frame
+              has already posed rather than the previous one's. */}
+          <Spine material={spine} frontRef={frontBoard} backRef={backBoard} />
         </group>
       </group>
     </group>

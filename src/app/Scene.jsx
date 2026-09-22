@@ -1,6 +1,7 @@
 import { Table } from '@/features/table'
 import { Candle, CandleHolder, FireAudio } from '@/features/candle'
 import { Helmet } from '@/features/helmet'
+import { Wizard } from '@/features/wizard'
 import { DustParticles } from '@/features/dust'
 import { Lighting } from '@/features/lighting'
 import { CameraRig } from '@/features/camera'
@@ -10,13 +11,15 @@ import {
   CANDLE_POSITION,
   FLAME_POSITION,
   HELMET_POSITION,
+  WIZARD_POSITION,
+  WIZARD_ROTATION,
   BOOK_POSITION,
 } from './scene/layout'
 
 // The scene assembled from its features. The one piece of state that
 // crosses a feature boundary — whether the book is open, which the book
-// itself drives and the camera reacts to — is handed down from App,
-// because the hint line outside the canvas reads it too.
+// itself drives and the camera and the wizard react to — is handed down
+// from App, because the hint line outside the canvas reads it too.
 //
 // The book is features/pageCurlBook. features/book — the from-scratch
 // vertex-displacement one this scene opened with — is no longer mounted;
@@ -31,6 +34,7 @@ export default function Scene({ open, onOpenChange }) {
       <Candle position={CANDLE_POSITION} />
       <FireAudio position={FLAME_POSITION} />
       <Helmet position={HELMET_POSITION} />
+      <Wizard position={WIZARD_POSITION} rotation={WIZARD_ROTATION} open={open} />
       <PageCurlBook position={BOOK_POSITION} onOpenChange={onOpenChange} />
       <DustParticles />
       <CameraRig open={open} />

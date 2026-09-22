@@ -47,11 +47,25 @@ export function usePageMaterials() {
       color: 0xffffff,
     })
     const cut = new THREE.MeshStandardMaterial({ color: LEATHER_COLOR, roughness: 0.9, metalness: 0.03 })
+    // The spine's leather. Same hide as the boards' cut edges, and the same
+    // green the cover is painted at, so the back reads as one piece with
+    // them. DoubleSide because the strip has no thickness of its own and
+    // the fold is looked into from both sides; the bump gives the grain
+    // something to catch the candle with, since it carries no map.
+    const spine = new THREE.MeshStandardMaterial({
+      color: LEATHER_COLOR,
+      bumpMap: createCoverBumpTexture(),
+      bumpScale: 0.004,
+      roughness: 0.88,
+      metalness: 0.03,
+      side: THREE.DoubleSide,
+    })
 
     return {
       paper: [paper(), gutter, paper(), paper(), face, face],
       frontCover: [cut, cut, cut, cut, tooled, doublure],
       backCover: [cut, cut, cut, cut, doublure, tooled],
+      spine,
     }
   }, [])
 }

@@ -9,8 +9,10 @@ sobre three.js, con Vite.
 
 **Todo es procedural.** No se usarán assets (modelos GLTF, imágenes) a menos que se
 soliciten: cada malla se construye en código y cada textura se pinta en un canvas 2D.
-El único asset del repo es `public/audio/fire-ambience.mp3`. Antes de buscar un
-archivo de modelo o de textura, asume que no existe y que hay que generarlo.
+Los únicos assets del repo son `public/audio/fire-ambience.mp3` y los del mago gato
+de `features/wizard`, pedidos expresamente: `public/models/wizard-cat.glb` y su sonido
+`public/audio/appear-magic.mp3`. Antes de buscar otro archivo de modelo o de textura,
+asume que no existe y que hay que generarlo.
 
 Hay **dos implementaciones de libro**. La que se monta es `src/features/pageCurlBook/`:
 hojas con esqueleto de huesos, tomada del tutorial wass08/r3f-animated-book-slider.
