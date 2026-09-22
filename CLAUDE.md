@@ -9,9 +9,10 @@ sobre three.js, con Vite.
 
 **Todo es procedural.** No se usarán assets (modelos GLTF, imágenes) a menos que se
 soliciten: cada malla se construye en código y cada textura se pinta en un canvas 2D.
-Los únicos assets del repo son `public/audio/fire-ambience.mp3` y los del mago gato
+Los únicos assets del repo son `public/audio/fire-ambience.mp3`, los del mago gato
 de `features/wizard`, pedidos expresamente: `public/models/wizard-cat.glb` y su sonido
-`public/audio/appear-magic.mp3`. Antes de buscar otro archivo de modelo o de textura,
+`public/audio/appear-magic.mp3`, y el casco de `features/helmet`, también pedido:
+`public/models/fantasy-helmet.glb`. Antes de buscar otro archivo de modelo o de textura,
 asume que no existe y que hay que generarlo.
 
 Hay **dos implementaciones de libro**. La que se monta es `src/features/pageCurlBook/`:
@@ -97,7 +98,7 @@ que estableció esta estructura.
   bisagras (tapas, hojas, lomo) giran en Z.
 - **Elegir la técnica de malla:**
   - Silueta revuelta en torno → perfil `[radio, altura]` + `latheFromProfile`
-    (candelabro, yelmo). El perfil es dato en `domain/`.
+    (candelabro). El perfil es dato en `domain/`.
   - Panel plano con grosor → `wornRect` (rectángulo de bordes irregulares) + `extrudeFlat`.
   - Malla que se deforma → `BufferGeometry` a mano (las hojas: grid compartido, dos
     capas y faldón perimetral; ver `book/geometry/pageSheet.js`).

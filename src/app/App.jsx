@@ -20,9 +20,12 @@ export default function App() {
 
   return (
     <div className="scene-wrap">
+      {/* 'percentage' is PCFShadowMap. It used to be 'soft', but three has
+          dropped PCFSoftShadowMap: 0.186 warns and falls back to
+          PCFShadowMap anyway, so this is the same filter, minus the warning. */}
       <Canvas
         style={{ animation: 'fadeIn 1.2s ease' }}
-        shadows="soft"
+        shadows="percentage"
         dpr={[1, 2]}
         gl={{ antialias: true, alpha: false }}
         camera={{ ...CAMERA, position: SHOTS.intro.position.toArray() }}

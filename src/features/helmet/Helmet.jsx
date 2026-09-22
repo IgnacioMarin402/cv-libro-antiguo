@@ -1,19 +1,37 @@
-import { useMemo } from 'react'
-import * as THREE from 'three'
-import { latheFromProfile } from '@/shared/three/latheProfile'
-import { DOME_PROFILE, RIM_RADIUS, NASAL } from './domain/helmetShell'
+import { Suspense, useLayoutEffect } from 'react'
+import { useLoader } from '@react-three/fiber'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { HELMET_SCALE } from './domain/helmet'
 
-// Still a blockout: wireframe, so it reads as work-in-progress next to the
-// finished props rather than as a solid object that missed its material.
-export default function Helmet({ position = [0, 0, 0] }) {
-  const domeGeo = useMemo(() => latheFromProfile(DOME_PROFILE, 32), [])
-  const nasalGeo = useMemo(() => new THREE.BoxGeometry(NASAL.width, NASAL.height, NASAL.depth), [])
-  const wireMat = useMemo(() => new THREE.MeshBasicMaterial({ color: 0x44ccff, wireframe: true }), [])
+// Loaded from a file, like the wizard. Its face looks down +z as exported;
+// the layout turns it toward the book.
+const MODEL_URL = '/models/fantasy-helmet.glb'
+
+function HelmetModel(props) {
+  const { scene } = useLoader(GLTFLoader, MODEL_URL)
+
+  // Casts its shadow on the table but doesn't receive any, like the wizard:
+  // the candle's shadow has no bias, and a double-sided Tripo mesh shadows
+  // itself in fine stripes (shadow acne).
+  useLayoutEffect(() => {
+    scene.traverse((object) => {
+      if (object.isMesh) object.castShadow = true
+    })
+  }, [scene])
 
   return (
-    <group position={position}>
-      <mesh geometry={domeGeo} material={wireMat} castShadow receiveShadow />
-      <mesh geometry={nasalGeo} material={wireMat} position={[0, -0.025, RIM_RADIUS * 0.98]} castShadow />
+    <group {...props} scale={HELMET_SCALE}>
+      <primitive object={scene} />
     </group>
+  )
+}
+
+// Its own Suspense, so the file loads without holding up the rest of the
+// scene.
+export default function Helmet(props) {
+  return (
+    <Suspense fallback={null}>
+      <HelmetModel {...props} />
+    </Suspense>
   )
 }

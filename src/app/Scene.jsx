@@ -11,6 +11,7 @@ import {
   CANDLE_POSITION,
   FLAME_POSITION,
   HELMET_POSITION,
+  HELMET_ROTATION,
   WIZARD_POSITION,
   WIZARD_ROTATION,
   BOOK_POSITION,
@@ -33,7 +34,7 @@ export default function Scene({ open, onOpenChange }) {
       <CandleHolder position={CANDLE_HOLDER_POSITION} />
       <Candle position={CANDLE_POSITION} />
       <FireAudio position={FLAME_POSITION} />
-      <Helmet position={HELMET_POSITION} />
+      <Helmet position={HELMET_POSITION} rotation={HELMET_ROTATION} />
       <Wizard position={WIZARD_POSITION} rotation={WIZARD_ROTATION} open={open} />
       <PageCurlBook position={BOOK_POSITION} onOpenChange={onOpenChange} />
       <DustParticles />

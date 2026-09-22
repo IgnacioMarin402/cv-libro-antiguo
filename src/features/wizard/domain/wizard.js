@@ -4,9 +4,13 @@
 // How big it stands. The GLB comes 0.97 m tall — Tripo exports its figures
 // at about a unit — which next to a 52.7 cm book is a person, not a figure,
 // and the resting camera is only 62 cm off the table: at that size its
-// frame cuts the figure at the waist (35 cm). At 0.3 it is 29 cm, just
-// under the candle's flame (31.9 cm), and stands whole in both framings.
-export const WIZARD_SCALE = 0.3
+// frame cuts the figure at the waist (35 cm). At 0.4 it is 39 cm, 7 cm
+// over the candle's flame. That is more than the resting shot has room for
+// — measured over every spot at the book's side, nothing over 29 cm fits
+// whole, and at 39 cm its top edge takes about two thirds of the hat — but
+// the open shot takes it whole bar the hat's tip. It first stood at 29 cm;
+// asked for bigger, 39 was chosen over 32 and 35, which cut less of the hat.
+export const WIZARD_SCALE = 0.4
 
 // Which of the GLB's three clips does what. Its rest pose is a T-pose, arms
 // straight out (91 cm across at full size), so a clip always has to be

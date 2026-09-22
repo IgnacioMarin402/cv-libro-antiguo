@@ -52,6 +52,15 @@ export function usePageMaterials() {
     // them. DoubleSide because the strip has no thickness of its own and
     // the fold is looked into from both sides; the bump gives the grain
     // something to catch the candle with, since it carries no map.
+    //
+    // shadowSide: a DoubleSide material also draws both sides into the
+    // shadow map, so the strip shadowed itself — the candle has no bias —
+    // in fine arcs over the part lying on the front board (shadow acne).
+    // The strip's winding faces in, toward the boards (see spineGeometry),
+    // so FrontSide casts only from the parts whose outside looks away from
+    // the light, which are dark anyway. Measured on a close-up of the
+    // strip, neighbour-pixel detail went from 20.2 to 0.58 — the same as
+    // not receiving shadow at all — while it still receives the rest's.
     const spine = new THREE.MeshStandardMaterial({
       color: LEATHER_COLOR,
       bumpMap: createCoverBumpTexture(),
@@ -59,6 +68,7 @@ export function usePageMaterials() {
       roughness: 0.88,
       metalness: 0.03,
       side: THREE.DoubleSide,
+      shadowSide: THREE.FrontSide,
     })
 
     return {
