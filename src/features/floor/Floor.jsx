@@ -6,7 +6,7 @@ import { BUMP_SCALE } from './domain/floor'
 
 // Loaded from a file, asked for like the table: only the colour map. The
 // relief is taken from that same image, read as height.
-const TEXTURE_URL = '/textures/floor/stone-floor.webp'
+const TEXTURE_URL = '/textures/floor/wood-floor.webp'
 
 // Receives the shadows of the table and all it holds; casts none, there's
 // nothing under it.
@@ -17,7 +17,7 @@ function FloorMesh() {
   const geometry = useMemo(() => buildFloorGeometry(), [])
   const material = useMemo(() => {
     // Seen at a grazing angle from most of the orbit, so it takes the most
-    // anisotropic filtering the GPU has, or the far slabs smear.
+    // anisotropic filtering the GPU has, or the far planks smear.
     const anisotropy = gl.capabilities.getMaxAnisotropy()
     const color = map.clone()
     color.colorSpace = THREE.SRGBColorSpace

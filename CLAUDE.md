@@ -15,8 +15,11 @@ de `features/wizard`, pedidos expresamente: `public/models/wizard-cat.glb` y su 
 `public/models/fantasy-helmet.glb`, y el candelabro con su vela de `features/candle`:
 `public/models/candle-holder.glb` (la llama sigue siendo procedural), y la mesa de
 `features/table`: `public/models/ornate-table.glb`, y la textura del piso de
-`features/floor`: `public/textures/floor/stone-floor.webp` (sólo color; el relieve sale
-de esa misma imagen). Antes de buscar otro archivo de modelo o de textura,
+`features/floor`: `public/textures/floor/wood-floor.webp` (sólo color; el relieve sale
+de esa misma imagen), y la de las paredes de `features/wall`:
+`public/textures/wall/gothic-panelling.webp` (igual; no se repite tal cual, se recorta
+un tramo de tres arcos al cargarla), y la ventana gótica que va en una de ellas:
+`public/models/gothic-window.glb`. Antes de buscar otro archivo de modelo o de textura,
 asume que no existe y que hay que generarlo.
 
 Hay **dos implementaciones de libro**. La que se monta es `src/features/pageCurlBook/`:

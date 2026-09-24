@@ -60,3 +60,6 @@ export const HELMET_ROTATION = [
 
 // Under the table, where its feet stand, centred on it like everything else.
 export const FLOOR_POSITION = [0, TABLE_FOOT_Y, 0]
+
+// The walls stand on that same floor, around the same centre.
+export const WALL_POSITION = FLOOR_POSITION
