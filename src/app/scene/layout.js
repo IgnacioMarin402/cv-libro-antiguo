@@ -1,4 +1,4 @@
-import { HOLDER_CUP_Y, FLAME_OFFSET_Y, CANDLE_SCALE } from '@/features/candle'
+import { FLAME_Y } from '@/features/candle'
 import { TABLE_CLEARANCE_Y } from '@/features/pageCurlBook'
 
 // Where each prop stands on the table. The book holds the origin — it's what
@@ -10,13 +10,11 @@ import { TABLE_CLEARANCE_Y } from '@/features/pageCurlBook'
 const CANDLE_X = 0
 const CANDLE_Z = -0.45
 
-export const CANDLE_HOLDER_POSITION = [CANDLE_X, 0, CANDLE_Z]
-// The candle itself stands in the holder's cup, and the fire's ambience is
-// anchored at the flame above it, so the crackle comes from where the light
-// visibly does. Both heights are the candle's own measurements, so the
-// scene converts them with the scale the prop is built at.
-export const CANDLE_POSITION = [CANDLE_X, HOLDER_CUP_Y * CANDLE_SCALE, CANDLE_Z]
-export const FLAME_POSITION = [CANDLE_X, (HOLDER_CUP_Y + FLAME_OFFSET_Y) * CANDLE_SCALE, CANDLE_Z]
+// The candlestick stands on the table on its own foot, and the fire's
+// ambience is anchored at the flame on its wick, so the crackle comes from
+// where the light visibly does.
+export const CANDLE_POSITION = [CANDLE_X, 0, CANDLE_Z]
+export const FLAME_POSITION = [CANDLE_X, FLAME_Y, CANDLE_Z]
 
 // The book itself holds the origin — it is what the scene is about and
 // what the camera frames against. Lifted just enough that it rests on the

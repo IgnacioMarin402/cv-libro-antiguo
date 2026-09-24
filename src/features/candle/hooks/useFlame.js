@@ -2,7 +2,7 @@ import { useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { FLAME, LIGHT_LEAN, flameAt } from '../domain/flame'
-import { CANDLE } from '../domain/candle'
+import { WICK_RADIUS_IN_FLAME } from '../domain/candle'
 import { flameVertexShader, flameFragmentShader } from '../shaders/flameShader'
 
 const UP = new THREE.Vector3(0, 1, 0)
@@ -11,7 +11,7 @@ const UP = new THREE.Vector3(0, 1, 0)
 // of it. The card stands in for the whole flame, so it's brought forward
 // past the wick's radius: through the wick's middle, the wick hid the
 // flame's base.
-const NUDGE = CANDLE.wickRadius * 1.5
+const NUDGE = WICK_RADIUS_IN_FLAME * 1.5
 
 // How much of the glow's reach the lean carries: it sits at the flame's
 // middle, where the bend has moved it a quarter as far as the tip.

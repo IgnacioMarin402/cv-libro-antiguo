@@ -7,8 +7,8 @@
 // drives the flame's body, its shader and the candle's light together, so
 // the light breathes with the flame instead of on a wobble of its own.
 
-// The flame's card, in the candle's own units (the component applies
-// CANDLE_SCALE around it). The shader draws the teardrop inside it with
+// The flame's card, in the flame's own units (the component applies
+// FLAME_SCALE around it). The shader draws the teardrop inside it with
 // room to spare for the soft sheath of glow around the body: the body
 // itself is 0.58 of the card's width and 0.88 of its height, 1.7 x 4.9 cm
 // once scaled — about the 1:3 of a real candle flame, where the first one
@@ -28,7 +28,7 @@ export const LIGHT_LEAN = 0.6
 // 1% of it, measured).
 const BASE_INTENSITY = 6.5
 
-// How far the draft pushes the tip, in the candle's units: a few
+// How far the draft pushes the tip, in the flame's units: a few
 // millimetres of lean on still air, three times that when the air stirs.
 const CALM_LEAN = 0.003
 const GUST_LEAN = 0.009
@@ -50,7 +50,7 @@ const wander = (t, seed) =>
 export const gust = (t) => smoothstep(0.3, 0.75, wander(t * 0.17, 11))
 
 // Everything the flame does at time t (seconds):
-// - leanX / leanZ: where the draft has pushed the tip, in the candle's units
+// - leanX / leanZ: where the draft has pushed the tip, in the flame's units
 // - stretch: the flame's height against FLAME.height — a slow breath, and
 //   during a gust a quick flicker over a slightly shorter flame
 // - flutter: 0..1, how hard the ripple runs up the flame's body

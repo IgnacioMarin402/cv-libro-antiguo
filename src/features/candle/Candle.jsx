@@ -1,11 +1,31 @@
-import { useMemo } from 'react'
+import { Suspense, useLayoutEffect, useMemo } from 'react'
+import { useLoader } from '@react-three/fiber'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import * as THREE from 'three'
 import { createGlowTexture } from './textures/glowTexture'
 import { useFlame } from './hooks/useFlame'
-import { CANDLE, CANDLE_SCALE, FLAME_OFFSET_Y } from './domain/candle'
+import { MODEL_SCALE, FLAME_SCALE, FLAME_Y, LIGHT_Y } from './domain/candle'
 import { FLAME } from './domain/flame'
 
-// The candle and its fire: a wax cylinder, a wick, and a flame made of a
+const MODEL_URL = '/models/candle-holder.glb'
+
+// The candlestick, candle and wick, loaded from a file like the wizard.
+// Casts its shadow on the table but doesn't receive any, like the wizard
+// and the helmet: the candle's shadow has no bias, and a double-sided
+// Tripo mesh shadows itself in fine stripes (shadow acne).
+function CandleModel() {
+  const { scene } = useLoader(GLTFLoader, MODEL_URL)
+
+  useLayoutEffect(() => {
+    scene.traverse((object) => {
+      if (object.isMesh) object.castShadow = true
+    })
+  }, [scene])
+
+  return <primitive object={scene} scale={MODEL_SCALE} />
+}
+
+// The candle and its fire: the model, and on its wick a flame made of a
 // shader card that turns to face the viewer plus a glow sprite. Everything
 // that moves here is driven by one reading of the draft per frame (see
 // domain/flame), so the light, the flame's lean and its brightness move
@@ -18,37 +38,30 @@ export default function Candle({ position = [0, 0, 0] }) {
   const cardGeometry = useMemo(() => new THREE.PlaneGeometry(1, 1, 1, 24), [])
 
   return (
-    <group position={position} scale={CANDLE_SCALE}>
-      <mesh position-y={CANDLE.height / 2} castShadow>
-        <cylinderGeometry args={[CANDLE.radius, CANDLE.radius, CANDLE.height, 20]} />
-        <meshStandardMaterial color={0xe9dcb8} roughness={0.6} />
-      </mesh>
-      {/* Unlit: the candle's light burns 3.5 cm over the wick's tip and
-          saturated any lit material there, however dark, into a bright grey
-          cap in the flame's base. A charred wick seen through its own flame
-          is a dark silhouette. */}
-      <mesh position-y={CANDLE.height + CANDLE.wickHeight / 2}>
-        <cylinderGeometry args={[CANDLE.wickRadius, CANDLE.wickRadius, CANDLE.wickHeight, 6]} />
-        <meshBasicMaterial color={0x1a1208} />
-      </mesh>
+    <group position={position}>
+      {/* Its own Suspense: the fire is the room's only light, and it
+          doesn't wait for the file. */}
+      <Suspense fallback={null}>
+        <CandleModel />
+      </Suspense>
 
-      <group position-y={FLAME_OFFSET_Y}>
+      <group position-y={FLAME_Y} scale={FLAME_SCALE}>
         <mesh ref={cardRef} geometry={cardGeometry} material={material} position-y={-FLAME.sink} />
         <sprite ref={glowRef} position-y={0.028} scale={[0.16, 0.16, 1]}>
           <spriteMaterial map={glowTex} transparent blending={THREE.AdditiveBlending} depthWrite={false} />
         </sprite>
-      </group>
 
-      <pointLight
-        ref={lightRef}
-        position={[0, 0.4, 0]}
-        color={0xffb066}
-        intensity={6.5}
-        distance={9}
-        decay={1.8}
-        castShadow
-        shadow-mapSize={[1024, 1024]}
-      />
+        <pointLight
+          ref={lightRef}
+          position={[0, LIGHT_Y, 0]}
+          color={0xffb066}
+          intensity={6.5}
+          distance={9}
+          decay={1.8}
+          castShadow
+          shadow-mapSize={[1024, 1024]}
+        />
+      </group>
     </group>
   )
 }

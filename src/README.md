@@ -49,7 +49,7 @@ import { PageCurlBook } from '@/features/pageCurlBook'
 
 Dentro de una feature, rutas relativas. Entre features, sólo lo que el
 `index.js` de la otra exporta — hoy: la altura y la huella del libro cerrado
-que encuadra la cámara, la altura de la copa del candelabro que usa el
+que encuadra la cámara, la altura de la llama que usa el
 layout, y el cuero de tapa de `features/book`, con el que el libro de la
 escena se encuaderna.
 

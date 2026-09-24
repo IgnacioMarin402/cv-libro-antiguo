@@ -14,16 +14,22 @@ export const WIZARD_SCALE = 0.4
 
 // Which of the GLB's three clips does what. Its rest pose is a T-pose, arms
 // straight out (91 cm across at full size), so a clip always has to be
-// posing it. It stands in the one made for standing — over its one-second
-// loop the outline moves under 2 mm at full size. The book opening plays
-// the staff one ("Con el cuerpo recto, tienes un báculo…"): over 3 s it
-// thrusts the staff straight ahead, 58.6 cm at full size, and brings it
-// back. A click plays the wave ("Necesito un saludo…"): over 5 s the right
+// posing it. It stands in the one made for standing, held on one frame (see
+// STANDING_POSE). The book opening plays the staff one ("Con el cuerpo
+// recto, tienes un báculo…"): over 3 s it thrusts the staff straight
+// ahead, 58.6 cm at full size, and brings it back. A click plays the wave ("Necesito un saludo…"): over 5 s the right
 // hand comes up to head height, waves, and comes down by 3.3 s. Neither
 // one leaves its spot.
 export const STANDING_CLIP = 'standing still'
 export const STAFF_CLIP = 'Con el cuerpo recto'
 export const WAVE_CLIP = 'Necesito un saludo'
+
+// The frame the figure stands still on. Played, the standing clip sways the
+// whole figure — up to 1.6 mm a frame at full size, and its loop doesn't
+// close (16 mm off at the seam) — which read as fidgeting, not standing.
+// This is the frame nearest its average pose: no bone more than 1.1° off
+// it. The breathing (domain/breathing.js) goes over it.
+export const STANDING_POSE = 2 / 24
 
 // Where the wave starts playing from. The clip holds still for its first
 // second — the hand doesn't move until 1.0 s — so from zero a click would
