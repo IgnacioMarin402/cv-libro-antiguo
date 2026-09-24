@@ -1,4 +1,4 @@
-import { AMBIENT, COLD_FILL, KEY } from './domain/lightingRig'
+import { AMBIENT, COLD_FILL, TABLE_GLOW } from './domain/lightingRig'
 
 export default function Lighting() {
   return (
@@ -10,7 +10,13 @@ export default function Lighting() {
         distance={COLD_FILL.distance}
         position={COLD_FILL.position}
       />
-      <directionalLight color={KEY.color} intensity={KEY.intensity} position={KEY.position} />
+      <pointLight
+        color={TABLE_GLOW.color}
+        intensity={TABLE_GLOW.intensity}
+        distance={TABLE_GLOW.distance}
+        decay={TABLE_GLOW.decay}
+        position={TABLE_GLOW.position}
+      />
     </>
   )
 }

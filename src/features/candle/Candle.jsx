@@ -5,7 +5,7 @@ import * as THREE from 'three'
 import { createGlowTexture } from './textures/glowTexture'
 import { useFlame } from './hooks/useFlame'
 import { MODEL_SCALE, FLAME_SCALE, FLAME_Y, LIGHT_Y } from './domain/candle'
-import { FLAME } from './domain/flame'
+import { FLAME, LIGHT_COLOR, BASE_INTENSITY } from './domain/flame'
 
 const MODEL_URL = '/models/candle-holder.glb'
 
@@ -54,10 +54,10 @@ export default function Candle({ position = [0, 0, 0] }) {
         <pointLight
           ref={lightRef}
           position={[0, LIGHT_Y, 0]}
-          color={0xffb066}
-          intensity={6.5}
-          distance={9}
-          decay={1.8}
+          color={LIGHT_COLOR}
+          intensity={BASE_INTENSITY}
+          distance={0}
+          decay={2}
           castShadow
           shadow-mapSize={[1024, 1024]}
         />

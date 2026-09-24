@@ -18,8 +18,18 @@ import { TABLE_SURFACE_Y } from './table'
 // #1c1826, both still rendered brown. They're pushed to indigo instead,
 // which the flame warms back to a dark violet-grey — the fur as it reads on
 // screen — so they recede and frame the cross.
-export const ROBE = '#2e1d3f'
-export const FUR = '#15163a'
+//
+// Those were #2e1d3f and #15163a, under the candle's old 0xffb066. When its
+// light was made whiter (see features/candle/domain/flame) the cross
+// went a true violet and the quarters plain blue, and they were asked to
+// look as they did. The recolour scales these in linear light, so each
+// channel is multiplied by what the old light gave that channel over what
+// the new one does — ×1.11 red, ×0.96 green, ×0.63 blue, from the candle,
+// the table's glow and the ambient together on the cross's near arm. On
+// screen they match the old ones within 1% there, 3% at the rim and 4%
+// beside the candle, measured.
+export const ROBE = '#311c31'
+export const FUR = '#17152d'
 
 // Which texels are the red. Everything else on the model is wood and brass
 // between hue 15° and 30°, so the red is picked out by hue alone: whole

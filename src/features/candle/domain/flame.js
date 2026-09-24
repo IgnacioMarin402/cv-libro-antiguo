@@ -25,8 +25,21 @@ export const LIGHT_LEAN = 0.6
 
 // The candle's light at rest. The room's exposure is tuned against it, so
 // the flicker only swings around it (the average over a visit stays within
-// 1% of it, measured).
-const BASE_INTENSITY = 6.5
+// 1% of it, measured). It was 7 at a true inverse square, which kept the
+// book as lit as at decay 1.8 with a directional key beside it; the
+// whiter LIGHT_COLOR is 12% brighter at the same intensity (luminance
+// 0.596 against 0.533), so it's 7 scaled back by that, to change the
+// colour and not the brightness.
+export const BASE_INTENSITY = 6.3
+
+// The candle light's colour. It was 0xffb066, whose blue in linear terms
+// is 13% of its red: it turned the room orange, dark greys brown and
+// violets mauve. Asked whiter, it's that colour mixed 13.5% toward white
+// in linear light, the space the renderer lights in: the mix that puts its
+// blue at 25% of its red, which is what was asked for. (40%, 30% and 20%
+// were tried first — blue at 48%, 39% and 31%.) The cloth's colours were chosen under the old
+// orange and are compensated for this one (see features/table/domain/cloth).
+export const LIGHT_COLOR = 0xffbd89
 
 // How far the draft pushes the tip, in the flame's units: a few
 // millimetres of lean on still air, three times that when the air stirs.

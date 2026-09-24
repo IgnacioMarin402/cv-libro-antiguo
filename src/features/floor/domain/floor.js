@@ -10,8 +10,8 @@ export const FLOOR_TILE_SIZE = 2
 // The room has no walls, and the canvas behind everything is black. A floor
 // that simply stopped would show its rim against it from the far end of
 // the orbit, so it darkens into that black instead: whole out to FADE_START
-// around the table, gone by FADE_END. The candle's own light reaches 9 m
-// but is faint well before this; the flat ambient is what would otherwise
+// around the table, gone by FADE_END. The candle's own light has no cutoff
+// but falls off as a true inverse square; the flat ambient is what would otherwise
 // keep a far rim lit. Both are the first 2.5 and 6 m scaled by √0.7, to
 // take 30% off the floor's area (12 × 12 m down to 10 × 10) and keep the
 // room close around the table.
