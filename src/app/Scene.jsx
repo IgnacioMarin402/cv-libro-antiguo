@@ -1,7 +1,9 @@
 import { Table } from '@/features/table'
 import { Floor } from '@/features/floor'
 import { Wall } from '@/features/wall'
+import { Bookshelf } from '@/features/bookshelf'
 import { Candle, FireAudio } from '@/features/candle'
+import { Sconce } from '@/features/sconce'
 import { Helmet } from '@/features/helmet'
 import { Wizard } from '@/features/wizard'
 import { DustParticles } from '@/features/dust'
@@ -12,6 +14,9 @@ import {
   CANDLE_POSITION,
   FLOOR_POSITION,
   WALL_POSITION,
+  BOOKSHELF_POSITION,
+  BOOKSHELF_ROTATION,
+  SCONCES,
   FLAME_POSITION,
   HELMET_POSITION,
   HELMET_ROTATION,
@@ -35,9 +40,13 @@ export default function Scene({ open, onOpenChange }) {
       <Lighting />
       <Floor position={FLOOR_POSITION} />
       <Wall position={WALL_POSITION} />
+      <Bookshelf position={BOOKSHELF_POSITION} rotation={BOOKSHELF_ROTATION} />
       <Table />
       <Candle position={CANDLE_POSITION} />
       <FireAudio position={FLAME_POSITION} />
+      {SCONCES.map((sconce, i) => (
+        <Sconce key={i} {...sconce} />
+      ))}
       <Helmet position={HELMET_POSITION} rotation={HELMET_ROTATION} />
       <Wizard position={WIZARD_POSITION} rotation={WIZARD_ROTATION} open={open} />
       <PageCurlBook position={BOOK_POSITION} onOpenChange={onOpenChange} />

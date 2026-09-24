@@ -4,7 +4,7 @@ import { WALL_HEIGHT } from './wall'
 // mesh generated in Tripo like the table and not built in code (see
 // components/GothicWindow.jsx). Its lights are open, not glazed — the
 // model has no glass, 55% of its outline is see-through — so whatever lies
-// behind the wall shows through them. For now that's the canvas's black.
+// behind the wall shows through them: the night outside (see domain/view).
 
 // Which wall it's in (an index into WALL_SIDES: the north one, which the
 // resting camera faces across the table) and where along it, centred

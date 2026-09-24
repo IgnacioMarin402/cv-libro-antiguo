@@ -11,7 +11,10 @@ import {
   openingHalfWidth,
   windowPlacement,
 } from './domain/window'
+import { DOOR_WALL, doorPlacement } from './domain/door'
 import GothicWindow from './components/GothicWindow'
+import WindowView from './components/WindowView'
+import ArchedDoor from './components/ArchedDoor'
 
 // Loaded from a file, asked for like the floor: only the colour map. The
 // relief is taken from that same image, read as height.
@@ -74,6 +77,12 @@ export default function Wall({ position }) {
           shouldn't wait on it. */}
       <Suspense fallback={null}>
         <GothicWindow {...windowPlacement(WALL_SIDES[WINDOW_WALL])} />
+      </Suspense>
+      <Suspense fallback={null}>
+        <WindowView {...windowPlacement(WALL_SIDES[WINDOW_WALL])} />
+      </Suspense>
+      <Suspense fallback={null}>
+        <ArchedDoor {...doorPlacement(WALL_SIDES[DOOR_WALL])} />
       </Suspense>
     </group>
   )

@@ -24,9 +24,9 @@ export const FLAME_SCALE = 0.7
 // (see the layout).
 export const FLAME_Y = WICK_TIP * MODEL_SCALE
 
-// The wick's radius in the flame's units, for bringing the flame's card
-// out in front of it (see useFlame).
-export const WICK_RADIUS_IN_FLAME = (WICK_RADIUS * MODEL_SCALE) / FLAME_SCALE
+// The wick's radius in the scene, for bringing the flame's card out in
+// front of it (see useFlame).
+export const WICK_RADIUS_IN_SCENE = WICK_RADIUS * MODEL_SCALE
 
 // The light burns 3.5 cm over the wick's tip (0.05 in the flame's units),
 // as it did over the procedural one. It has to stay clear of the model:

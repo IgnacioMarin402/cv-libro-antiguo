@@ -19,7 +19,12 @@ de `features/wizard`, pedidos expresamente: `public/models/wizard-cat.glb` y su 
 de esa misma imagen), y la de las paredes de `features/wall`:
 `public/textures/wall/gothic-panelling.webp` (igual; no se repite tal cual, se recorta
 un tramo de tres arcos al cargarla), y la ventana gótica que va en una de ellas:
-`public/models/gothic-window.glb`. Antes de buscar otro archivo de modelo o de textura,
+`public/models/gothic-window.glb`, y la foto nocturna que se ve a través de ella:
+`public/textures/wall/night-sky.webp`, y la puerta enfrente de ella, en la pared sur:
+`public/models/arched-door.glb`, y el librero de la esquina noroeste, `features/bookshelf`:
+`public/models/wooden-bookshelf.glb`, y los dos apliques de hierro a los lados de la
+puerta, `features/sconce`: `public/models/wrought-iron-sconce.glb` (sus llamas son las
+de la vela). Antes de buscar otro archivo de modelo o de textura,
 asume que no existe y que hay que generarlo.
 
 Hay **dos implementaciones de libro**. La que se monta es `src/features/pageCurlBook/`:

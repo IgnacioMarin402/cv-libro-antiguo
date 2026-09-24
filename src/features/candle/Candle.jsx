@@ -1,11 +1,8 @@
-import { Suspense, useLayoutEffect, useMemo } from 'react'
+import { Suspense, useLayoutEffect } from 'react'
 import { useLoader } from '@react-three/fiber'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
-import * as THREE from 'three'
-import { createGlowTexture } from './textures/glowTexture'
-import { useFlame } from './hooks/useFlame'
-import { MODEL_SCALE, FLAME_SCALE, FLAME_Y, LIGHT_Y } from './domain/candle'
-import { FLAME, LIGHT_COLOR, BASE_INTENSITY } from './domain/flame'
+import Flame from './components/Flame'
+import { MODEL_SCALE, FLAME_Y, WICK_RADIUS_IN_SCENE } from './domain/candle'
 
 const MODEL_URL = '/models/candle-holder.glb'
 
@@ -25,43 +22,19 @@ function CandleModel() {
   return <primitive object={scene} scale={MODEL_SCALE} />
 }
 
-// The candle and its fire: the model, and on its wick a flame made of a
-// shader card that turns to face the viewer plus a glow sprite. Everything
-// that moves here is driven by one reading of the draft per frame (see
-// domain/flame), so the light, the flame's lean and its brightness move
-// together.
+// The candle and its fire: the model, and on its wick a flame (see
+// components/Flame) carrying the candle's light — the one light in the
+// room that casts shadows.
 export default function Candle({ position = [0, 0, 0] }) {
-  const { cardRef, glowRef, lightRef, material } = useFlame()
-  const glowTex = useMemo(() => createGlowTexture(), [])
-  // The card's corners are placed by the vertex shader; the plane only
-  // supplies its uvs, split along the height so the flame can bend.
-  const cardGeometry = useMemo(() => new THREE.PlaneGeometry(1, 1, 1, 24), [])
-
   return (
     <group position={position}>
-      {/* Its own Suspense: the fire is the room's only light, and it
+      {/* Its own Suspense: the fire is the room's main light, and it
           doesn't wait for the file. */}
       <Suspense fallback={null}>
         <CandleModel />
       </Suspense>
 
-      <group position-y={FLAME_Y} scale={FLAME_SCALE}>
-        <mesh ref={cardRef} geometry={cardGeometry} material={material} position-y={-FLAME.sink} />
-        <sprite ref={glowRef} position-y={0.028} scale={[0.16, 0.16, 1]}>
-          <spriteMaterial map={glowTex} transparent blending={THREE.AdditiveBlending} depthWrite={false} />
-        </sprite>
-
-        <pointLight
-          ref={lightRef}
-          position={[0, LIGHT_Y, 0]}
-          color={LIGHT_COLOR}
-          intensity={BASE_INTENSITY}
-          distance={0}
-          decay={2}
-          castShadow
-          shadow-mapSize={[1024, 1024]}
-        />
-      </group>
+      <Flame position={[0, FLAME_Y, 0]} wickRadius={WICK_RADIUS_IN_SCENE} light castShadow />
     </group>
   )
 }
