@@ -1,5 +1,6 @@
 import { FLAME_Y } from '@/features/candle'
 import { TABLE_CLEARANCE_Y } from '@/features/pageCurlBook'
+import { TABLE_FOOT_Y } from '@/features/table'
 
 // Where each prop stands on the table. The book holds the origin — it's what
 // the scene is about and what the camera frames against — and everything
@@ -56,3 +57,6 @@ export const HELMET_ROTATION = [
   Math.atan2(BOOK_POSITION[0] - HELMET_POSITION[0], BOOK_POSITION[2] - HELMET_POSITION[2]),
   0,
 ]
+
+// Under the table, where its feet stand, centred on it like everything else.
+export const FLOOR_POSITION = [0, TABLE_FOOT_Y, 0]

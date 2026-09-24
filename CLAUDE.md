@@ -14,7 +14,9 @@ de `features/wizard`, pedidos expresamente: `public/models/wizard-cat.glb` y su 
 `public/audio/appear-magic.mp3`, el casco de `features/helmet`, también pedido:
 `public/models/fantasy-helmet.glb`, y el candelabro con su vela de `features/candle`:
 `public/models/candle-holder.glb` (la llama sigue siendo procedural), y la mesa de
-`features/table`: `public/models/ornate-table.glb`. Antes de buscar otro archivo de modelo o de textura,
+`features/table`: `public/models/ornate-table.glb`, y la textura del piso de
+`features/floor`: `public/textures/floor/stone-floor.webp` (sólo color; el relieve sale
+de esa misma imagen). Antes de buscar otro archivo de modelo o de textura,
 asume que no existe y que hay que generarlo.
 
 Hay **dos implementaciones de libro**. La que se monta es `src/features/pageCurlBook/`:

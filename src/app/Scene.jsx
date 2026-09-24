@@ -1,4 +1,5 @@
 import { Table } from '@/features/table'
+import { Floor } from '@/features/floor'
 import { Candle, FireAudio } from '@/features/candle'
 import { Helmet } from '@/features/helmet'
 import { Wizard } from '@/features/wizard'
@@ -8,6 +9,7 @@ import { CameraRig } from '@/features/camera'
 import { PageCurlBook } from '@/features/pageCurlBook'
 import {
   CANDLE_POSITION,
+  FLOOR_POSITION,
   FLAME_POSITION,
   HELMET_POSITION,
   HELMET_ROTATION,
@@ -29,6 +31,7 @@ export default function Scene({ open, onOpenChange }) {
   return (
     <>
       <Lighting />
+      <Floor position={FLOOR_POSITION} />
       <Table />
       <Candle position={CANDLE_POSITION} />
       <FireAudio position={FLAME_POSITION} />

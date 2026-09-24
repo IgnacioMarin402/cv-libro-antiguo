@@ -7,9 +7,10 @@ import { recolorCloth } from './shaders/clothRecolor'
 // Loaded from a file, like the wizard and the helmet.
 const MODEL_URL = '/models/ornate-table.glb'
 
-// Receives the candle's shadows but casts none — nothing lies under it to
-// catch one. Unlike the props on it, it can't shadow itself either, so its
-// single-sided mesh doesn't stripe the way the double-sided ones did. Its
+// Receives the candle's shadows, and casts them onto the floor — without
+// that the flame would light the stones under the top straight through it.
+// Its mesh is single-sided, so the shadow pass draws only its back faces
+// and the cloth doesn't stripe the way the double-sided props did. Its
 // cloth is repainted in the wizard cat's colours on load (see domain/cloth).
 function TableModel() {
   const { scene } = useLoader(GLTFLoader, MODEL_URL)
@@ -17,6 +18,7 @@ function TableModel() {
   useLayoutEffect(() => {
     scene.traverse((object) => {
       if (!object.isMesh) return
+      object.castShadow = true
       object.receiveShadow = true
       recolorCloth(object.material)
     })

@@ -26,3 +26,7 @@ export const TABLE_SCALE = 1 / MODEL_TOP_RADIUS
 
 // Lowered so the cloth, not the model's feet, lands on y = 0.
 export const TABLE_OFFSET_Y = TABLE_SURFACE_Y - MODEL_TOP_Y * TABLE_SCALE
+
+// Where its feet stand — the model's y = 0, lowered with the rest of it:
+// 1.01 m under the cloth. The floor is laid here.
+export const TABLE_FOOT_Y = TABLE_OFFSET_Y
