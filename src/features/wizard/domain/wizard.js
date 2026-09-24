@@ -10,7 +10,10 @@
 // whole, and at 39 cm its top edge takes about two thirds of the hat — but
 // the open shot takes it whole bar the hat's tip. It first stood at 29 cm;
 // asked for bigger, 39 was chosen over 32 and 35, which cut less of the hat.
-export const WIZARD_SCALE = 0.4
+// Then asked for half as big again: 0.6, 58.1 cm. At that size its staff
+// clip reaches 35 cm, which from where it stood went into the leaves, so
+// it moved (see WIZARD_POSITION in the layout).
+export const WIZARD_SCALE = 0.6
 
 // Which of the GLB's three clips does what. Its rest pose is a T-pose, arms
 // straight out (91 cm across at full size), so a clip always has to be
