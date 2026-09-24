@@ -13,7 +13,8 @@ Los únicos assets del repo son `public/audio/fire-ambience.mp3`, los del mago g
 de `features/wizard`, pedidos expresamente: `public/models/wizard-cat.glb` y su sonido
 `public/audio/appear-magic.mp3`, el casco de `features/helmet`, también pedido:
 `public/models/fantasy-helmet.glb`, y el candelabro con su vela de `features/candle`:
-`public/models/candle-holder.glb` (la llama sigue siendo procedural). Antes de buscar otro archivo de modelo o de textura,
+`public/models/candle-holder.glb` (la llama sigue siendo procedural), y la mesa de
+`features/table`: `public/models/ornate-table.glb`. Antes de buscar otro archivo de modelo o de textura,
 asume que no existe y que hay que generarlo.
 
 Hay **dos implementaciones de libro**. La que se monta es `src/features/pageCurlBook/`:

@@ -1,28 +1,40 @@
-import { useMemo } from 'react'
-import { latheFromProfile } from '@/shared/three/latheProfile'
-import { createWoodTexture } from './textures/woodTexture'
-import { TABLE, TABLE_SURFACE_Y } from './domain/tableTop'
-import { PEDESTAL_PROFILE, PEDESTAL_BASE_Y } from './domain/tablePedestal'
+import { Suspense, useLayoutEffect } from 'react'
+import { useLoader } from '@react-three/fiber'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { TABLE_SCALE, TABLE_OFFSET_Y } from './domain/table'
+import { recolorCloth } from './shaders/clothRecolor'
 
-export default function Table() {
-  const woodTex = useMemo(() => createWoodTexture(), [])
-  // The top is a cylinder and needs no building; the pedestal is a turned
-  // silhouette, so it comes off the same lathe as the candlestick.
-  const pedestal = useMemo(() => latheFromProfile(PEDESTAL_PROFILE, TABLE.segments), [])
+// Loaded from a file, like the wizard and the helmet.
+const MODEL_URL = '/models/ornate-table.glb'
+
+// Receives the candle's shadows but casts none — nothing lies under it to
+// catch one. Unlike the props on it, it can't shadow itself either, so its
+// single-sided mesh doesn't stripe the way the double-sided ones did. Its
+// cloth is repainted in the wizard cat's colours on load (see domain/cloth).
+function TableModel() {
+  const { scene } = useLoader(GLTFLoader, MODEL_URL)
+
+  useLayoutEffect(() => {
+    scene.traverse((object) => {
+      if (!object.isMesh) return
+      object.receiveShadow = true
+      recolorCloth(object.material)
+    })
+  }, [scene])
 
   return (
-    <group>
-      <mesh position-y={TABLE_SURFACE_Y - TABLE.thickness / 2} receiveShadow>
-        <cylinderGeometry args={[TABLE.topRadius, TABLE.bottomRadius, TABLE.thickness, TABLE.segments]} />
-        <meshStandardMaterial map={woodTex} roughness={0.85} metalness={0.05} />
-      </mesh>
-      {/* Only the lower, wider stretch of this is ever on screen: the top
-          itself hides the shaft from every angle the orbit allows, and what
-          shows below the rim is the foot. It's built whole anyway — the
-          part that reads has to be the end of something. */}
-      <mesh geometry={pedestal} position-y={PEDESTAL_BASE_Y} receiveShadow>
-        <meshStandardMaterial map={woodTex} roughness={0.85} metalness={0.05} />
-      </mesh>
+    <group position-y={TABLE_OFFSET_Y} scale={TABLE_SCALE}>
+      <primitive object={scene} />
     </group>
+  )
+}
+
+// Its own Suspense, so the file loads without holding up the rest of the
+// scene.
+export default function Table() {
+  return (
+    <Suspense fallback={null}>
+      <TableModel />
+    </Suspense>
   )
 }
