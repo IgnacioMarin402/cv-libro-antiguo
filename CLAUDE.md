@@ -48,6 +48,7 @@ npm run dev             # Vite en $PORT (.env) o 5173
 npm run build
 npm run preview
 node scripts/probe.mjs  # mide el libro sin navegador (ver Medir antes de tocar)
+node scripts/shrink-glb.mjs [archivo.glb ...]  # texturas de los GLB a 2048, rugosidad/metal a JPG; sin argumentos, todo public/models
 ```
 
 No hay tests, linter ni type-checking, y **`npm run build` no vale como verificación**
