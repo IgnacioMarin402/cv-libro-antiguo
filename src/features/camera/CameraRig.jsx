@@ -15,7 +15,7 @@ import { SHOTS, shotFor, INTRO_DURATION, OPEN_ZOOM_DURATION, ORBIT_LIMITS } from
 // same gesture really — pick a corner, then go and read it — and both
 // belong to the open book only, which is why they live here next to the
 // phase that knows.
-export default function CameraRig({ open = false }) {
+export default function CameraRig({ open = false, ready = true }) {
   const { camera } = useThree()
   const controlsRef = useOrbitControls(SHOTS.rest.target)
   const panStep = useKeyboardPan()
@@ -40,6 +40,10 @@ export default function CameraRig({ open = false }) {
     if (!controls) return
 
     if (phaseRef.current === 'intro') {
+      // Held on the wide shot until the loading screen lifts (`ready`):
+      // the dolly-in is the visit's first move, not something to spend
+      // behind the curtain.
+      if (!ready) introStart.current = performance.now()
       const elapsed = performance.now() - introStart.current
       const p = easeInOutCubic(Math.min(1, elapsed / INTRO_DURATION))
       camera.position.lerpVectors(SHOTS.intro.position, SHOTS.rest.position, p)

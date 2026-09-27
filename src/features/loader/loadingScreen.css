@@ -1,0 +1,424 @@
+/* The loading screen. Its colours are the room's: the brown dark round the
+   table, the parchment gold of the hint line, the candle's warm white.
+
+   Everything that moves on its own (the dial, the flame, the motes, the
+   grain) animates transform and opacity only, which the browser runs off
+   the main thread — so it keeps moving while the GPU warm-up blocks it.
+   What follows the progress is written from JS as --p (0..1). */
+
+/* Registered so it can be animated: the radius of the hole that opens in
+   the screen when it lifts, as light spreading out from the flame. */
+@property --iris {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: -30%;
+}
+
+.loader {
+  --gold: 214, 190, 150;
+  --seal: min(52vw, 200px);
+  --iris: -30%;
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  overflow: hidden;
+  color: rgb(var(--gold));
+  background: radial-gradient(ellipse at 50% 50%, #22160b 0%, #120b05 50%, #060302 100%);
+  -webkit-mask-image: radial-gradient(circle at 50% 50%, transparent var(--iris), #000 calc(var(--iris) + 26%));
+  mask-image: radial-gradient(circle at 50% 50%, transparent var(--iris), #000 calc(var(--iris) + 26%));
+}
+
+/* The candle's light on the room, growing as the room loads. */
+.loader__halo {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 170vmin;
+  height: 170vmin;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(255, 176, 96, 0.2) 0%, rgba(255, 140, 60, 0.07) 20%, transparent 46%);
+  opacity: calc(0.3 + 0.7 * var(--p, 0));
+  pointer-events: none;
+}
+
+/* --- the seal ------------------------------------------------------------ */
+
+.loader__seal {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--seal);
+  height: var(--seal);
+  transform: translate(-50%, -50%);
+}
+
+.loader__seal > svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.loader__dial {
+  animation: loader-turn 90s linear infinite;
+}
+
+.loader__dots-ring {
+  animation: loader-turn 60s linear infinite reverse;
+}
+
+.loader__rim {
+  fill: none;
+  stroke: rgba(var(--gold), 0.18);
+  stroke-width: 0.6;
+}
+
+.loader__ticks {
+  stroke: rgba(var(--gold), 0.34);
+  stroke-width: 0.7;
+  stroke-linecap: round;
+}
+
+.loader__jewel {
+  fill: rgba(var(--gold), 0.6);
+}
+
+.loader__dots-ring circle {
+  fill: rgba(var(--gold), 0.32);
+}
+
+.loader__ring {
+  filter: drop-shadow(0 0 4px rgba(255, 190, 110, 0.45));
+  transition: filter 0.8s ease;
+}
+
+.loader__track {
+  fill: none;
+  stroke: rgba(var(--gold), 0.1);
+  stroke-width: 1.2;
+}
+
+.loader__arc {
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+}
+
+.loader__bead {
+  fill: #fff1d0;
+}
+
+/* --- the flame ------------------------------------------------------------
+   Grows from its wick as the room loads: half size when the screen opens,
+   whole when it's done. The box is sized so the flame's bulb, 69% of the
+   way down it, sits on the seal's centre — where the reveal opens from. */
+
+.loader__flame {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 22%;
+  height: 35%;
+  transform-origin: 50% 86%;
+  transform: translate(-50%, -69%) scale(calc(0.5 + 0.5 * var(--p, 0)));
+}
+
+.loader__flame-glow {
+  position: absolute;
+  left: 50%;
+  top: 69%;
+  width: 380%;
+  aspect-ratio: 1;
+  background: radial-gradient(circle, rgba(255, 200, 120, 0.5) 0%, rgba(255, 150, 60, 0.16) 30%, transparent 62%);
+  animation: loader-breathe 3.2s ease-in-out infinite;
+  transition: opacity 0.8s ease;
+}
+
+.loader__flame-body {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  transform-origin: 50% 86%;
+  filter: drop-shadow(0 0 6px rgba(255, 170, 80, 0.7));
+  animation: loader-flicker 2.6s ease-in-out infinite;
+}
+
+.loader__flame-base {
+  fill: #7a96ff;
+  opacity: 0.35;
+}
+
+.loader__wick {
+  stroke: #1c1108;
+  stroke-width: 1.4;
+  stroke-linecap: round;
+}
+
+/* --- the caption ---------------------------------------------------------- */
+
+.loader__caption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(50% + var(--seal) / 2 + 26px);
+  padding: 0 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+}
+
+/* Not Georgia, unlike the rest: its figures are old-style only, and its
+   zero is a lowercase o — 80% read "8o". */
+.loader__percent {
+  font: 400 13px/1 'Palatino Linotype', Palatino, 'Book Antiqua', 'Times New Roman', serif;
+  font-variant-numeric: lining-nums;
+  letter-spacing: 0.32em;
+  /* letter-spacing trails the last glyph too; this keeps the number centred */
+  padding-left: 0.32em;
+  color: rgba(var(--gold), 0.85);
+}
+
+.loader__percent::after {
+  content: '%';
+  font-size: 0.8em;
+  opacity: 0.55;
+}
+
+.loader__rule {
+  position: relative;
+  width: 132px;
+  height: 7px;
+  background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(var(--gold), 0.45) 38%,
+      transparent 45%,
+      transparent 55%,
+      rgba(var(--gold), 0.45) 62%,
+      transparent
+    )
+    center / 100% 1px no-repeat;
+}
+
+.loader__rule::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 4px;
+  height: 4px;
+  border: 1px solid rgba(var(--gold), 0.6);
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.loader__line {
+  margin: 0;
+  font: italic 400 15px/1.4 Georgia, 'Times New Roman', serif;
+  letter-spacing: 0.05em;
+  color: rgba(var(--gold), 0.72);
+  animation: loader-line-in 0.8s ease both;
+}
+
+.loader__ellipsis i {
+  font-style: normal;
+  opacity: 0.2;
+  animation: loader-dot 1.4s ease-in-out infinite;
+}
+
+.loader__ellipsis i:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.loader__ellipsis i:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+/* --- motes and grain ------------------------------------------------------ */
+
+.loader__embers {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.loader__embers span {
+  position: absolute;
+  left: calc(50% + var(--x));
+  bottom: -10px;
+  width: var(--size);
+  height: var(--size);
+  border-radius: 50%;
+  background: #ffd699;
+  box-shadow: 0 0 6px 1px rgba(255, 170, 80, 0.7);
+  opacity: 0;
+  animation-name: loader-ember;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.loader__grain {
+  position: absolute;
+  inset: -50%;
+  pointer-events: none;
+  opacity: 0.06;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: loader-grain 0.9s steps(5) infinite;
+}
+
+/* --- ready, then lifting ---------------------------------------------------- */
+
+.loader.is-ready .loader__ring {
+  filter: drop-shadow(0 0 9px rgba(255, 205, 130, 0.85));
+}
+
+.loader.is-revealing {
+  --iris: 105%;
+  pointer-events: none;
+  transition: --iris var(--reveal) cubic-bezier(0.55, 0, 0.2, 1);
+}
+
+.loader.is-revealing .loader__seal {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(1.15);
+  transition:
+    opacity calc(var(--reveal) * 0.5) ease,
+    transform var(--reveal) cubic-bezier(0.2, 0.6, 0.2, 1);
+}
+
+.loader.is-revealing .loader__caption {
+  opacity: 0;
+  transform: translateY(10px);
+  transition:
+    opacity calc(var(--reveal) * 0.35) ease,
+    transform calc(var(--reveal) * 0.5) ease;
+}
+
+@keyframes loader-turn {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+@keyframes loader-breathe {
+  0%,
+  100% {
+    opacity: 0.75;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.08);
+  }
+}
+
+@keyframes loader-flicker {
+  0%,
+  100% {
+    transform: scale(1, 1) skewX(0deg);
+  }
+  13% {
+    transform: scale(0.96, 1.05) skewX(1.8deg);
+  }
+  29% {
+    transform: scale(1.03, 0.97) skewX(-1.2deg);
+  }
+  47% {
+    transform: scale(0.98, 1.07) skewX(2.4deg);
+  }
+  63% {
+    transform: scale(1.02, 0.95) skewX(-2deg);
+  }
+  81% {
+    transform: scale(0.97, 1.03) skewX(1deg);
+  }
+}
+
+@keyframes loader-line-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes loader-dot {
+  0%,
+  100% {
+    opacity: 0.2;
+  }
+  40% {
+    opacity: 1;
+  }
+}
+
+@keyframes loader-ember {
+  0% {
+    transform: translate3d(0, 0, 0);
+    opacity: 0;
+  }
+  15% {
+    opacity: var(--peak);
+  }
+  70% {
+    opacity: calc(var(--peak) * 0.6);
+  }
+  100% {
+    transform: translate3d(var(--drift), calc(-1 * var(--rise)), 0);
+    opacity: 0;
+  }
+}
+
+@keyframes loader-grain {
+  0% {
+    transform: translate(0, 0);
+  }
+  20% {
+    transform: translate(-3%, 2%);
+  }
+  40% {
+    transform: translate(2%, -3%);
+  }
+  60% {
+    transform: translate(-2%, -1%);
+  }
+  80% {
+    transform: translate(3%, 3%);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loader__dial,
+  .loader__dots-ring,
+  .loader__flame-body,
+  .loader__flame-glow,
+  .loader__grain,
+  .loader__ellipsis i {
+    animation: none;
+  }
+
+  .loader__flame-glow {
+    transform: translate(-50%, -50%);
+  }
+
+  .loader__embers {
+    display: none;
+  }
+
+  /* No light spreading out: the screen just fades. */
+  .loader.is-revealing {
+    --iris: -30%;
+    opacity: 0;
+    transition: opacity var(--reveal) ease;
+  }
+}

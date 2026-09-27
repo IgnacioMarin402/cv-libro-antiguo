@@ -28,13 +28,14 @@ import {
 // The scene assembled from its features. The one piece of state that
 // crosses a feature boundary — whether the book is open, which the book
 // itself drives and the camera and the wizard react to — is handed down
-// from App, because the hint line outside the canvas reads it too.
+// from App, because the hint line outside the canvas reads it too. So is
+// whether the loading screen has lifted, which only the camera waits on.
 //
 // The book is features/pageCurlBook. features/book — the from-scratch
 // vertex-displacement one this scene opened with — is no longer mounted;
 // its cover leather is still what this one is bound in (see
 // pageCurlBook/hooks/usePageMaterials).
-export default function Scene({ open, onOpenChange }) {
+export default function Scene({ open, onOpenChange, revealed }) {
   return (
     <>
       <Lighting />
@@ -51,7 +52,7 @@ export default function Scene({ open, onOpenChange }) {
       <Wizard position={WIZARD_POSITION} rotation={WIZARD_ROTATION} open={open} />
       <PageCurlBook position={BOOK_POSITION} onOpenChange={onOpenChange} />
       <DustParticles />
-      <CameraRig open={open} />
+      <CameraRig open={open} ready={revealed} />
     </>
   )
 }
