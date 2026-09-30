@@ -1,0 +1,92 @@
+/* The heart counter over the canvas, in the loading screen's colours: its
+   parchment gold for the lines and the figures, its flame for the ember.
+   Under the loading screen (z-index 10), which covers it until the room
+   is up. */
+
+.love-counter {
+  --gold: 214, 190, 150;
+  position: absolute;
+  top: 18px;
+  right: 20px;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 6px 15px 6px 10px;
+  border: 1px solid rgba(var(--gold), 0.22);
+  border-radius: 999px;
+  background: rgba(18, 11, 5, 0.55);
+  color: rgba(var(--gold), 0.85);
+  pointer-events: none;
+  user-select: none;
+  animation: fadeIn 1.2s ease;
+}
+
+.love-counter__heart {
+  width: 22px;
+  height: 22px;
+  overflow: visible;
+  transition: filter 0.6s ease;
+}
+
+.love-counter__rim {
+  fill: none;
+  stroke: rgba(var(--gold), 0.7);
+  stroke-width: 1.4;
+  stroke-linejoin: round;
+}
+
+/* Unlit: the ember is there, dark, waiting for the visitor's heart. */
+.love-counter__ember {
+  fill: url(#love-counter-ember);
+  opacity: 0.22;
+  transition: opacity 0.6s ease;
+}
+
+.love-counter--loved .love-counter__heart {
+  filter: drop-shadow(0 0 5px rgba(255, 180, 90, 0.75));
+}
+
+.love-counter--loved .love-counter__ember {
+  opacity: 1;
+  animation: love-breathe 3.2s ease-in-out infinite;
+}
+
+/* The loading screen's percentage figures: Georgia's are old-style only. */
+.love-counter__count {
+  display: inline-block;
+  min-width: 1ch;
+  font: 400 14px/1 'Palatino Linotype', Palatino, 'Book Antiqua', 'Times New Roman', serif;
+  font-variant-numeric: lining-nums tabular-nums;
+  letter-spacing: 0.16em;
+  animation: love-flare 0.8s ease-out;
+}
+
+@keyframes love-flare {
+  0% {
+    transform: scale(1.5);
+    color: #fff1d0;
+    text-shadow: 0 0 8px rgba(255, 190, 110, 0.9);
+  }
+  100% {
+    transform: scale(1);
+    text-shadow: 0 0 0 rgba(255, 190, 110, 0);
+  }
+}
+
+@keyframes love-breathe {
+  0%,
+  100% {
+    opacity: 0.82;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .love-counter__count,
+  .love-counter--loved .love-counter__ember {
+    animation: none;
+  }
+}

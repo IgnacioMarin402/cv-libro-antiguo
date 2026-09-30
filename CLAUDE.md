@@ -47,6 +47,7 @@ referencia. No entra en el build.
 npm run dev             # Vite en $PORT (.env) o 5173
 npm run build
 npm run preview
+npm start               # producción: server/server.js sirve dist/ y /api/love (build antes)
 node scripts/probe.mjs  # mide el libro sin navegador (ver Medir antes de tocar)
 node scripts/shrink-glb.mjs [archivo.glb ...]  # texturas de los GLB a 2048, rugosidad/metal a JPG; sin argumentos, todo public/models
 ```
@@ -57,6 +58,24 @@ No hay tests, linter ni type-checking, y **`npm run build` no vale como verifica
 `.env` (copiar de `.env.example`): `PORT`. `VITE_MAX_PAGES` sólo alimenta
 `features/book`, que ya no se monta — hoy no hace nada. La palanca de hojas es
 `PAGE_COUNT` en `pageCurlBook/domain/pageCurl.js`.
+
+### El servidor y el contador de corazones
+
+El sitio ya no es sólo estático: `features/love` (el corazón que flota junto a la vela
+y el contador arriba a la derecha) cuenta contra `/api/love`, un corazón por IP
+(IPv6 por /64), guardado como HMAC de la IP en SQLite — `node:sqlite`, que trae Node
+desde 22.13, sin dependencias. El handler es uno solo, `server/love.js`: lo monta
+`server/server.js` en producción y Vite en `dev`/`preview` (plugin en
+`vite.config.js`), así que `npm run dev` ya cuenta.
+
+- La base es `data/love.db` (ignorada por git). En local todo es la misma IP: para
+  volver a probar el clic, borrar ese archivo.
+- En un host: `LOVE_DB` a un volumen persistente (si no, cada deploy vuelve a 0) y
+  `TRUST_PROXY=1` si hay un proxy delante (si no, todos comparten la IP del proxy y el
+  contador se queda en 1). Para ver la cuenta:
+  `node -e "console.log(new (require('node:sqlite').DatabaseSync)('data/love.db').prepare('select count(*) n from love').get())"`.
+- Sin servidor detrás (hosting estático), el contador no aparece y el corazón sólo
+  anima.
 
 ## Arquitectura
 

@@ -4,6 +4,7 @@ import Scene from './Scene'
 import { configureScene } from './scene/renderer'
 import { CAMERA, SHOTS } from '@/features/camera'
 import { LoadingScreen, SceneWarmup } from '@/features/loader'
+import { LoveCounter, useLove } from '@/features/love'
 
 // What the visitor can do right now, which is not the same before and after
 // the book opens: an open book takes the keyboard and lets the lens much
@@ -25,6 +26,9 @@ export default function App() {
   const [ready, setReady] = useState(false)
   const [revealed, setRevealed] = useState(false)
   const warmup = useRef(null)
+  // The project's hearts: given by the heart in the room, counted in the
+  // corner over it.
+  const love = useLove()
 
   return (
     <div className="scene-wrap">
@@ -39,11 +43,12 @@ export default function App() {
         camera={{ ...CAMERA, position: SHOTS.intro.position.toArray() }}
         onCreated={configureScene}
       >
-        <Scene open={isOpen} onOpenChange={setIsOpen} revealed={revealed} />
+        <Scene open={isOpen} onOpenChange={setIsOpen} revealed={revealed} onLove={love.give} />
         <SceneWarmup progressRef={warmup} onReady={() => setReady(true)} />
       </Canvas>
       <div className="vignette" />
       <div className="hint">{isOpen ? HINTS.open : HINTS.closed}</div>
+      <LoveCounter count={love.count} loved={love.loved} />
       <LoadingScreen ready={ready} warmupRef={warmup} onReveal={() => setRevealed(true)} />
     </div>
   )

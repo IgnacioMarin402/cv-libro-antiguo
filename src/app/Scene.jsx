@@ -10,6 +10,7 @@ import { DustParticles } from '@/features/dust'
 import { Lighting } from '@/features/lighting'
 import { CameraRig } from '@/features/camera'
 import { PageCurlBook } from '@/features/pageCurlBook'
+import { LoveHeart } from '@/features/love'
 import {
   CANDLE_POSITION,
   FLOOR_POSITION,
@@ -23,6 +24,7 @@ import {
   WIZARD_POSITION,
   WIZARD_ROTATION,
   BOOK_POSITION,
+  LOVE_HEART_POSITION,
 } from './scene/layout'
 
 // The scene assembled from its features. The one piece of state that
@@ -30,12 +32,14 @@ import {
 // itself drives and the camera and the wizard react to — is handed down
 // from App, because the hint line outside the canvas reads it too. So is
 // whether the loading screen has lifted, which only the camera waits on.
+// And so is what a click on the love heart does, since the count it adds
+// to is drawn over the canvas.
 //
 // The book is features/pageCurlBook. features/book — the from-scratch
 // vertex-displacement one this scene opened with — is no longer mounted;
 // its cover leather is still what this one is bound in (see
 // pageCurlBook/hooks/usePageMaterials).
-export default function Scene({ open, onOpenChange, revealed }) {
+export default function Scene({ open, onOpenChange, revealed, onLove }) {
   return (
     <>
       <Lighting />
@@ -51,6 +55,7 @@ export default function Scene({ open, onOpenChange, revealed }) {
       <Helmet position={HELMET_POSITION} rotation={HELMET_ROTATION} />
       <Wizard position={WIZARD_POSITION} rotation={WIZARD_ROTATION} open={open} />
       <PageCurlBook position={BOOK_POSITION} onOpenChange={onOpenChange} />
+      <LoveHeart position={LOVE_HEART_POSITION} onLove={onLove} />
       <DustParticles />
       <CameraRig open={open} ready={revealed} />
     </>

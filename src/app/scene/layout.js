@@ -61,6 +61,17 @@ export const HELMET_ROTATION = [
   0,
 ]
 
+// The love heart, behind the book on the candle's right: the middle of its
+// lap (8 cm round, see features/love), 20 cm over the table. Chosen by
+// sweeping the table's back half for where the whole lap stays in frame:
+// from here it is in every frame of the intro and the resting shot, on a
+// 16:9 screen and on a phone held upright, and of the open shot on 16:9;
+// upright, the open shot takes 44% of the lap. Out on the table's right,
+// where there is room, it fell out of every phone frame. Along its lap it
+// keeps 15.7 cm from the leaves, 4 cm from the candlestick's foot (10.5 from
+// its axis) and 44 cm from the helmet's axis.
+export const LOVE_HEART_POSITION = [0.2, 0.2, -0.53]
+
 // Under the table, where its feet stand, centred on it like everything else.
 export const FLOOR_POSITION = [0, TABLE_FOOT_Y, 0]
 
