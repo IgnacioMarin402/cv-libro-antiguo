@@ -12,6 +12,10 @@ const MODEL_HEIGHT = 97.92
 export const SCONCE_HEIGHT = 0.5
 export const SCONCE_SCALE = SCONCE_HEIGHT / MODEL_HEIGHT
 
+// How much of the wall it takes across, once scaled: 48 cm.
+const MODEL_WIDTH = 94.7
+export const SCONCE_WIDTH = MODEL_WIDTH * SCONCE_SCALE
+
 // The plate's back, what meets the wall: the bulk of the model's rear-most
 // vertices lie at z = -25.8 (measured in 0.2 slices). Only the ends of the
 // bar that carries the side arms stand out behind it, by up to 1.6 (8 mm),

@@ -3,9 +3,11 @@
 // Where they stand is the layout's call — on the floor, centred on the table.
 
 // How far each wall stands from the table's centre. It has to clear the
-// camera: the orbit reaches 3.6 m from its aim, and the aim pans at most
-// 0.33 m off the book (0.85 of a page), so the lens gets to 3.93 m on
-// either axis. 4.2 m keeps it 27 cm inside the walls from every angle.
+// camera: the orbit reaches 3.3 m from its aim, and the aim pans at most
+// 0.33 m off the book (0.85 of a page), so low at the polar limit the lens
+// gets to 3.61 m on either axis — 59 cm inside the walls. What stands on
+// them, not the walls, is what stops the orbit there (see features/camera);
+// the walls alone would let it out to 3.87.
 export const WALL_HALF_SPAN = 4.2
 
 // The image isn't tileable across as it comes: 1024 px holds 3.7 bays, and

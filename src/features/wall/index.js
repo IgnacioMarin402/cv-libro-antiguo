@@ -4,3 +4,4 @@
 export { default as Wall } from './Wall'
 export { WALL_HALF_SPAN, REPEAT_LENGTH } from './domain/wall'
 export { DOOR_CENTER_X } from './domain/door'
+export { WINDOW_CENTER_X, WINDOW_HALF_WIDTH } from './domain/window'

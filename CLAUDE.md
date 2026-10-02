@@ -24,7 +24,17 @@ un tramo de tres arcos al cargarla), y la ventana gótica que va en una de ellas
 `public/models/arched-door.glb`, y el librero de la esquina noroeste, `features/bookshelf`:
 `public/models/wooden-bookshelf.glb`, y los dos apliques de hierro a los lados de la
 puerta, `features/sconce`: `public/models/wrought-iron-sconce.glb` (sus llamas son las
-de la vela). Antes de buscar otro archivo de modelo o de textura,
+de la vela), y la chimenea de la pared este, `features/fireplace`:
+`public/models/brick-fireplace.glb` (su fuego son llamas de la vela, más grandes),
+y los cuatro tronos alrededor de la mesa, `features/throne`: `public/models/ornate-throne.glb`,
+y el caldero de la esquina noreste, `features/cauldron`: `public/models/medieval-cauldron.glb`
+(su fuego, también de llamas de la vela), y el estante de pared al otro lado de la chimenea,
+`features/shelf`: `public/models/ornate-shelf.glb`, y el aparador junto al librero,
+`features/cabinet`: `public/models/ornate-cabinet.glb`, y el escudo junto a la ventana,
+`features/shield`: `public/models/medieval-shield.glb`, y la mesa antigua de la esquina suroeste,
+`features/antiqueTable`: `public/models/antique-table.glb`, y la alfombra bajo la mesa,
+`features/rug`: `public/models/dragon-lion-rug.glb` (se aplana al cargarla: el modelo
+trae las figuras en relieve y las cabezas sobresalían). Antes de buscar otro archivo de modelo o de textura,
 asume que no existe y que hay que generarlo.
 
 Hay **dos implementaciones de libro**. La que se monta es `src/features/pageCurlBook/`:

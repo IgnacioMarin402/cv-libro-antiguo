@@ -1,14 +1,15 @@
 import { useMemo } from 'react'
 import * as THREE from 'three'
-import { createCoverTexture, createCoverBumpTexture, createCoverInnerTexture } from '@/features/book'
+import { createCoverBumpTexture, createCoverInnerTexture } from '@/features/book'
 
-// Three material sets: blank paper for the leaves, and the real book's own
-// leather for the two boards, so the second book reads as the same edition
-// rather than a different prop. The tooling is painted on a square canvas
-// and stretched over whatever face it lands on; the two books' covers are
-// 0.740 and 0.744 wide-to-tall, so the design arrives here at the same
-// proportions it has over there. Each book paints its own leather, so the
-// gilt matches but the grain and the wear don't repeat.
+// Three material sets: blank paper for the leaves, and leather for the two
+// boards. The boards' outer face is a picture, asked for: the front board
+// cut out of a render of the whole book, spine and table trimmed off. The
+// cut is 431 x 603 px, 0.715 wide-to-tall against the board's 0.740, so it
+// is stretched 3.5% across — less than the cut can be moved by a pixel of
+// shadow at its edges. The relief is that same picture read as height, as
+// the floor does: the gilt is the brightest thing on it, and stands up.
+// The inside of the boards is still features/book's painted doublure.
 //
 // The paper is the tutorial's own set: white all round, a near-black
 // gutter down the spine edge, and the two faces glossy (roughness 0.1,
@@ -22,9 +23,21 @@ import { createCoverTexture, createCoverBumpTexture, createCoverInnerTexture } f
 const PAPER_COLOR = 0xffffff
 const GUTTER_COLOR = 0x111111
 // The flat leather on the boards' cut edges. It has no map, so it has to be
-// the green the cover texture is painted at — otherwise the four edges give
-// the binding away as brown from every angle but straight on.
-const LEATHER_COLOR = 0x1f342e
+// the red the cover picture is — otherwise the four edges give the binding
+// away from every angle but straight on. Averaged in linear light over the
+// plain field between the top corner plates (#50231d) and the bottom ones
+// (#3c1612, darker under the picture's vignette), and taken about midway.
+const LEATHER_COLOR = 0x461d18
+const COVER_URL = '/textures/book/cover.webp'
+
+// Not useLoader: that suspends, and the whole book would wait on one
+// picture. The board shows untextured for the moment it takes to load.
+// Loaded twice, once per colour space; the second is the browser's cache.
+function loadCover(colorSpace) {
+  const tex = new THREE.TextureLoader().load(COVER_URL)
+  tex.colorSpace = colorSpace
+  return tex
+}
 
 export function usePageMaterials() {
   return useMemo(() => {
@@ -33,8 +46,8 @@ export function usePageMaterials() {
     const face = new THREE.MeshStandardMaterial({ color: PAPER_COLOR, roughness: 0.1 })
 
     const tooled = new THREE.MeshStandardMaterial({
-      map: createCoverTexture(),
-      bumpMap: createCoverBumpTexture(),
+      map: loadCover(THREE.SRGBColorSpace),
+      bumpMap: loadCover(THREE.NoColorSpace),
       bumpScale: 0.005,
       roughness: 0.92,
       metalness: 0.02,
@@ -48,7 +61,7 @@ export function usePageMaterials() {
     })
     const cut = new THREE.MeshStandardMaterial({ color: LEATHER_COLOR, roughness: 0.9, metalness: 0.03 })
     // The spine's leather. Same hide as the boards' cut edges, and the same
-    // green the cover is painted at, so the back reads as one piece with
+    // red as the cover picture, so the back reads as one piece with
     // them. DoubleSide because the strip has no thickness of its own and
     // the fold is looked into from both sides; the bump gives the grain
     // something to catch the candle with, since it carries no map.

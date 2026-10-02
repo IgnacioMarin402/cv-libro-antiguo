@@ -1,9 +1,17 @@
 import { Table } from '@/features/table'
 import { Floor } from '@/features/floor'
+import { Rug } from '@/features/rug'
 import { Wall } from '@/features/wall'
 import { Bookshelf } from '@/features/bookshelf'
 import { Candle, FireAudio } from '@/features/candle'
 import { Sconce } from '@/features/sconce'
+import { Fireplace } from '@/features/fireplace'
+import { Throne } from '@/features/throne'
+import { Cauldron } from '@/features/cauldron'
+import { Shelf } from '@/features/shelf'
+import { Cabinet } from '@/features/cabinet'
+import { Shield } from '@/features/shield'
+import { AntiqueTable } from '@/features/antiqueTable'
 import { Helmet } from '@/features/helmet'
 import { Wizard } from '@/features/wizard'
 import { DustParticles } from '@/features/dust'
@@ -14,10 +22,23 @@ import { LoveHeart } from '@/features/love'
 import {
   CANDLE_POSITION,
   FLOOR_POSITION,
+  RUG_POSITION,
   WALL_POSITION,
   BOOKSHELF_POSITION,
   BOOKSHELF_ROTATION,
+  CABINET_POSITION,
+  CABINET_ROTATION,
+  SHIELD_POSITION,
+  ANTIQUE_TABLE_POSITION,
+  ANTIQUE_TABLE_ROTATION,
   SCONCES,
+  FIREPLACE_POSITION,
+  FIREPLACE_ROTATION,
+  CAULDRON_POSITION,
+  CAULDRON_ROTATION,
+  SHELF_POSITION,
+  SHELF_ROTATION,
+  THRONES,
   FLAME_POSITION,
   HELMET_POSITION,
   HELMET_ROTATION,
@@ -44,9 +65,19 @@ export default function Scene({ open, onOpenChange, revealed, onLove }) {
     <>
       <Lighting />
       <Floor position={FLOOR_POSITION} />
+      <Rug position={RUG_POSITION} />
       <Wall position={WALL_POSITION} />
       <Bookshelf position={BOOKSHELF_POSITION} rotation={BOOKSHELF_ROTATION} />
+      <Cabinet position={CABINET_POSITION} rotation={CABINET_ROTATION} />
+      <Shield position={SHIELD_POSITION} />
+      <Fireplace position={FIREPLACE_POSITION} rotation={FIREPLACE_ROTATION} />
+      <Cauldron position={CAULDRON_POSITION} rotation={CAULDRON_ROTATION} />
+      <Shelf position={SHELF_POSITION} rotation={SHELF_ROTATION} />
+      <AntiqueTable position={ANTIQUE_TABLE_POSITION} rotation={ANTIQUE_TABLE_ROTATION} />
       <Table />
+      {THRONES.map((throne, i) => (
+        <Throne key={i} {...throne} />
+      ))}
       <Candle position={CANDLE_POSITION} />
       <FireAudio position={FLAME_POSITION} />
       {SCONCES.map((sconce, i) => (

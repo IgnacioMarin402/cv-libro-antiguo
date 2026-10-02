@@ -20,9 +20,9 @@ import { PAGE_COUNT, PAGE_DEPTH, PAGE_WIDTH, CLOSED_PITCH } from './pageCurl'
 
 // How far along each board the leather runs before it leaves it. A real
 // binding covers the spine plus a strip of each board, but here the strip
-// has to stop short of the cover's tooling: the gilt border is painted
-// 4.3% of the width in from the edge (16.8 mm, `o` in features/book's
-// giltOrnament), and the first cut — a sixth of the width, 65 mm — hid it
+// has to stop short of the cover's tooling: the gilt rule runs 4.8% of the
+// width in from the spine edge (18.6 mm; column 20 of the 431 px cover
+// picture), and the first cut — a sixth of the width, 65 mm — hid it
 // along with over a third of the two corner plates. 3% (11.7 mm) leaves
 // a few millimetres of bare cover between the leather and the gilt.
 export const SPINE_GRIP = PAGE_WIDTH * 0.03

@@ -1,7 +1,7 @@
 import { useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
-import { FLAME, LIGHT_LEAN, flameAt } from '../domain/flame'
+import { FLAME, LIGHT_LEAN, BASE_INTENSITY, flameAt } from '../domain/flame'
 import { FLAME_SCALE } from '../domain/candle'
 import { flameVertexShader, flameFragmentShader } from '../shaders/flameShader'
 
@@ -22,7 +22,10 @@ const GLOW_OPACITY = 0.85
 // candle's light from one reading of the draft per frame (see
 // domain/flame). `phase` (seconds) takes that reading earlier or later, so
 // flames burning side by side don't move in step; `wickRadius` is in
-// metres.
+// metres. `size` is how many times a candle's flame this one is, and
+// `intensity` its light at rest. A candle burns laminar and slow; a fire on
+// wood is restless, so `sway` multiplies how far the draft leans it and how
+// hard the ripple runs up it, and `pace` how fast it all happens.
 //
 // The card turns about the flame's own upright axis to face the camera,
 // rather than copying the camera's rotation the way a sprite does: seen
@@ -30,8 +33,8 @@ const GLOW_OPACITY = 0.85
 // leans it in the room, not on the screen. Only when the visitor looks
 // down from high above does the axis tip toward the camera's up — a card
 // kept strictly upright would be seen end-on from overhead and vanish.
-export function useFlame({ wickRadius, phase = 0 }) {
-  const nudge = (wickRadius / FLAME_SCALE) * NUDGE_RADII
+export function useFlame({ wickRadius, phase = 0, size = 1, intensity = BASE_INTENSITY, sway = 1, pace = 1 }) {
+  const nudge = (wickRadius / (FLAME_SCALE * size)) * NUDGE_RADII
   const cardRef = useRef()
   const glowRef = useRef()
   const lightRef = useRef()
@@ -64,8 +67,10 @@ export function useFlame({ wickRadius, phase = 0 }) {
   const scratch = useMemo(() => ({ eye: new THREE.Vector3(), camUp: new THREE.Vector3() }), [])
 
   useFrame((state) => {
-    const t = state.clock.getElapsedTime() + phase
+    const t = (state.clock.getElapsedTime() + phase) * pace
     const f = flameAt(t)
+    const leanX = f.leanX * sway
+    const leanZ = f.leanZ * sway
     const { eye, camUp } = scratch
     const { value: axis } = uniforms.uAxis
     const { value: side } = uniforms.uSide
@@ -85,22 +90,22 @@ export function useFlame({ wickRadius, phase = 0 }) {
     side.crossVectors(axis, eye).normalize()
     uniforms.uNudge.value.copy(eye).multiplyScalar(nudge)
 
-    uniforms.uLean.value.set(f.leanX, 0, f.leanZ)
+    uniforms.uLean.value.set(leanX, 0, leanZ)
     uniforms.uHeight.value = FLAME.height * f.stretch
     uniforms.uTime.value = t
-    uniforms.uFlutter.value = f.flutter
+    uniforms.uFlutter.value = f.flutter * sway
     uniforms.uBrightness.value = f.brightness
 
     const light = lightRef.current
     if (light) {
-      light.intensity = f.light
-      light.position.x = f.leanX * LIGHT_LEAN
-      light.position.z = f.leanZ * LIGHT_LEAN
+      light.intensity = (f.light / BASE_INTENSITY) * intensity
+      light.position.x = leanX * LIGHT_LEAN
+      light.position.z = leanZ * LIGHT_LEAN
     }
 
     const glow = glowRef.current
-    glow.position.x = f.leanX * GLOW_LEAN
-    glow.position.z = f.leanZ * GLOW_LEAN
+    glow.position.x = leanX * GLOW_LEAN
+    glow.position.z = leanZ * GLOW_LEAN
     glow.material.opacity = GLOW_OPACITY * f.brightness
   })
 

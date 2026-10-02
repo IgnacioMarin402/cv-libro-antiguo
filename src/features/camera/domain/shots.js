@@ -62,6 +62,15 @@ export const OPEN_ZOOM_DURATION = 1700
 // reads whole. Measured, not guessed; re-measure if the fov, the table
 // radius or the pedestal's height change.
 //
+// (That was measured on the scene's first table, a pedestal, and not again
+// since.) It was later let out to 3.87, as far as the walls allow, and the
+// lens was caught inside the fireplace — which it could already reach at
+// 3.6, low and backed all the way out toward it. 3.3 is the farthest that
+// keeps it out of everything in the room: over every orbit and aim, with
+// the polar limit, it keeps 6.2 cm from the fireplace's mantel, outside the
+// near plane's 2, and more than 20 cm from anything else. At 3.35 the
+// mantel came within 1.2 cm; at 3.4 the lens went into it.
+//
 // minPolarAngle is 0 so the visitor can come all the way overhead and read
 // the open spread flat, straight down. OrbitControls clamps the pole to
 // its own epsilon, so 0 is the vertical without the gimbal flip. From up
@@ -82,7 +91,7 @@ export const ORBIT_LIMITS = {
   dampingFactor: 0.08,
   minDistance: 0.35,
   openMinDistance: 0.18,
-  maxDistance: 3.6,
+  maxDistance: 3.3,
   minPolarAngle: 0,
   maxPolarAngle: 1.45,
 }

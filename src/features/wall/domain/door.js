@@ -27,7 +27,7 @@ export const DOOR_SCALE = DOOR_HEIGHT / DOOR_MODEL_HEIGHT
 // 2.0 to 12.8 mm at scale, where the depth buffer resolves 0.2 mm even from
 // the far side of the room — the frame 11.5 cm proud and the ring pull 16.
 // What's behind (the leaf's back and the far side of its hinges) goes into
-// the wall. Over every orbit and aim the lens keeps 26.8 cm from the frame
+// the wall. Over every orbit and aim the lens keeps 57 cm from the frame
 // (measured with the polar limit).
 export function doorPlacement(side) {
   const { position: [x, y, z], rotationY } = side

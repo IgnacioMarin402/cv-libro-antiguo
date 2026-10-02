@@ -16,7 +16,8 @@ export const WINDOW_CENTER_X = 0
 // and facing +z. Scaled so it runs the wall's whole height from the floor,
 // like the reference's floor-to-vault window: 1.82 m wide, two bays of the
 // panelling, and 29 cm deep, so it stands 14 cm proud of the wall into the
-// room — still 19 cm short of the nearest the camera gets (3.86 m on z).
+// room. Over every orbit and aim the lens keeps 59 cm from it (measured
+// with the polar limit).
 export const WINDOW_MODEL_HEIGHT = 97.82
 export const WINDOW_SCALE = WALL_HEIGHT / WINDOW_MODEL_HEIGHT
 
@@ -28,6 +29,10 @@ const OUTLINE = [
   [80.5, 20.65], [82.5, 19.55], [84.5, 18.3], [86.5, 16.85], [88.5, 15.2],
   [90.5, 13.2], [92.5, 10.9], [94.5, 8.1], [96.5, 4.35], [97.82, 0],
 ]
+
+// Half its width at the outside of its frame, in metres: 88 cm. For what
+// hangs on the wall beside it.
+export const WINDOW_HALF_WIDTH = 25 * WINDOW_SCALE
 
 // The hole cut in the wall for it is that outline pulled in by 2.5 units
 // (9 cm): the frame is 5.8 units wide all round, so the hole's edge falls
