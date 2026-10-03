@@ -274,23 +274,25 @@ export const SHELF_POSITION = [
 export const SHELF_ROTATION = FIREPLACE_ROTATION
 
 // The cushion nook in the south-east corner, under the wall shelf's south
-// end: its back on the shelf's wall, the east one — the cushions leant on
-// it — and turned with it to face the table; its +x side, turned, faces
-// the door's wall. Not pushed into the corner, as the antique table was
-// and was asked out of it: 15 cm off the door's wall, as the cauldron
-// stands off its two. It reaches 1.5 m into the room, ending 47 cm from the
-// rug's corner and 1.6 m from the nearest throne. Over it, the shelf comes
-// down no lower than its brackets, 85 cm off the floor, 29 cm over the
-// cushions' tops (what hangs from the shelf to 59 cm is at its other end,
-// 2.6 m from the corner). Over every orbit and aim the lens keeps 1.12 m
-// from it (measured with the polar limit).
-const SOFA_WALL_GAP = 0.15
+// end: its back on the door's wall, the south one — the cushions leant on
+// it — and facing north along the shelf's wall, toward the fireplace. It
+// faced west first, its back on the shelf's wall, which had it looking
+// along the door's wall at the door, and was asked turned to the fire.
+// Right into the corner, against both walls: it stood 15 cm off the
+// shelf's wall, as the cauldron stands off its two, and was asked against
+// it. It runs 1.73 m along the door's wall and as far out from it, ending
+// 1.4 m short of the hearth's corner, 39 cm from the rug's edge and 1.35 m
+// from the nearest throne. Over it, the shelf keeps 28 cm over the
+// cushions at the nearest (its brackets come down to 85 cm off the floor;
+// what hangs from it to 59 cm is at its other end, 2.6 m from the
+// corner). Over every orbit and aim the lens keeps 1.32 m from it
+// (measured with the polar limit).
 export const SOFA_POSITION = [
-  WALL_POSITION[0] + WALL_HALF_SPAN - SOFA_BACK_OFFSET,
+  WALL_POSITION[0] + WALL_HALF_SPAN - SOFA_SIDE_OFFSET,
   WALL_POSITION[1],
-  WALL_POSITION[2] + WALL_HALF_SPAN - SOFA_WALL_GAP - SOFA_SIDE_OFFSET,
+  WALL_POSITION[2] + WALL_HALF_SPAN - SOFA_BACK_OFFSET,
 ]
-export const SOFA_ROTATION = FIREPLACE_ROTATION
+export const SOFA_ROTATION = [0, Math.PI, 0]
 
 // The antique table in the south-west corner, beside the cabinet, running
 // along the door's wall from the corner toward the door: its back to that

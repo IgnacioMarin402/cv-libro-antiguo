@@ -15,17 +15,18 @@
 // The model exports 0.977 wide, 0.364 tall and 0.981 deep, standing on
 // y = 0 and facing +z: the cushions along its back, at -z, the book stack
 // at its front on the -x side. Its rearmost point is at z = -0.491, and its
-// +x side reaches x = 0.488.
+// sides reach x = ±0.488, the model centred across.
 const MODEL_WIDTH = 0.9768
 const MODEL_BACK_Z = -0.4906
 const MODEL_SIDE_X = 0.4884
 
-// 1.5 m across, which makes the big cushions 51 cm wide and their tops
-// 56 cm off the floor, and the books in the stack 24 cm.
-export const SOFA_WIDTH = 1.5
+// 1.73 m across, which makes the big cushions 59 cm wide and their tops
+// 64 cm off the floor, and the books in the stack 27 cm. It was 1.5 m and
+// was asked 15% bigger.
+export const SOFA_WIDTH = 1.5 * 1.15
 export const SOFA_SCALE = SOFA_WIDTH / MODEL_WIDTH
 
 // How far the model's origin stands, once scaled, from the wall at its
-// back, and from whatever its +x side faces.
+// back, and from whatever either of its sides faces.
 export const SOFA_BACK_OFFSET = -MODEL_BACK_Z * SOFA_SCALE
 export const SOFA_SIDE_OFFSET = MODEL_SIDE_X * SOFA_SCALE
