@@ -13,11 +13,21 @@ import { loveApi } from './love.js'
 //   PORT         where it listens (3000 if unset); hosts usually set it
 //   LOVE_DB      the SQLite file (data/love.db) — on a host, a path on a
 //                persistent volume, or every deploy starts the count at 0
-//   TRUST_PROXY  set it (to anything) when a reverse proxy sits in front,
-//                or every visitor shares the proxy's IP (see server/love.js)
+//   TRUST_PROXY  set it to 1 when a reverse proxy sits in front, or every
+//                visitor shares the proxy's IP (see server/love.js)
+//   HOST         the interface it listens on; see below
 
 const ROOT = fileURLToPath(new URL('../dist/', import.meta.url))
 const PORT = Number(process.env.PORT) || 3000
+const TRUST_PROXY = process.env.TRUST_PROXY === '1'
+// Behind a proxy on the same machine (a VPS with Caddy or nginx), only the
+// proxy may reach this port: open on every interface, anyone could skip the
+// proxy, write their own X-Forwarded-For and be counted as whoever they
+// like. So with TRUST_PROXY it listens on loopback alone — point the proxy
+// at 127.0.0.1:PORT, not localhost, which may try ::1 first. A platform
+// whose proxy runs on another machine (Railway, Fly, Render) sets
+// HOST=0.0.0.0. Without a proxy, every interface, as before.
+const HOST = process.env.HOST || (TRUST_PROXY ? '127.0.0.1' : undefined)
 
 const TYPES = {
   '.html': 'text/html; charset=utf-8',
@@ -41,7 +51,7 @@ const TYPES = {
 const COMPRESSIBLE = new Set(['.html', '.js', '.css', '.json', '.svg', '.wasm'])
 const gzipped = new Map()
 
-const love = loveApi()
+const love = loveApi({ trustProxy: TRUST_PROXY })
 
 async function serveStatic(req, res) {
   if (req.method !== 'GET' && req.method !== 'HEAD') {
@@ -109,6 +119,6 @@ createServer((req, res) => {
       res.end()
     })
   })
-}).listen(PORT, () => {
-  console.log(`Libro antiguo en http://localhost:${PORT}`)
+}).listen(PORT, HOST, () => {
+  console.log(`Libro antiguo en http://${HOST || 'localhost'}:${PORT}`)
 })

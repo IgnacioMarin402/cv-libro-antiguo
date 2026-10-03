@@ -93,7 +93,10 @@ desde 22.13, sin dependencias. El handler es uno solo, `server/love.js`: lo mont
   volver a probar el clic, borrar ese archivo.
 - En un host: `LOVE_DB` a un volumen persistente (si no, cada deploy vuelve a 0) y
   `TRUST_PROXY=1` si hay un proxy delante (si no, todos comparten la IP del proxy y el
-  contador se queda en 1). Para ver la cuenta:
+  contador se queda en 1). Tiene que ser `1` exacto, y con él el servidor escucha sólo
+  en `127.0.0.1`, para que nadie se salte el proxy y escriba su propio
+  `X-Forwarded-For`: en una VPS, el proxy apunta a `127.0.0.1:PORT`. Si el proxy está
+  en otra máquina (Railway, Fly, Render), además `HOST=0.0.0.0`. Para ver la cuenta:
   `node -e "console.log(new (require('node:sqlite').DatabaseSync)('data/love.db').prepare('select count(*) n from love').get())"`.
 - Sin servidor detrás (hosting estático), el contador no aparece y el corazón sólo
   anima.
@@ -182,6 +185,11 @@ que estableció esta estructura.
   veces, y un mesh con array de materiales, una vez por grupo y por cara. Las hojas
   proyectan con un gemelo de un solo material (`shared/three/shadowTwin`): pasaron
   de 360 draw calls a 60.
+- **Un hover cuesta un raycast por cada movimiento del puntero**, contra todo lo que
+  tenga `onPointerOver/Out/Move`. Las 10 hojas (con esqueleto: el raycast recalcula
+  cada vértice con sus huesos) son 3,7 ms por movimiento, el doble de todo el resto
+  del frame. Mientras se arrastra para girar, `useOrbitControls` apaga el hit-testing
+  de R3F. Antes de poner un hover en un GLB o en un mesh con esqueleto, medirlo.
 
 ## Estilo
 

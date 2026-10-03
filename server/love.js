@@ -1,6 +1,7 @@
 import { mkdirSync } from 'node:fs'
 import { dirname } from 'node:path'
 import { createHmac, randomBytes } from 'node:crypto'
+import { isIP } from 'node:net'
 import { DatabaseSync } from 'node:sqlite'
 
 // The love counter: how many visitors have clicked the heart, one each.
@@ -36,10 +37,15 @@ export function visitorKey(ip) {
 // address and the counter would stop at 1. TRUST_PROXY says so, and then
 // the address is the LAST in X-Forwarded-For — the one the proxy itself
 // appended. Earlier entries are whatever the client chose to send.
+//
+// Anything that isn't an address is refused (null): visitorKey assumes one,
+// and a request that reached the server without passing through the proxy
+// writes the header itself. A 9-group IPv6 there (1:2:3:4:5:6:7:8::9) made
+// visitorKey call Array(-1) and took the whole process down.
 export function clientIp(req, trustProxy) {
   const forwarded = trustProxy && req.headers['x-forwarded-for']
-  if (forwarded) return forwarded.split(',').at(-1).trim()
-  return req.socket.remoteAddress
+  const ip = forwarded ? forwarded.split(',').at(-1).trim() : req.socket.remoteAddress
+  return isIP(ip) ? ip : null
 }
 
 function openStore(file) {
@@ -77,7 +83,10 @@ function openStore(file) {
 // Connect-style (req, res, next), so the same handler is mounted by the
 // production server (server/server.js) and by Vite in development (see
 // vite.config.js). Anything that isn't /api/love goes on to next().
-export function loveApi({ file = process.env.LOVE_DB || 'data/love.db', trustProxy = Boolean(process.env.TRUST_PROXY) } = {}) {
+//
+// TRUST_PROXY is exactly '1': Boolean() of an env var is true for any text,
+// so TRUST_PROXY=false and TRUST_PROXY=0 used to turn it on.
+export function loveApi({ file = process.env.LOVE_DB || 'data/love.db', trustProxy = process.env.TRUST_PROXY === '1' } = {}) {
   const store = openStore(file)
 
   return (req, res, next) => {
@@ -87,15 +96,35 @@ export function loveApi({ file = process.env.LOVE_DB || 'data/love.db', trustPro
       res.writeHead(405, { Allow: 'GET, POST' })
       return res.end()
     }
+    // A heart is given from this site's own page. Without this, any other
+    // site could have its visitors' browsers POST here and give theirs
+    // unasked. Browsers since 2023 send Sec-Fetch-Site on every fetch; a
+    // client that doesn't (curl, a script) can spoof it anyway, and is
+    // held to one heart per IP like everyone else.
+    const site = req.headers['sec-fetch-site']
+    if (req.method === 'POST' && site && site !== 'same-origin') {
+      res.writeHead(403)
+      return res.end()
+    }
     const ip = clientIp(req, trustProxy)
     if (!ip) {
       res.writeHead(400)
       return res.end()
     }
 
-    const visitor = store.visitor(ip)
-    if (req.method === 'POST') store.add(visitor)
-    res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' })
-    res.end(JSON.stringify({ count: store.count(), loved: store.has(visitor) }))
+    // server.js calls this outside any promise, so an error thrown here
+    // would take down the whole site, not just the counter — and SQLite
+    // throws too (a full disk, a locked file).
+    try {
+      const visitor = store.visitor(ip)
+      if (req.method === 'POST') store.add(visitor)
+      const body = JSON.stringify({ count: store.count(), loved: store.has(visitor) })
+      res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' })
+      res.end(body)
+    } catch (error) {
+      console.error(error)
+      res.writeHead(500)
+      res.end()
+    }
   }
 }
