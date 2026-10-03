@@ -12,8 +12,11 @@ import { BOOKSHELF_BACK_OFFSET, BOOKSHELF_SIDE_OFFSET } from '@/features/bookshe
 import { SCONCE_WIDTH, SCONCE_BACK_OFFSET } from '@/features/sconce'
 import { FIREPLACE_WIDTH, FIREPLACE_BACK_OFFSET } from '@/features/fireplace'
 import { SHELF_WIDTH, SHELF_BACK_OFFSET, SHELF_FLOOR_OFFSET } from '@/features/shelf'
+import { SOFA_BACK_OFFSET, SOFA_SIDE_OFFSET } from '@/features/sofa'
 import { CABINET_WIDTH, CABINET_BACK_OFFSET } from '@/features/cabinet'
 import { SHIELD_WIDTH, SHIELD_BACK_OFFSET, SHIELD_FLOOR_OFFSET } from '@/features/shield'
+import { PORTRAIT_WIDTH, PORTRAIT_BACK_OFFSET, PORTRAIT_FLOOR_OFFSET } from '@/features/portrait'
+import { BUST_WIDTH, BUST_BACK_OFFSET } from '@/features/bust'
 import { ANTIQUE_TABLE_BACK_OFFSET, ANTIQUE_TABLE_HALF_WIDTH } from '@/features/antiqueTable'
 import { CAULDRON_RADIUS } from '@/features/cauldron'
 
@@ -191,6 +194,41 @@ export const SHIELD_POSITION = [
   WALL_POSITION[2] - WALL_HALF_SPAN + SHIELD_BACK_OFFSET,
 ]
 
+// The dogs' portrait on the same wall, across the window from the shield:
+// east of it, past the sconce on that side, 30 cm clear of it as the shield
+// is of its own, its back on the wall and facing the room. It hangs from
+// 1.35 m off the floor to 2.35, like the shield, over the left end of the
+// cauldron in the corner — 18 cm over its top, 1.17 m — and short of the
+// orbs rising off its brew, which keep 5 cm past the frame's right edge.
+// The frame stands 12 cm out from the wall, and over every orbit and aim
+// the lens keeps 81 cm from it (measured with the polar limit).
+const PORTRAIT_SCONCE_GAP = SHIELD_SCONCE_GAP
+export const PORTRAIT_POSITION = [
+  WINDOW_SCONCES[1].position[0] + SCONCE_WIDTH / 2 + PORTRAIT_SCONCE_GAP + PORTRAIT_WIDTH / 2,
+  WALL_POSITION[1] + PORTRAIT_FLOOR_OFFSET,
+  WALL_POSITION[2] - WALL_HALF_SPAN + PORTRAIT_BACK_OFFSET,
+]
+
+// Shourdo's bust on the floor below them, beside the window: its cape's hem
+// 14 cm clear of the window's frame. At half its size it stood halfway from
+// the frame to under the portrait's left edge, 14 cm from each; grown, it's
+// wider than that stretch, 1.15 m against 86 cm, and centred there its hem
+// came within 2 mm of the frame's foot and stood in front of 14 cm of it.
+// So it kept its gap to the window and grew toward the portrait: it now
+// stands under its left half, 35 cm below it, and 41 cm short of the
+// cauldron's wood. The hem's back on the wall, facing the room as the model
+// does. Off the rug, which stops a metre short of it. Over every orbit and
+// aim the lens keeps 45 cm from it, from the top of his head (measured with
+// the polar limit): the orbit never comes down past the table's top, and
+// his head is level with it.
+const WINDOW_FRAME_EDGE_X = WINDOW_CENTER_X + WINDOW_HALF_WIDTH
+const BUST_WINDOW_GAP = 0.14
+export const BUST_POSITION = [
+  WINDOW_FRAME_EDGE_X + BUST_WINDOW_GAP + BUST_WIDTH / 2,
+  WALL_POSITION[1],
+  WALL_POSITION[2] - WALL_HALF_SPAN + BUST_BACK_OFFSET,
+]
+
 // The fireplace on the east wall, the one that stood bare — across the room
 // from the bookshelf's — centred on it, its back on the wall and turned with
 // it to face the table. It stands 87 cm into the room, the hearth's front
@@ -234,6 +272,25 @@ export const SHELF_POSITION = [
   FIREPLACE_POSITION[2] + FIREPLACE_WIDTH / 2 + SHELF_FIREPLACE_GAP + SHELF_WIDTH / 2,
 ]
 export const SHELF_ROTATION = FIREPLACE_ROTATION
+
+// The cushion nook in the south-east corner, under the wall shelf's south
+// end: its back on the shelf's wall, the east one — the cushions leant on
+// it — and turned with it to face the table; its +x side, turned, faces
+// the door's wall. Not pushed into the corner, as the antique table was
+// and was asked out of it: 15 cm off the door's wall, as the cauldron
+// stands off its two. It reaches 1.5 m into the room, ending 47 cm from the
+// rug's corner and 1.6 m from the nearest throne. Over it, the shelf comes
+// down no lower than its brackets, 85 cm off the floor, 29 cm over the
+// cushions' tops (what hangs from the shelf to 59 cm is at its other end,
+// 2.6 m from the corner). Over every orbit and aim the lens keeps 1.12 m
+// from it (measured with the polar limit).
+const SOFA_WALL_GAP = 0.15
+export const SOFA_POSITION = [
+  WALL_POSITION[0] + WALL_HALF_SPAN - SOFA_BACK_OFFSET,
+  WALL_POSITION[1],
+  WALL_POSITION[2] + WALL_HALF_SPAN - SOFA_WALL_GAP - SOFA_SIDE_OFFSET,
+]
+export const SOFA_ROTATION = FIREPLACE_ROTATION
 
 // The antique table in the south-west corner, beside the cabinet, running
 // along the door's wall from the corner toward the door: its back to that

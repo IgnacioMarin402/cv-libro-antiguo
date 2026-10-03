@@ -34,7 +34,14 @@ y el caldero de la esquina noreste, `features/cauldron`: `public/models/medieval
 `features/shield`: `public/models/medieval-shield.glb`, y la mesa antigua de la esquina suroeste,
 `features/antiqueTable`: `public/models/antique-table.glb`, y la alfombra bajo la mesa,
 `features/rug`: `public/models/dragon-lion-rug.glb` (se aplana al cargarla: el modelo
-trae las figuras en relieve y las cabezas sobresalían). Antes de buscar otro archivo de modelo o de textura,
+trae las figuras en relieve y las cabezas sobresalían), y el retrato de los perros junto a
+la ventana, `features/portrait`: la imagen `public/textures/portrait/dog-portrait.webp`, tal
+cual se dio, en el marco `public/models/portrait-frame.glb` (recortado del modelo de Tripo del
+mismo cuadro: los perros en relieve se probaron y se descartaron), y el busto de Shourdo en el
+piso bajo ellos, `features/bust`: `public/models/shourdo-bust.glb` (con el borde de la capa
+repintado en su textura: venía desteñido hacia el blanco), y el rincón de cojines de la esquina
+sureste, `features/sofa`: `public/models/cozy-sofa.glb` (simplificado de 1,9 M a 199 mil
+triángulos con gltfpack, medido contra el original). Antes de buscar otro archivo de modelo o de textura,
 asume que no existe y que hay que generarlo.
 
 Hay **dos implementaciones de libro**. La que se monta es `src/features/pageCurlBook/`:

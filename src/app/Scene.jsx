@@ -9,8 +9,11 @@ import { Fireplace } from '@/features/fireplace'
 import { Throne } from '@/features/throne'
 import { Cauldron } from '@/features/cauldron'
 import { Shelf } from '@/features/shelf'
+import { Sofa } from '@/features/sofa'
 import { Cabinet } from '@/features/cabinet'
 import { Shield } from '@/features/shield'
+import { Portrait } from '@/features/portrait'
+import { Bust } from '@/features/bust'
 import { AntiqueTable } from '@/features/antiqueTable'
 import { Helmet } from '@/features/helmet'
 import { Wizard } from '@/features/wizard'
@@ -29,6 +32,8 @@ import {
   CABINET_POSITION,
   CABINET_ROTATION,
   SHIELD_POSITION,
+  PORTRAIT_POSITION,
+  BUST_POSITION,
   ANTIQUE_TABLE_POSITION,
   ANTIQUE_TABLE_ROTATION,
   SCONCES,
@@ -38,6 +43,8 @@ import {
   CAULDRON_ROTATION,
   SHELF_POSITION,
   SHELF_ROTATION,
+  SOFA_POSITION,
+  SOFA_ROTATION,
   THRONES,
   FLAME_POSITION,
   HELMET_POSITION,
@@ -70,9 +77,12 @@ export default function Scene({ open, onOpenChange, revealed, onLove }) {
       <Bookshelf position={BOOKSHELF_POSITION} rotation={BOOKSHELF_ROTATION} />
       <Cabinet position={CABINET_POSITION} rotation={CABINET_ROTATION} />
       <Shield position={SHIELD_POSITION} />
+      <Portrait position={PORTRAIT_POSITION} />
+      <Bust position={BUST_POSITION} />
       <Fireplace position={FIREPLACE_POSITION} rotation={FIREPLACE_ROTATION} />
       <Cauldron position={CAULDRON_POSITION} rotation={CAULDRON_ROTATION} />
       <Shelf position={SHELF_POSITION} rotation={SHELF_ROTATION} />
+      <Sofa position={SOFA_POSITION} rotation={SOFA_ROTATION} />
       <AntiqueTable position={ANTIQUE_TABLE_POSITION} rotation={ANTIQUE_TABLE_ROTATION} />
       <Table />
       {THRONES.map((throne, i) => (
