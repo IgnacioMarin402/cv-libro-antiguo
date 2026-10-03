@@ -16,8 +16,15 @@
 // of the origin and the ornaments to 0.074, close in on an opening ±0.428
 // across and from 0.077 to 0.9 up.
 const MODEL_WIDTH = 0.9797
+const MODEL_HEIGHT = 0.976
 const MODEL_BACK_Z = -0.0434
+const MODEL_FRONT_Z = 0.074
 const OPENING = { halfWidth: 0.428, bottom: 0.077, top: 0.9 }
+
+// The whole frame as a flat face, ornaments and all, in the file's units:
+// what a click on the portrait lands on, the same outline the camera
+// frames when it comes to look (see PORTRAIT_FOCUS in app/scene/layout).
+export const FRAME = { halfWidth: MODEL_WIDTH / 2, bottom: 0, top: MODEL_HEIGHT, front: MODEL_FRONT_Z }
 
 // The canvas the image is on, a flat panel in the frame: halfway through the
 // rails' depth, 4.7 cm in from their front at scale, and running 2 cm into
@@ -35,27 +42,42 @@ export const CANVAS = { z: 0, halfWidth: 0.45, bottom: 0.057, top: 0.92 }
 const IMAGE_SIZE = 1024
 const IMAGE_INNER = { left: 78, right: 947, top: 70, bottom: 915 }
 
+// The fit above as numbers: image pixels to the frame's units, and the
+// painting's middle in the image and in the frame.
+export const PX_PER_UNIT = (IMAGE_INNER.right - IMAGE_INNER.left) / (OPENING.halfWidth * 2)
+const IMAGE_CENTRE_X = (IMAGE_INNER.left + IMAGE_INNER.right) / 2
+const IMAGE_CENTRE_Y = (IMAGE_INNER.top + IMAGE_INNER.bottom) / 2
+const OPENING_MIDDLE = (OPENING.bottom + OPENING.top) / 2
+
 // The part of the image the canvas shows, as a texture's offset and repeat
 // (v counted from the image's bottom, as a texture flips it).
 export function canvasImageWindow() {
-  const pxPerUnit = (IMAGE_INNER.right - IMAGE_INNER.left) / (OPENING.halfWidth * 2)
-  const centreX = (IMAGE_INNER.left + IMAGE_INNER.right) / 2
-  const centreY = (IMAGE_INNER.top + IMAGE_INNER.bottom) / 2
-  const openingMiddle = (OPENING.bottom + OPENING.top) / 2
-  const left = centreX - CANVAS.halfWidth * pxPerUnit
-  const right = centreX + CANVAS.halfWidth * pxPerUnit
-  const top = centreY - (CANVAS.top - openingMiddle) * pxPerUnit
-  const bottom = centreY + (openingMiddle - CANVAS.bottom) * pxPerUnit
+  const left = IMAGE_CENTRE_X - CANVAS.halfWidth * PX_PER_UNIT
+  const right = IMAGE_CENTRE_X + CANVAS.halfWidth * PX_PER_UNIT
+  const top = IMAGE_CENTRE_Y - (CANVAS.top - OPENING_MIDDLE) * PX_PER_UNIT
+  const bottom = IMAGE_CENTRE_Y + (OPENING_MIDDLE - CANVAS.bottom) * PX_PER_UNIT
   return {
     offset: [left / IMAGE_SIZE, 1 - bottom / IMAGE_SIZE],
     repeat: [(right - left) / IMAGE_SIZE, (bottom - top) / IMAGE_SIZE],
   }
 }
 
+// Where a pixel of the image lies on the canvas, in the frame's units (y up,
+// as the frame stands): the same fit, the other way round. It's what lets a
+// point picked on the image — a dog's head — be found on the wall.
+export function imageToCanvas(px, py) {
+  return [(px - IMAGE_CENTRE_X) / PX_PER_UNIT, OPENING_MIDDLE - (py - IMAGE_CENTRE_Y) / PX_PER_UNIT]
+}
+
 // 1 m across the frame, which makes it 1 m tall too, and the painting in
 // it 87 by 84 cm.
 export const PORTRAIT_WIDTH = 1
 export const PORTRAIT_SCALE = PORTRAIT_WIDTH / MODEL_WIDTH
+export const PORTRAIT_HEIGHT = MODEL_HEIGHT * PORTRAIT_SCALE
+
+// How far the frame's face — its ornaments, the front of the whole thing —
+// stands in front of the model's origin once scaled: 7.6 cm.
+export const PORTRAIT_FRONT_OFFSET = MODEL_FRONT_Z * PORTRAIT_SCALE
 
 // Hung like the shield across the window from it, its bottom 1.35 m off the
 // floor, so its top reaches 2.35 m — as high as the sconce beside it, 2.32.

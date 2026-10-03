@@ -16,6 +16,8 @@ import { Portrait } from '@/features/portrait'
 import { Bust } from '@/features/bust'
 import { AntiqueTable } from '@/features/antiqueTable'
 import { Helmet } from '@/features/helmet'
+import { Quill } from '@/features/quill'
+import { Mug } from '@/features/mug'
 import { Wizard } from '@/features/wizard'
 import { DustParticles } from '@/features/dust'
 import { Lighting } from '@/features/lighting'
@@ -34,6 +36,7 @@ import {
   CABINET_ROTATION,
   SHIELD_POSITION,
   PORTRAIT_POSITION,
+  PORTRAIT_FOCUS,
   BUST_POSITION,
   ANTIQUE_TABLE_POSITION,
   ANTIQUE_TABLE_ROTATION,
@@ -50,6 +53,10 @@ import {
   FLAME_POSITION,
   HELMET_POSITION,
   HELMET_ROTATION,
+  QUILL_POSITION,
+  QUILL_ROTATION,
+  MUG_POSITION,
+  MUG_ROTATION,
   WIZARD_POSITION,
   WIZARD_ROTATION,
   BOOK_POSITION,
@@ -62,13 +69,28 @@ import {
 // from App, because the hint line outside the canvas reads it too. So is
 // whether the loading screen has lifted, which only the camera waits on.
 // And so is what a click on the love heart does, since the count it adds
-// to is drawn over the canvas.
+// to is drawn over the canvas — as is the tip the heart shows beside itself
+// under the pointer (heartTipRef). And whether the visitor is looking at the
+// portrait: a click on it asks for that, the camera goes to it and its
+// names show — and the way back is a button over the canvas, which the
+// portrait places beside its frame (portraitBackRef).
 //
 // The book is features/pageCurlBook. features/book — the from-scratch
 // vertex-displacement one this scene opened with — is no longer mounted;
 // its cover leather is still what this one is bound in (see
 // pageCurlBook/hooks/usePageMaterials).
-export default function Scene({ open, onOpenChange, page, onPageChange, revealed, onLove }) {
+export default function Scene({
+  open,
+  onOpenChange,
+  page,
+  onPageChange,
+  revealed,
+  onLove,
+  heartTipRef,
+  viewingPortrait,
+  onViewPortrait,
+  portraitBackRef,
+}) {
   return (
     <>
       <Lighting />
@@ -78,7 +100,12 @@ export default function Scene({ open, onOpenChange, page, onPageChange, revealed
       <Bookshelf position={BOOKSHELF_POSITION} rotation={BOOKSHELF_ROTATION} />
       <Cabinet position={CABINET_POSITION} rotation={CABINET_ROTATION} />
       <Shield position={SHIELD_POSITION} />
-      <Portrait position={PORTRAIT_POSITION} />
+      <Portrait
+        position={PORTRAIT_POSITION}
+        focused={viewingPortrait}
+        onFocus={onViewPortrait}
+        backRef={portraitBackRef}
+      />
       <Bust position={BUST_POSITION} />
       <Fireplace position={FIREPLACE_POSITION} rotation={FIREPLACE_ROTATION} />
       <Cauldron position={CAULDRON_POSITION} rotation={CAULDRON_ROTATION} />
@@ -95,6 +122,8 @@ export default function Scene({ open, onOpenChange, page, onPageChange, revealed
         <Sconce key={i} {...sconce} />
       ))}
       <Helmet position={HELMET_POSITION} rotation={HELMET_ROTATION} />
+      <Quill position={QUILL_POSITION} rotation={QUILL_ROTATION} />
+      <Mug position={MUG_POSITION} rotation={MUG_ROTATION} />
       <Wizard position={WIZARD_POSITION} rotation={WIZARD_ROTATION} open={open} />
       <PageCurlBook
         position={BOOK_POSITION}
@@ -103,9 +132,9 @@ export default function Scene({ open, onOpenChange, page, onPageChange, revealed
         onPageChange={onPageChange}
         onOpenChange={onOpenChange}
       />
-      <LoveHeart position={LOVE_HEART_POSITION} onLove={onLove} />
+      <LoveHeart position={LOVE_HEART_POSITION} onLove={onLove} tipRef={heartTipRef} />
       <DustParticles />
-      <CameraRig open={open} ready={revealed} />
+      <CameraRig open={open} ready={revealed} focus={viewingPortrait ? PORTRAIT_FOCUS : null} />
     </>
   )
 }

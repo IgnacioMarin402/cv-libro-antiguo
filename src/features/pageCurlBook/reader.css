@@ -28,6 +28,43 @@
   outline: none;
 }
 
+/* New to the visitor until they've used it once (see BookReader): a gold
+   glow breathing round it — the heart counter's, when it's lit (see
+   features/love) — and its ring and mark brighter, so a button that wasn't
+   there before the book opened gets seen. */
+.reader-button--new {
+  border-color: rgba(var(--gold), 0.6);
+  color: #f3dfb8;
+  animation:
+    fadeIn 0.8s ease,
+    reader-glow 2.4s ease-in-out 0.8s infinite;
+}
+
+.reader-button--new .reader-button__icon {
+  filter: drop-shadow(0 0 3px rgba(255, 200, 120, 0.8));
+}
+
+@keyframes reader-glow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 4px 0 rgba(255, 180, 90, 0.2),
+      inset 0 0 2px 0 rgba(255, 220, 160, 0.15);
+  }
+  50% {
+    box-shadow:
+      0 0 16px 4px rgba(255, 180, 90, 0.6),
+      inset 0 0 6px 1px rgba(255, 220, 160, 0.45);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reader-button--new {
+    animation: fadeIn 0.8s ease;
+    box-shadow: 0 0 12px 3px rgba(255, 180, 90, 0.5);
+  }
+}
+
 .reader-button__icon {
   width: 18px;
   height: 18px;

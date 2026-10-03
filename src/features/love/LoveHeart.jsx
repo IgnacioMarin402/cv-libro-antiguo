@@ -5,6 +5,7 @@ import { createRimGeometry, createEmberGeometry, createHitGeometry } from './geo
 import { createEmberTexture, createHaloTexture } from './textures/glowTextures'
 import { useHeartMotion } from './hooks/useHeartMotion'
 import { useHeartBurst } from './hooks/useHeartBurst'
+import { useHeartTip } from './hooks/useHeartTip'
 import { HEART_ASPECT, RIM_COLOR, RIM_OPACITY, HALO_SIZE, HALO_OPACITY } from './domain/heart'
 
 // Only the flat hit shape answers the pointer: the halo is three times the
@@ -14,9 +15,11 @@ const noRaycast = () => null
 // The heart floating by the candle — the counter's heart, in the room: a
 // gold hairline, and an ember inside it. A click plays its animation every
 // time and calls onLove, which counts it once per visitor (see useLove).
+// Under the pointer it leans in, and `tipRef` — what it's for, over the
+// canvas (see LoveHeartTip) — shows beside it.
 //
 // `position` is the middle of its lap; the heart circles round it.
-export default function LoveHeart({ position, onLove }) {
+export default function LoveHeart({ position, onLove, tipRef }) {
   const rim = useMemo(() => createRimGeometry(), [])
   const emberShape = useMemo(() => createEmberGeometry(), [])
   const hit = useMemo(() => createHitGeometry(), [])
@@ -51,6 +54,7 @@ export default function LoveHeart({ position, onLove }) {
 
   const motion = useHeartMotion({ ember, halo })
   const burst = useHeartBurst()
+  useHeartTip({ heart: motion.heart, hovered: motion.hovered, tip: tipRef })
 
   const handleClick = (e) => {
     e.stopPropagation()

@@ -13,9 +13,16 @@ import { SCONCE_WIDTH, SCONCE_BACK_OFFSET } from '@/features/sconce'
 import { FIREPLACE_WIDTH, FIREPLACE_BACK_OFFSET } from '@/features/fireplace'
 import { SHELF_WIDTH, SHELF_BACK_OFFSET, SHELF_FLOOR_OFFSET } from '@/features/shelf'
 import { SOFA_BACK_OFFSET, SOFA_SIDE_OFFSET } from '@/features/sofa'
-import { CABINET_WIDTH, CABINET_BACK_OFFSET } from '@/features/cabinet'
+import { CABINET_WIDTH, CABINET_BACK_OFFSET, CABINET_TOP_HEIGHT } from '@/features/cabinet'
+import { SHOTS } from '@/features/camera'
 import { SHIELD_WIDTH, SHIELD_BACK_OFFSET, SHIELD_FLOOR_OFFSET } from '@/features/shield'
-import { PORTRAIT_WIDTH, PORTRAIT_BACK_OFFSET, PORTRAIT_FLOOR_OFFSET } from '@/features/portrait'
+import {
+  PORTRAIT_WIDTH,
+  PORTRAIT_HEIGHT,
+  PORTRAIT_BACK_OFFSET,
+  PORTRAIT_FLOOR_OFFSET,
+  PORTRAIT_FRONT_OFFSET,
+} from '@/features/portrait'
 import { BUST_WIDTH, BUST_BACK_OFFSET } from '@/features/bust'
 import { ANTIQUE_TABLE_BACK_OFFSET, ANTIQUE_TABLE_HALF_WIDTH } from '@/features/antiqueTable'
 import { CAULDRON_RADIUS } from '@/features/cauldron'
@@ -40,7 +47,7 @@ export const FLAME_POSITION = [CANDLE_X, FLAME_Y, CANDLE_Z]
 // table on its bottom leaf (see TABLE_CLEARANCE_Y).
 export const BOOK_POSITION = [0, TABLE_CLEARANCE_Y, 0]
 
-// West of the book, across from the helmet, turned to face it. What sets
+// West of the book, across from the tankard, turned to face it. What sets
 // the spot is its staff clip, which thrusts straight ahead at the book,
 // since it faces it — 35 cm at the wizard's size, the tip 17 cm off the
 // table — against everything the book sweeps over a whole visit with its
@@ -62,19 +69,28 @@ export const WIZARD_ROTATION = [
   0,
 ]
 
-// East of the book, where the wizard's mirror image stood before it grew and
-// moved: 0.76 m from the book, turned to face it the same way — its face is
-// +z as exported, like the wizard's. It stayed put rather than follow the
-// wizard. Nothing of it moves, so the only reach to clear is the book's: on
-// this side the book goes out to 39.3 cm right of the spine over a whole
-// visit, and the helmet keeps 24.2 cm from it at its nearest (measured with
-// the book's levitation).
-export const HELMET_POSITION = [0.7, 0, -0.3]
-export const HELMET_ROTATION = [
-  0,
-  Math.atan2(BOOK_POSITION[0] - HELMET_POSITION[0], BOOK_POSITION[2] - HELMET_POSITION[2]),
-  0,
-]
+// The dragon tankard behind the book's right-hand side, where it was marked
+// on a screenshot (the camera rebuilt from the book's corners and the
+// candle, to 2.75 px): 9 cm west and 16 cm north of where the helmet stood.
+// It keeps 17.3 cm from the book's reach over a visit (39.3 cm right of the
+// spine), 15.4 cm from the heart's lap and 46.7 cm from the candle's axis,
+// and every fixed shot takes it whole. Turned halfway between the resting
+// camera and the book — asked to look a little toward the book. At its
+// height the free orbit can bring the lens onto it in 0.1–0.14% of the
+// reachable views (measured with the polar limit), like the thrones.
+export const MUG_POSITION = [0.61, 0, -0.46]
+const MUG_TO_CAMERA = Math.atan2(SHOTS.rest.position.x - MUG_POSITION[0], SHOTS.rest.position.z - MUG_POSITION[2])
+const MUG_TO_BOOK = Math.atan2(BOOK_POSITION[0] - MUG_POSITION[0], BOOK_POSITION[2] - MUG_POSITION[2])
+export const MUG_ROTATION = [0, (MUG_TO_CAMERA + MUG_TO_BOOK) / 2, 0]
+
+// The quill and its inkwell west of the book, toward the reader, where they
+// were marked on the same screenshot as the tankard. They keep 15.5 cm from
+// the book's reach on this side and 33.6 cm from the wizard, and the lens
+// never touches them (3.8 cm at the nearest, before their last 10%). Turned
+// to face the south-west, on the diagonal, as asked. The intro takes them
+// whole and the open shot 83%; the resting shot doesn't reach them.
+export const QUILL_POSITION = [-0.61, 0, 0.32]
+export const QUILL_ROTATION = [0, -Math.PI / 4, 0]
 
 // The love heart, behind the book on the candle's right: the middle of its
 // lap (8 cm round, see features/love), 20 cm over the table. Chosen by
@@ -84,7 +100,7 @@ export const HELMET_ROTATION = [
 // upright, the open shot takes 44% of the lap. Out on the table's right,
 // where there is room, it fell out of every phone frame. Along its lap it
 // keeps 15.7 cm from the leaves, 4 cm from the candlestick's foot (10.5 from
-// its axis) and 44 cm from the helmet's axis.
+// its axis) and 44 cm from the tankard's axis, where the helmet stood.
 export const LOVE_HEART_POSITION = [0.2, 0.2, -0.53]
 
 // Under the table, where its feet stand, centred on it like everything else.
@@ -131,6 +147,26 @@ export const CABINET_POSITION = [
   WALL_POSITION[2] - WALL_HALF_SPAN + REPEAT_LENGTH + CABINET_GAP + CABINET_WIDTH / 2,
 ]
 export const CABINET_ROTATION = BOOKSHELF_ROTATION
+
+// The fantasy helmet up on the cabinet, asked off the table, where it stood
+// east of the book (the tankard has its place now). On the bare stretch of
+// the cabinet's top north of its ornaments, in the middle of it — 90 cm
+// north of the cabinet's middle — and over the cabinet's own origin in
+// depth, so its stand keeps 7 cm from the wall and 10 cm from the top's
+// front edge. Turned to face the book, as it did on the table. Up there
+// the lens keeps 47 cm from it over every orbit and aim (measured with the
+// polar limit).
+const HELMET_ALONG_CABINET = -0.9
+export const HELMET_POSITION = [
+  CABINET_POSITION[0],
+  WALL_POSITION[1] + CABINET_TOP_HEIGHT,
+  CABINET_POSITION[2] + HELMET_ALONG_CABINET,
+]
+export const HELMET_ROTATION = [
+  0,
+  Math.atan2(BOOK_POSITION[0] - HELMET_POSITION[0], BOOK_POSITION[2] - HELMET_POSITION[2]),
+  0,
+]
 
 // Two sconces on the door's wall — the south one, behind the resting
 // camera — one to each side of the door, high up beside its arch. Each
@@ -208,6 +244,20 @@ export const PORTRAIT_POSITION = [
   WALL_POSITION[1] + PORTRAIT_FLOOR_OFFSET,
   WALL_POSITION[2] - WALL_HALF_SPAN + PORTRAIT_BACK_OFFSET,
 ]
+
+// What the camera goes to look at when the portrait is clicked (see
+// features/camera's focus): the face of its frame, its middle, facing the
+// room — the wall's way, +z — and its size.
+export const PORTRAIT_FOCUS = {
+  center: [
+    PORTRAIT_POSITION[0],
+    PORTRAIT_POSITION[1] + PORTRAIT_HEIGHT / 2,
+    PORTRAIT_POSITION[2] + PORTRAIT_FRONT_OFFSET,
+  ],
+  normal: [0, 0, 1],
+  width: PORTRAIT_WIDTH,
+  height: PORTRAIT_HEIGHT,
+}
 
 // Shourdo's bust on the floor below them, beside the window: its cape's hem
 // 14 cm clear of the window's frame. At half its size it stood halfway from
@@ -319,7 +369,7 @@ export const ANTIQUE_TABLE_ROTATION = [0, Math.PI, 0]
 // The cross's arms run along the axes — at 0.1°, 90.1°, 179.3° and 268.5°
 // round from +z, measured from the red in the model's texture over its
 // flat top — so the quarters between them, and the thrones, fall on the
-// diagonals. The two on the north, behind the helmet and the wizard, show
+// diagonals. The two on the north, behind the tankard and the wizard, show
 // 69–76% of themselves in the resting and open shots on a 16:9 screen; the
 // two on the reader's side, the south, stand behind the lens in every
 // fixed shot and only come into view with the orbit. None covers the book

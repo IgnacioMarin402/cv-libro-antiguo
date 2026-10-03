@@ -1,12 +1,12 @@
-// The fantasy helmet on the book's other side: a mesh generated in Tripo,
-// like the wizard cat, and not built in code (see Helmet.jsx). It comes on
-// its own display stand — a round foot and a stem, the helmet proper
-// starting 15 cm up at full size — and has no clips: it just stands.
+// The fantasy helmet, up on the cabinet: a mesh generated in Tripo, like
+// the wizard cat, and not built in code (see Helmet.jsx). It comes on its
+// own display stand — a round foot and a stem, the helmet proper starting
+// 15 cm up at full size — and has no clips: it just stands.
 
 // How big it stands. The GLB comes 0.98 m tall, stand and spikes included:
 // Tripo exports at about a unit, as with the wizard. At the wizard's own
 // scale it is 39.3 cm, which was the wizard's height, so the two read as a
-// pair across the book — until the wizard grew to 58 cm. Like the wizard's hat, the resting shot cuts the tips
-// of its spikes — from 35.2 cm up on a 16:9 screen, 2:1 too — and the open
-// shot takes it whole (both measured).
+// pair across the book, where it stood first — until the wizard grew to
+// 58 cm, and the helmet was asked off the table and onto the cabinet. Its
+// stand's foot is 16 by 17 cm at this size, the whole 19 by 23.5.
 export const HELMET_SCALE = 0.4

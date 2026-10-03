@@ -1,6 +1,7 @@
 import { useMemo, useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
+import { smoothDamp } from '@/shared/math/easing'
 import {
   loopOffset,
   rock,
@@ -13,24 +14,33 @@ import {
   LOVE_FLARE,
   HALO_OPACITY,
   HOVER_GLOW,
+  HOVER_SCALE,
+  HOVER_EMBER,
+  HOVER_SMOOTH_TIME,
 } from '../domain/heart'
 
 // The heart's life from frame to frame: its lap round its spot, its beat,
-// its face turned to the visitor, and what a click sets off. Returns the
-// ref for the group that carries the whole heart and its halo, the hover
-// flag the pointer handlers write, and love() to play the click.
+// its face turned to the visitor, how it leans in under the pointer, and
+// what a click sets off. Returns the ref for the group that carries the
+// whole heart and its halo, the hover flag the pointer handlers write, and
+// love() to play the click.
 export function useHeartMotion({ ember, halo }) {
   const heart = useRef()
   const hovered = useRef(false)
   const lovedAt = useRef(-Infinity)
+  // How far into its hover it is, 0 to 1, eased toward the flag.
+  const leaning = useRef(0)
+  const leanVelocity = useRef({ value: 0 })
   const clock = useThree((state) => state.clock)
   const world = useMemo(() => new THREE.Vector3(), [])
 
-  useFrame(({ camera }) => {
+  useFrame(({ camera }, delta) => {
     const group = heart.current
     if (!group) return
     const t = clock.elapsedTime
     const since = t - lovedAt.current
+    leaning.current = smoothDamp(leaning.current, hovered.current ? 1 : 0, leanVelocity.current, HOVER_SMOOTH_TIME, delta)
+    const lean = (top) => 1 + (top - 1) * leaning.current
 
     group.position.set(...loopOffset(t))
     group.parent.localToWorld(world.copy(group.position))
@@ -41,14 +51,14 @@ export function useHeartMotion({ ember, halo }) {
     // visitor looks down from.
     const facing = Math.atan2(camera.position.x - world.x, camera.position.z - world.z)
     group.rotation.y = facing + rock(t) + loveSpin(since)
-    group.scale.setScalar(beatScale(t) * loveScale(since) * fade)
+    group.scale.setScalar(beatScale(t) * loveScale(since) * fade * lean(HOVER_SCALE))
 
     // The ember isn't tone mapped, so past 1 its colours brighten until they
     // clip: the click's flare burns it hot and lets it cool back to the
     // gradient.
     const flare = 1 + LOVE_FLARE * loveFlare(since)
-    ember.color.setScalar(emberBreath(t) * flare)
-    halo.opacity = HALO_OPACITY * (hovered.current ? HOVER_GLOW : 1) * flare
+    ember.color.setScalar(emberBreath(t) * flare * lean(HOVER_EMBER))
+    halo.opacity = HALO_OPACITY * lean(HOVER_GLOW) * flare
   })
 
   const love = () => {

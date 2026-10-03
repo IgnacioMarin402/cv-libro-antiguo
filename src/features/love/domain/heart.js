@@ -87,6 +87,15 @@ export const HALO_OPACITY = 0.45
 // Brighter under the pointer, so the visitor knows it's there to be clicked.
 export const HOVER_GLOW = 1.6
 
+// And under the pointer it leans in before the click, the swell the click
+// then finishes: it grows by 30% — the click's pop still takes it past
+// that — and its ember burns a quarter brighter, with the halo's glow above.
+// Eased in and out over about a third of a second (smoothDamp's smooth
+// time), so it swells toward the pointer rather than snapping to it.
+export const HOVER_SCALE = 1.3
+export const HOVER_EMBER = 1.25
+export const HOVER_SMOOTH_TIME = 0.12
+
 // --- the float --------------------------------------------------------------
 
 // A slow flat circle around its spot, one lap every 16 s, rising and falling

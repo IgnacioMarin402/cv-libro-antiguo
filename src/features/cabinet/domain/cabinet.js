@@ -22,3 +22,10 @@ export const CABINET_SCALE = CABINET_WIDTH / MODEL_WIDTH
 // How far the model's origin stands, once scaled, from the wall its back is
 // pushed against.
 export const CABINET_BACK_OFFSET = -MODEL_BACK_Z * CABINET_SCALE
+
+// Its top, for what stands on it: flat at 1.964 m off the floor, measured
+// by raycasting straight down onto it — across its whole depth, 40 cm from
+// the wall, and along it but for three ornaments: the tallest in the middle
+// (to 2.17 m), and one 35 cm to its north and one 55 cm to its south (to
+// 2.10). North of those, 88 cm of it are bare.
+export const CABINET_TOP_HEIGHT = 1.964

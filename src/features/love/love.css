@@ -6,6 +6,7 @@
 
 .love-counter {
   --gold: 214, 190, 150;
+  position: relative;
   display: flex;
   align-items: center;
   gap: 9px;
@@ -14,9 +15,21 @@
   border-radius: 999px;
   background: rgba(18, 11, 5, 0.55);
   color: rgba(var(--gold), 0.85);
-  pointer-events: none;
+  pointer-events: auto;
   user-select: none;
+  cursor: default;
   animation: fadeIn 1.2s ease;
+  transition:
+    transform 0.25s ease,
+    border-color 0.3s ease;
+}
+
+/* Under the pointer it grows by 12% — about 5 px either side, inside the
+   10 px between it and the CV link — and says what it counts (the tip,
+   below). */
+.love-counter:hover {
+  transform: scale(1.12);
+  border-color: rgba(var(--gold), 0.5);
 }
 
 .love-counter__heart {
@@ -57,6 +70,49 @@
   font-variant-numeric: lining-nums tabular-nums;
   letter-spacing: 0.16em;
   animation: love-flare 0.8s ease-out;
+}
+
+/* What the counter and the heart in the room are for, said under the
+   pointer: a small pill in the counter's colours, never in the pointer's way. */
+.love-tip {
+  --gold: 214, 190, 150;
+  padding: 6px 13px 7px;
+  border: 1px solid rgba(var(--gold), 0.3);
+  border-radius: 999px;
+  background: rgba(18, 11, 5, 0.8);
+  color: rgba(var(--gold), 0.95);
+  font: italic 400 13px/1.2 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+/* The counter's, hung under it from its right end. */
+.love-tip--counter {
+  position: absolute;
+  top: calc(100% + 9px);
+  right: 0;
+}
+
+.love-counter:hover .love-tip--counter {
+  opacity: 1;
+}
+
+/* The heart's, over the canvas: the heart places it beside itself and shows
+   it, writing its transform and data-shown every frame
+   (hooks/useHeartTip). Under the loading screen (z-index 10) like the
+   corner. */
+.love-tip--heart {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 5;
+}
+
+.love-tip--heart[data-shown='true'] {
+  opacity: 1;
 }
 
 @keyframes love-flare {

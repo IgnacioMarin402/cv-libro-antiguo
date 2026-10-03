@@ -3,11 +3,18 @@ import { printBook } from './textures/pageTexture'
 import { PAGE_COUNT } from './domain/pageCurl'
 import './reader.css'
 
-// The magnifier: a button next to the heart counter while the book is open,
-// and what it opens — the two pages the book is showing, laid flat over the
-// canvas at a size meant for reading. In the book the body text is 8 px from
-// where the camera stands (see domain/typography); here it is the page as
-// it was printed, the very same sheets (see printBook).
+// The magnifier: a button in the corner, first in its row — left of the
+// link to the CV, so it comes in without moving the others — while the book
+// is open, and what it opens: the two pages the book is showing, laid flat
+// over the canvas at a size meant for reading. In the book the body text is
+// 8 px from where the camera stands (see domain/typography); here it is the
+// page as it was printed, the very same sheets (see printBook).
+//
+// It wasn't there before the book opened, and up in the corner it went
+// unseen; so until the visitor has used it once it glows, gold breathing
+// round it, and from then on it's a button like the others. It hung beside
+// the book itself for a while, but from low down the camera saw it right
+// over the pages.
 //
 // It turns the book's own page, so the book behind it turns with it and is
 // open where the reader left off when it closes. It stays between the two
@@ -23,6 +30,7 @@ const facing = (spread) => [2 * spread - 3, 2 * spread - 2]
 
 export default function BookReader({ pages, page, onPageChange, open }) {
   const [reading, setReading] = useState(false)
+  const [used, setUsed] = useState(false)
   const spread = Math.min(Math.max(page, FIRST), LAST)
   // A sheet becomes an image the first time it is shown, and stays one.
   const images = useMemo(() => new Map(), [pages])
@@ -62,8 +70,11 @@ export default function BookReader({ pages, page, onPageChange, open }) {
       {open && (
         <button
           type="button"
-          className="reader-button"
-          onClick={() => setReading(true)}
+          className={used ? 'reader-button' : 'reader-button reader-button--new'}
+          onClick={() => {
+            setUsed(true)
+            setReading(true)
+          }}
           aria-label="Leer las páginas en grande"
           title="Leer las páginas en grande"
         >

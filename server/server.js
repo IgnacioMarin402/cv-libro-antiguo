@@ -40,6 +40,7 @@ const TYPES = {
   '.webp': 'image/webp',
   '.ico': 'image/x-icon',
   '.glb': 'model/gltf-binary',
+  '.woff2': 'font/woff2',
   '.mp3': 'audio/mpeg',
   '.wasm': 'application/wasm',
 }
