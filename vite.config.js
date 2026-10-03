@@ -30,5 +30,15 @@ export default defineConfig(({ mode }) => {
     server: {
       port: Number(env.PORT) || 5173,
     },
+    // Two pages: the scene, and the CV as a page of its own (cv/index.html,
+    // at /cv/ — server/server.js serves a folder's index.html).
+    build: {
+      rollupOptions: {
+        input: {
+          main: fileURLToPath(new URL('./index.html', import.meta.url)),
+          cv: fileURLToPath(new URL('./cv/index.html', import.meta.url)),
+        },
+      },
+    },
   }
 })

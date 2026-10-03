@@ -108,6 +108,25 @@ desde 22.13, sin dependencias. El handler es uno solo, `server/love.js`: lo mont
 - Sin servidor detrás (hosting estático), el contador no aparece y el corazón sólo
   anima.
 
+### El CV
+
+El sitio es el CV de Ignacio, y el CV vive en un solo lugar: `features/cv/domain/cv.js`
+(datos). De ahí salen tres cosas:
+
+- **El libro**: `features/cv/domain/bookPages.js` lo reparte en las 16 caras de papel
+  como bloques, y `pageCurlBook/textures/pageTexture.js` los compone sobre el papel. El
+  libro no sabe que imprime un CV: `app/Scene.jsx` le pasa las páginas.
+- **La lupa** (`pageCurlBook/BookReader.jsx`): con el libro abierto, muestra en plano las
+  dos páginas a la vista, los mismos canvas que el libro. La página abierta es estado de
+  `app/App.jsx`, por eso libro y lupa pasan página juntos.
+- **La página HTML** en `/cv/`: segunda entrada de Vite (`cv/index.html` → `src/cv.jsx` →
+  `features/cv/CvPage.jsx`), sin nada del 3D. El PDF es "Guardar como PDF" del diálogo de
+  impresión, con estilos `@media print` en `cv.css`: no hay un PDF que mantener aparte.
+
+Contacto sólo LinkedIn y GitHub (el sitio es público). Para cambiar el CV, editar
+`cv.js`; si una página del libro se llena, `pageTexture` la achica hasta `MIN_FIT` y avisa
+en consola: entonces hay que repartirla en `bookPages.js`.
+
 ## Arquitectura
 
 Tres capas, y una regla por capa:

@@ -7,7 +7,7 @@ import { CAMERA, SHOTS } from '@/features/camera'
 import { LoadingScreen, SceneWarmup } from '@/features/loader'
 import { LoveCounter, useLove } from '@/features/love'
 import { BookReader } from '@/features/pageCurlBook'
-import { BOOK_PAGES } from '@/features/cv'
+import { BOOK_PAGES, CvLink } from '@/features/cv'
 
 // What the visitor can do right now, which is not the same before and after
 // the book opens: an open book takes the keyboard and lets the lens much
@@ -63,6 +63,7 @@ export default function App() {
       <div className="vignette" />
       <div className="hint">{isOpen ? HINTS.open : HINTS.closed}</div>
       <div className="corner">
+        <CvLink />
         <BookReader pages={BOOK_PAGES} page={page} onPageChange={setPage} open={isOpen} />
         <LoveCounter count={love.count} loved={love.loved} />
       </div>

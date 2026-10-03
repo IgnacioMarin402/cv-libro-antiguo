@@ -1,0 +1,342 @@
+/* The CV page. On screen it is the book's page at reading size: the same
+   ivory paper and iron-gall ink, headings rubricated in red small caps, on
+   the room's dark. In print it is a plain A4 CV — white, compact, nothing
+   but the text — since that is what a PDF of it is for. */
+
+:root {
+  --cv-paper: #efe4cb;
+  --cv-paper-edge: #e2d2b0;
+  --cv-ink: #2a190c;
+  --cv-rubric: #8c2312;
+  --cv-faded: #4f3922;
+  --cv-gold: 214, 190, 150;
+  --cv-dark: #140c06;
+  --cv-font: 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, 'Times New Roman', serif;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--cv-dark);
+}
+
+.cv {
+  min-height: 100vh;
+  padding: 28px 16px 64px;
+  box-sizing: border-box;
+  font-family: var(--cv-font);
+  color: var(--cv-ink);
+}
+
+.cv-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  max-width: 820px;
+  margin: 0 auto;
+}
+
+.cv-button {
+  display: inline-flex;
+  align-items: center;
+  height: 36px;
+  padding: 0 16px;
+  border: 1px solid rgba(var(--cv-gold), 0.3);
+  border-radius: 999px;
+  background: rgba(18, 11, 5, 0.6);
+  color: rgba(var(--cv-gold), 0.9);
+  font: 400 13px/1 var(--cv-font);
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    border-color 0.3s ease,
+    color 0.3s ease;
+}
+
+.cv-button:hover,
+.cv-button:focus-visible {
+  border-color: rgba(var(--cv-gold), 0.6);
+  color: #f3dfb8;
+  outline: none;
+}
+
+.cv-hint {
+  max-width: 820px;
+  margin: 8px auto 18px;
+  text-align: right;
+  font: italic 400 12px/1.4 var(--cv-font);
+  color: rgba(var(--cv-gold), 0.45);
+}
+
+.cv-sheet {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 56px 64px 64px;
+  box-sizing: border-box;
+  background: radial-gradient(ellipse at 50% 40%, var(--cv-paper) 60%, var(--cv-paper-edge) 100%);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.6);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.cv-header {
+  text-align: center;
+  margin-bottom: 36px;
+}
+
+.cv-header h1 {
+  margin: 0;
+  font-weight: 400;
+  font-size: 40px;
+  line-height: 1.15;
+  letter-spacing: 0.01em;
+  color: var(--cv-rubric);
+}
+
+.cv-header__role {
+  margin: 6px 0 14px;
+  font-style: italic;
+  font-size: 19px;
+}
+
+.cv-header__links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px 22px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cv-label {
+  font-variant: small-caps;
+  letter-spacing: 0.06em;
+  color: var(--cv-rubric);
+}
+
+.cv a {
+  color: inherit;
+  text-decoration-color: rgba(140, 35, 18, 0.45);
+  text-underline-offset: 3px;
+}
+
+.cv a:hover {
+  color: var(--cv-rubric);
+}
+
+.cv-sheet h2 {
+  margin: 34px 0 14px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(140, 35, 18, 0.35);
+  font-weight: 400;
+  font-size: 21px;
+  font-variant: small-caps;
+  letter-spacing: 0.1em;
+  color: var(--cv-rubric);
+}
+
+.cv-sheet p {
+  margin: 0 0 8px;
+}
+
+.cv-stack {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+}
+
+.cv-stack > div {
+  display: grid;
+  grid-template-columns: 8.5em 1fr;
+  gap: 12px;
+}
+
+.cv-stack dd {
+  margin: 0;
+}
+
+.cv-entry {
+  margin-bottom: 20px;
+}
+
+.cv-entry__head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 2px 16px;
+}
+
+.cv-entry h3 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.cv-entry__dates {
+  font-size: 14px;
+  color: var(--cv-faded);
+  white-space: nowrap;
+}
+
+.cv-entry__org {
+  margin: 0 0 4px !important;
+  font-style: italic;
+  font-size: 15px;
+}
+
+.cv-entry__note {
+  font-style: italic;
+  font-size: 15px;
+  color: var(--cv-faded);
+}
+
+.cv-entry__bullets {
+  margin: 4px 0 6px;
+  padding-left: 1.3em;
+}
+
+.cv-entry__bullets li {
+  margin-bottom: 4px;
+}
+
+.cv-entry__bullets li::marker {
+  color: var(--cv-rubric);
+}
+
+.cv-entry__stack {
+  font-size: 14px;
+  font-style: italic;
+  color: var(--cv-faded);
+}
+
+.cv-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 40px;
+}
+
+@media (max-width: 640px) {
+  .cv {
+    padding: 16px 0 40px;
+  }
+
+  .cv-actions,
+  .cv-hint {
+    padding: 0 16px;
+  }
+
+  .cv-sheet {
+    padding: 32px 18px 40px;
+    font-size: 15px;
+  }
+
+  .cv-header h1 {
+    font-size: 30px;
+  }
+
+  .cv-stack > div {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .cv-columns {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* The PDF: white A4, the page's colours kept only where they carry
+   something — the rubricated headings and labels — and no navigation.
+   Sized by measuring the printed height against A4 with these very rules:
+   at 10 pt it took 3.00 pages, right on the edge of spilling to a fourth
+   once the page breaks fall; at 9.5 pt with these spacings, 2.45; at 9 pt,
+   2.18 — still three, only more cramped. (The old PDF CV was two pages,
+   before the current role was added.) */
+@media print {
+  @page {
+    size: A4;
+    margin: 11mm 12mm;
+  }
+
+  html,
+  body {
+    background: #fff;
+  }
+
+  .cv {
+    min-height: 0;
+    padding: 0;
+  }
+
+  .cv-actions,
+  .cv-hint {
+    display: none;
+  }
+
+  .cv-sheet {
+    max-width: none;
+    padding: 0;
+    background: none;
+    box-shadow: none;
+    font-size: 9.5pt;
+    line-height: 1.3;
+  }
+
+  .cv-sheet p {
+    margin: 0 0 4pt;
+  }
+
+  .cv-header {
+    margin-bottom: 10pt;
+  }
+
+  .cv-header h1 {
+    font-size: 20pt;
+  }
+
+  .cv-header__role {
+    margin: 2pt 0 5pt;
+    font-size: 11.5pt;
+  }
+
+  .cv-sheet h2 {
+    margin: 10pt 0 5pt;
+    padding-bottom: 2pt;
+    font-size: 11.5pt;
+    break-after: avoid;
+  }
+
+  .cv-stack {
+    gap: 2pt;
+  }
+
+  .cv-entry {
+    margin-bottom: 6pt;
+    break-inside: avoid;
+  }
+
+  .cv-entry h3 {
+    font-size: 10pt;
+  }
+
+  .cv-entry__dates,
+  .cv-entry__org,
+  .cv-entry__note,
+  .cv-entry__stack {
+    font-size: 9pt;
+  }
+
+  .cv-entry__bullets {
+    margin: 2pt 0 3pt;
+  }
+
+  .cv-entry__bullets li {
+    margin-bottom: 1.5pt;
+  }
+
+  .cv a {
+    text-decoration: none;
+  }
+}

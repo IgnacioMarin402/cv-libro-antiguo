@@ -1,0 +1,30 @@
+/* The CV link in the corner, drawn like its neighbours there: the heart
+   counter's parchment gold on its dark (see features/love). */
+
+.cv-link {
+  --gold: 214, 190, 150;
+  display: inline-flex;
+  align-items: center;
+  height: 36px;
+  padding: 0 14px;
+  box-sizing: border-box;
+  border: 1px solid rgba(var(--gold), 0.22);
+  border-radius: 999px;
+  background: rgba(18, 11, 5, 0.55);
+  color: rgba(var(--gold), 0.85);
+  font: 400 14px/1 'Palatino Linotype', Palatino, 'Book Antiqua', 'Times New Roman', serif;
+  letter-spacing: 0.16em;
+  text-decoration: none;
+  pointer-events: auto;
+  animation: fadeIn 1.2s ease;
+  transition:
+    border-color 0.3s ease,
+    color 0.3s ease;
+}
+
+.cv-link:hover,
+.cv-link:focus-visible {
+  border-color: rgba(var(--gold), 0.55);
+  color: #f3dfb8;
+  outline: none;
+}
