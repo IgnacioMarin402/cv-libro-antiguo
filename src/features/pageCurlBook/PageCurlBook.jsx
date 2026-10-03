@@ -17,12 +17,19 @@ import { PAGE_COUNT, TILT_ROTATION } from './domain/pageCurl'
 // TILT_ROTATION in domain/pageCurl — the frame every measurement in that
 // file is written in, which is also why scripts/probe.mjs can rebuild this
 // hierarchy and measure it without a browser.
-export default function PageCurlBook({ onOpenChange, ...props }) {
-  const [page, setPage] = useState(0)
+//
+// `pages` is what it prints (see textures/pageTexture). The page it is open
+// at can be held outside, through `page` and `onPageChange`, so something
+// over the canvas can turn it too (see BookReader); left out, the book
+// keeps it itself.
+export default function PageCurlBook({ onOpenChange, pages, page: heldPage, onPageChange, ...props }) {
+  const [ownPage, setOwnPage] = useState(0)
+  const page = heldPage ?? ownPage
+  const setPage = onPageChange ?? setOwnPage
   // What the book is showing trails what the reader asked for: a jump of
   // several sheets turns them one after another (see useTurnQueue).
   const shownPage = useTurnQueue(page)
-  const { paper, frontCover, backCover, spine } = usePageMaterials()
+  const { paper, frontCover, backCover, spine } = usePageMaterials(pages)
   // The two boards' live poses, which the spine's leather is glued to.
   // A ref and not state: the spine re-lays itself every frame, and the
   // boards curl continuously (see components/Spine).
@@ -68,7 +75,7 @@ export default function PageCurlBook({ onOpenChange, ...props }) {
                 closedBook={closedBook}
                 board={!!boards}
                 hingeRef={number === 0 ? frontBoard : number === PAGE_COUNT - 1 ? backBoard : undefined}
-                materials={boards || paper}
+                materials={boards || paper[number]}
                 onClick={(e) => {
                   e.stopPropagation()
                   setPage(opened ? number : number + 1)

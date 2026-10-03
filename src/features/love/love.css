@@ -1,14 +1,11 @@
 /* The heart counter over the canvas, in the loading screen's colours: its
    parchment gold for the lines and the figures, its flame for the ember.
-   Under the loading screen (z-index 10), which covers it until the room
-   is up. */
+   It sits in the app's top-right corner (.corner, app/App.jsx), which is
+   what places it and keeps it under the loading screen until the room is
+   up. */
 
 .love-counter {
   --gold: 214, 190, 150;
-  position: absolute;
-  top: 18px;
-  right: 20px;
-  z-index: 5;
   display: flex;
   align-items: center;
   gap: 9px;

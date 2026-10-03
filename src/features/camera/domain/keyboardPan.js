@@ -19,7 +19,7 @@ export const PAN_KEYS = {
 }
 
 // How far the aim may roam from the book's centre: the open spread's own
-// footprint, measured on the settled pose — x within [-0.333, +0.321], and
+// footprint, measured on the settled pose — x within [-0.349, +0.349], and
 // the leaves keep their full height in z. So any corner of the spread can
 // be brought to the middle of the frame and nothing past it can, which is
 // what keeps the visitor from sliding off the book and losing it.

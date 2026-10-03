@@ -21,6 +21,7 @@ import { DustParticles } from '@/features/dust'
 import { Lighting } from '@/features/lighting'
 import { CameraRig } from '@/features/camera'
 import { PageCurlBook } from '@/features/pageCurlBook'
+import { BOOK_PAGES } from '@/features/cv'
 import { LoveHeart } from '@/features/love'
 import {
   CANDLE_POSITION,
@@ -67,7 +68,7 @@ import {
 // vertex-displacement one this scene opened with — is no longer mounted;
 // its cover leather is still what this one is bound in (see
 // pageCurlBook/hooks/usePageMaterials).
-export default function Scene({ open, onOpenChange, revealed, onLove }) {
+export default function Scene({ open, onOpenChange, page, onPageChange, revealed, onLove }) {
   return (
     <>
       <Lighting />
@@ -95,7 +96,13 @@ export default function Scene({ open, onOpenChange, revealed, onLove }) {
       ))}
       <Helmet position={HELMET_POSITION} rotation={HELMET_ROTATION} />
       <Wizard position={WIZARD_POSITION} rotation={WIZARD_ROTATION} open={open} />
-      <PageCurlBook position={BOOK_POSITION} onOpenChange={onOpenChange} />
+      <PageCurlBook
+        position={BOOK_POSITION}
+        pages={BOOK_PAGES}
+        page={page}
+        onPageChange={onPageChange}
+        onOpenChange={onOpenChange}
+      />
       <LoveHeart position={LOVE_HEART_POSITION} onLove={onLove} />
       <DustParticles />
       <CameraRig open={open} ready={revealed} />

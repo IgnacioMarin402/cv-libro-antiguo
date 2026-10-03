@@ -3,7 +3,7 @@ import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { smoothDamp } from '@/shared/math/easing'
 import { createMoteTexture } from '../textures/moteTexture'
-import { createMoteField, driftMotes, MOTE_COUNT, MOTE_OPACITY, MOTE_FADE_SMOOTH_TIME } from '../domain/motes'
+import { createMoteField, driftMotes, MOTE_COUNT, MOTE_SIZE, MOTE_OPACITY, MOTE_FADE_SMOOTH_TIME } from '../domain/motes'
 
 // The book's own light, spiralling off it while it's open. Mounted outside
 // the book's tilt and outside its levitation, so the column keeps its own
@@ -41,7 +41,7 @@ export default function MagicMotes({ active }) {
         <bufferAttribute attach="attributes-color" count={MOTE_COUNT} array={field.colors} itemSize={3} />
       </bufferGeometry>
       <pointsMaterial
-        size={0.018}
+        size={MOTE_SIZE}
         map={texture}
         vertexColors
         transparent

@@ -8,7 +8,15 @@ import { PAGE_WIDTH, PAGE_HEIGHT } from './pageCurl'
 // breathes its own light, and the column runs cold, ice blue through
 // violet, so nothing about it reads as an ember off the candle.
 
-export const MOTE_COUNT = 140
+// Halved from 140, asked for: the column read as a snowfall over the page
+// and got between the reader and the print. Half is also the density it
+// had before its height was halved (see CEILING_TIERS).
+export const MOTE_COUNT = 70
+
+// How big a mote is drawn, in metres (pointsMaterial's size, attenuated
+// with distance). Down from 18 mm, also asked for: at that size a mote over
+// the page was the width of a word.
+export const MOTE_SIZE = 0.011
 
 // They come off the edges too, not only off the paper.
 const MARGIN = 0.08
@@ -29,10 +37,10 @@ const FLOOR_Y = 0
 // often as the tallest — which is why the column also ends up denser near
 // the paper it comes off, for free.
 //
-// MOTE_COUNT stayed at 140, so the same motes now share half the height:
-// over ten simulated minutes 92 of them sit in the lowest 15 cm (was 46) and
-// the column recycles 2203 a minute (was 1090). Halving MOTE_COUNT gives the
-// old density back.
+// MOTE_COUNT stayed at 140 then, so the same motes shared half the height:
+// over ten simulated minutes 92 of them sat in the lowest 15 cm (was 46) and
+// the column recycled 2203 a minute (was 1090). It has since been halved,
+// which gives the old density back.
 const CEILING_TIERS = [0.15, 0.225, 0.31]
 
 // A mote knows where it stops from the moment it exists, and recycling one

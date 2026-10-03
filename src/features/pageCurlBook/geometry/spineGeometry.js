@@ -12,12 +12,20 @@ import { skinnedPoint, boneAt, BOARD_CUT } from './pageGeometry'
 // bones (see updateSpineSkin) — the boards curl as they turn, so anything
 // glued to them has to curl with them. Only the positions change; the index
 // buffer never does.
+//
+// Wound to face OUT, away from the boards, so the normals computeVertexNormals
+// gives it point out too. They used to point in, and that only mattered once
+// the candle's shadow got a normal bias (SHADOW_NORMAL_BIAS): the bias moves
+// each point's shadow lookup along its normal, so the strip looked itself up
+// 4 mm inside the board it lies on, and came out hatched. Measured on a
+// close-up of the strip over the closed front board, neighbour-pixel detail
+// 5.18 wound in, 3.23 wound out — 3.25 with no shadow received at all.
 export function createSpineGeometry() {
   const positions = new Float32Array(SPINE_ROWS * 2 * 3)
   const indices = []
   for (let j = 0; j < SPINE_ROWS - 1; j++) {
     const a = j * 2
-    indices.push(a, a + 2, a + 1, a + 1, a + 2, a + 3)
+    indices.push(a, a + 1, a + 2, a + 1, a + 3, a + 2)
   }
   const geo = new THREE.BufferGeometry()
   geo.setAttribute('position', new THREE.BufferAttribute(positions, 3))

@@ -1,10 +1,13 @@
 import { useMemo } from 'react'
 import * as THREE from 'three'
 import { createCoverBumpTexture } from '@/features/book'
+import { PAGE_COUNT } from '../domain/pageCurl'
 import { createPaperTexture, createPaperBumpTexture } from '../textures/paperTexture'
+import { printBook, createPageTexture } from '../textures/pageTexture'
 import { createDoublureTexture, createLeatherGrainTexture } from '../textures/doublureTexture'
 
-// Three material sets: blank paper for the leaves, and leather for the two
+// The book's materials: paper for the leaves, each with its own two pages
+// printed on it (see textures/pageTexture), and leather for the two
 // boards. The boards' outer face is a picture, asked for: the front board
 // cut out of a render of the whole book, spine and table trimmed off. The
 // cut is 431 x 603 px, 0.715 wide-to-tall against the board's 0.740, so it
@@ -46,18 +49,30 @@ function loadCover(colorSpace) {
   return tex
 }
 
-export function usePageMaterials() {
+// `pages` is what the book prints, in reading order (see textures/
+// pageTexture for what a page is). Painting is done once, here: sixteen
+// canvases of paper and type.
+export function usePageMaterials(pages = []) {
   return useMemo(() => {
-    const paper = () => new THREE.MeshStandardMaterial({ color: PAPER_EDGE_COLOR, roughness: 0.95 })
+    const edge = new THREE.MeshStandardMaterial({ color: PAPER_EDGE_COLOR, roughness: 0.95 })
     const gutter = new THREE.MeshStandardMaterial({ color: GUTTER_COLOR })
-    const face = new THREE.MeshStandardMaterial({
-      map: createPaperTexture(),
-      bumpMap: createPaperBumpTexture(),
-      bumpScale: 0.002,
-      roughness: 0.9,
-      metalness: 0,
-      color: 0xffffff,
-    })
+    const paperBump = createPaperBumpTexture()
+    const face = (map) =>
+      new THREE.MeshStandardMaterial({ map, bumpMap: paperBump, bumpScale: 0.002, roughness: 0.9, metalness: 0, color: 0xffffff })
+    const blank = face(createPaperTexture())
+    // The pages, in reading order. The first lands on leaf 1's front — the
+    // right-hand page opposite the front board — and its back is the next
+    // left-hand page, so leaf n carries pages 2n-2 and 2n-1. A leaf with no
+    // page left to print stays blank paper.
+    const printed = printBook(pages).map((sheet) => face(createPageTexture(sheet)))
+    const paper = Array.from({ length: PAGE_COUNT }, (_, n) => [
+      edge,
+      gutter,
+      edge,
+      edge,
+      printed[2 * n - 2] || blank,
+      printed[2 * n - 1] || blank,
+    ])
 
     const tooled = new THREE.MeshStandardMaterial({
       map: loadCover(THREE.SRGBColorSpace),
@@ -83,13 +98,14 @@ export function usePageMaterials() {
     // something to catch the candle with, since it carries no map.
     //
     // shadowSide: a DoubleSide material also draws both sides into the
-    // shadow map, so the strip shadowed itself — the candle has no bias —
+    // shadow map, so the strip shadowed itself — the candle had no bias —
     // in fine arcs over the part lying on the front board (shadow acne).
-    // The strip's winding faces in, toward the boards (see spineGeometry),
-    // so FrontSide casts only from the parts whose outside looks away from
-    // the light, which are dark anyway. Measured on a close-up of the
-    // strip, neighbour-pixel detail went from 20.2 to 0.58 — the same as
-    // not receiving shadow at all — while it still receives the rest's.
+    // Only the faces whose outside looks away from the light cast, which
+    // are dark anyway. That measured 20.2 -> 0.58 in neighbour-pixel detail
+    // on a close-up of the strip, the same as not receiving shadow at all,
+    // while it still receives the rest's. The strip is wound facing out now
+    // (see spineGeometry), so those faces are its back ones: BackSide, which
+    // measured as clean as FrontSide did before (3.25 against 3.23).
     const spine = new THREE.MeshStandardMaterial({
       color: LEATHER_COLOR,
       bumpMap: createCoverBumpTexture(),
@@ -97,14 +113,14 @@ export function usePageMaterials() {
       roughness: 0.88,
       metalness: 0.03,
       side: THREE.DoubleSide,
-      shadowSide: THREE.FrontSide,
+      shadowSide: THREE.BackSide,
     })
 
     return {
-      paper: [paper(), gutter, paper(), paper(), face, face],
+      paper,
       frontCover: [cut, cut, cut, cut, tooled, doublure],
       backCover: [cut, cut, cut, cut, doublure, tooled],
       spine,
     }
-  }, [])
+  }, [pages])
 }
