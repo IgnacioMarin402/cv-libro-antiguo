@@ -35,9 +35,10 @@ export const SHOTS = {
     target: new THREE.Vector3(PAGE_WIDTH / 2, topSurfaceY, -PAGE_HEIGHT * 0.05),
   },
   // Open book: closer and more frontal, centred on the spine — which IS
-  // the open spread's middle, since the two piles are symmetric across it
-  // by construction (see stackOffset). Measured on the settled pose, the
-  // spread spans x [-0.333, +0.321]: 6mm off centre, i.e. centred.
+  // the open spread's middle: the two boards are bound either side of it
+  // and every other leaf reaches less far than the board under it (see
+  // pageCurlBook/domain/pile). Measured on the settled pose, the spread
+  // spans x [-0.349, +0.349] at every page.
   open: {
     position: new THREE.Vector3(0.05, 0.78, 1.05),
     target: new THREE.Vector3(0, topSurfaceY + 0.05, 0.03),
@@ -74,7 +75,7 @@ export const OPEN_ZOOM_DURATION = 1700
 // minPolarAngle is 0 so the visitor can come all the way overhead and read
 // the open spread flat, straight down. OrbitControls clamps the pole to
 // its own epsilon, so 0 is the vertical without the gimbal flip. From up
-// there the whole open book (0.654 x 0.527 m, measured) needs about 1 m of
+// there the whole open book (0.698 x 0.527 m, measured) needs about 1 m of
 // distance to fit the 38 deg lens — well inside the roaming range.
 //
 // How close in depends on what is being looked at, so there are two floors.

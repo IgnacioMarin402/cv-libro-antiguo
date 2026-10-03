@@ -22,12 +22,20 @@
 // THREE THINGS THIS MEASURES THAT AN EARLIER VERSION DID NOT, each of which
 // hid a real overlap behind a passing verdict:
 //
-//   · the SURFACE, not the bone joints. Linear blend skinning puts the skin
-//     INSIDE the polyline of the bones — 0.36 mm at this bone spacing, more
-//     than the whole clearance the stacking used to leave over. Sampling
-//     only at the joints read 3.14 mm where the surfaces were 2.78 apart,
-//     i.e. 0.22 mm inside each other. So every line below is sampled SUB
-//     times per bone segment.
+//   · the DRAWN surface. A sheet has its vertices only at the bones (one
+//     width segment per bone, see geometry/pageGeometry; checked on the
+//     live mesh, 31 distinct x), so between two bones the GPU draws a
+//     straight line, and that line is what two leaves must keep apart. So
+//     every line below is the polyline through the bones, and distances
+//     are taken point-to-segment both ways.
+//
+//     It used to sample four points per segment, blending the two bones the
+//     way skinning does — but the blend only ever runs at vertices, where
+//     it is exact. Mid-segment it bulges the sheet toward the outside of
+//     the bend by up to a quarter of the segment times the bend, 0.6 mm at
+//     an 11° joint: a surface nothing draws. It read a pair of leaves rising
+//     straight out of the spine 0.26 mm inside each other where the drawn
+//     ones are 0.80 mm apart. At the vertices the two readings agree.
 //   · MID-TURN, not just settled. The leaf that lands spent most of a turn
 //     inside the leaf it was landing on; the settled pose never showed it.
 //   · the FOLD (rotation.x). It moves the chain as soon as there is any
@@ -52,29 +60,27 @@ import {
   SQUARE,
   TILT_ROTATION,
   TURN_DURATION,
-  INSIDE_CURVE_STRENGTH,
-  OUTSIDE_CURVE_STRENGTH,
   TURNING_CURVE_STRENGTH,
   ROTATION_SMOOTH_TIME,
   FOLD_SMOOTH_TIME,
-  STACK_SMOOTH_TIME,
-  STACK_LEAN,
-  FAN_STEP,
-  OPEN_PITCH,
-  stackOffset,
-  flightArc,
   TABLE_CLEARANCE_Y,
   OPEN_LIFT,
   LIFT_SMOOTH_TIME,
   LIFT_FALL_SMOOTH_TIME,
 } from '../src/features/pageCurlBook/domain/pageCurl.js'
+import {
+  OPEN_PITCH,
+  leafPose,
+  spineRoot,
+  spineTurnTime,
+  ROOT_SMOOTH_TIME,
+} from '../src/features/pageCurlBook/domain/pile.js'
 
 const FRAME = 1 / 60
 
-// How many samples per bone segment every measured line carries. 4 puts a
-// sample every 3.2 mm of a 390 mm page, which resolves the skinning sag
-// (0.36 mm) an order of magnitude over.
-const SUB = 4
+// Samples per bone segment on every measured line: one, at the vertices —
+// the drawn sheet is straight between them (see the header).
+const SUB = 1
 const SAMPLES = PAGE_SEGMENTS * SUB
 
 // The first columns live inside the fold of the book, where leaves
@@ -126,15 +132,16 @@ export function createRig() {
       fold: Array.from({ length: PAGE_SEGMENTS + 1 }, () => ({ value: 0 })),
       up: { value: 0 },
       lateral: { value: 0 },
-      slot: { up: 0, lateral: 0 },
+      opening: { value: 0 },
+      slot: { up: 0, lateral: 0, openness: 0 },
     })
   }
 
   const liftVelocity = { value: 0 }
   let now = 0
 
-  // One frame of useTableLift + useStackOffset + usePageCurl, in that
-  // order, reading `page` the way the component's turn queue hands it over.
+  // One frame of useTableLift + useLeafRoot + usePageCurl, in that order,
+  // reading `page` the way the component's turn queue hands it over.
   const step = (page) => {
     const closedBook = page === 0 || page === PAGE_COUNT
     lift.position.y = smoothDamp(
@@ -150,31 +157,26 @@ export function createRig() {
         leaf.turnedAt = now
         leaf.lastOpened = opened
       }
-      const [up, lateral] = stackOffset(n, page)
-      leaf.slot.up = smoothDamp(leaf.slot.up, up, leaf.up, STACK_SMOOTH_TIME, FRAME)
-      leaf.slot.lateral = smoothDamp(leaf.slot.lateral, lateral, leaf.lateral, STACK_SMOOTH_TIME, FRAME)
-      // The arc rides over the damped slot, not into it (see useStackOffset).
-      const arc = flightArc((now - leaf.turnedAt) * 1000)
-      leaf.group.position.x = leaf.slot.up + arc * Math.cos(STACK_LEAN)
-      leaf.group.position.z = leaf.slot.lateral + arc * Math.sin(STACK_LEAN) * (opened ? -1 : 1)
+      const pose = leafPose(n, page)
+      const slot = leaf.slot
+      slot.up = smoothDamp(slot.up, pose.openRoot[0], leaf.up, ROOT_SMOOTH_TIME, FRAME)
+      slot.lateral = smoothDamp(slot.lateral, pose.openRoot[1], leaf.lateral, ROOT_SMOOTH_TIME, FRAME)
+      slot.openness = smoothDamp(slot.openness, closedBook ? 0 : 1, leaf.opening, spineTurnTime(page), FRAME)
+      const [up, lateral] = spineRoot(pose, [slot.up, slot.lateral], slot.openness)
+      leaf.group.position.x = up
+      leaf.group.position.z = lateral
 
       let turningTime = Math.min(TURN_DURATION, (now - leaf.turnedAt) * 1000) / TURN_DURATION
       turningTime = Math.sin(turningTime * Math.PI)
-      let target = opened ? -Math.PI / 2 : Math.PI / 2
-      if (!closedBook) target += n * FAN_STEP
+      const target = opened ? -Math.PI / 2 : Math.PI / 2
 
       for (let i = 0; i < leaf.bones.length; i++) {
-        const inside = i < 8 ? Math.sin(i * 0.2 + 0.25) : 0
-        const outside = i >= 8 ? Math.cos(i * 0.3 + 0.09) : 0
         const turning = Math.sin((i * Math.PI) / leaf.bones.length) * turningTime
-        let angle =
-          INSIDE_CURVE_STRENGTH * inside * target -
-          OUTSIDE_CURVE_STRENGTH * outside * target +
-          TURNING_CURVE_STRENGTH * turning * target
+        let angle = pose.angles[i] + TURNING_CURVE_STRENGTH * turning * target
         const foldIntensity = i > 8 ? Math.sin((i * Math.PI) / leaf.bones.length - 0.5) * turningTime : 0
         let foldAngle = THREE.MathUtils.degToRad(Math.sign(target) * 2)
         if (closedBook) {
-          angle = i === 0 ? target : 0
+          angle = pose.angles[i]
           foldAngle = 0
         }
         const node = i === 0 ? leaf.group : leaf.bones[i]
@@ -196,9 +198,9 @@ export function createRig() {
   // puts it there: mesh.bind() re-runs calculateInverses with the chain
   // already built, so bone i's inverse just undoes its rest offset, and the
   // attached bindMatrixInverse cancels the mesh's own matrix. What is left
-  // is the plain two-bone blend below — which is also where the sag comes
-  // from, because blending two rigid transforms is not the same as
-  // following the bend between them.
+  // is the plain two-bone blend below. The GPU only ever runs it at the
+  // vertices, which sit on the bones, where one of the two weights is 0 —
+  // so the bench reads it there too (see SUB).
   const _a = new THREE.Vector3()
   const _b = new THREE.Vector3()
   // The same two-bone pairing createPageGeometry bakes into skinIndex, so
@@ -333,9 +335,11 @@ function report() {
         const sheet = rig.leafGap(flier, other, GUTTER_SAMPLES)
         if (all < turnGutter.gap) turnGutter = { gap: all, page, pair: `${Math.min(flier, other)}-${Math.max(flier, other)}` }
         if (sheet < turnSheet.gap) turnSheet = { gap: sheet, page, pair: `${Math.min(flier, other)}-${Math.max(flier, other)}` }
-        // Counted on the sheet, not in the fold: down in the fold the
-        // leaves overlap all the time and always will (see STACK_LEAN), so
-        // counting there would just read 100% for every setting.
+        // Counted on the sheet, not in the fold. When the leaves were
+        // stacked copies of one curl, the fold overlapped in 96% of the
+        // frames and counting there read the same for every setting; with
+        // the pile of parallel curves (domain/pile.js), roots rising
+        // straight, no frame touches there either.
         if (sheet < 0) overlapped = true
       }
       turnFrames++

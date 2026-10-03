@@ -1,6 +1,8 @@
 import { useMemo } from 'react'
 import * as THREE from 'three'
-import { createCoverBumpTexture, createCoverInnerTexture } from '@/features/book'
+import { createCoverBumpTexture } from '@/features/book'
+import { createPaperTexture, createPaperBumpTexture } from '../textures/paperTexture'
+import { createDoublureTexture, createLeatherGrainTexture } from '../textures/doublureTexture'
 
 // Three material sets: blank paper for the leaves, and leather for the two
 // boards. The boards' outer face is a picture, asked for: the front board
@@ -9,18 +11,23 @@ import { createCoverBumpTexture, createCoverInnerTexture } from '@/features/book
 // is stretched 3.5% across — less than the cut can be moved by a pixel of
 // shadow at its edges. The relief is that same picture read as height, as
 // the floor does: the gilt is the brightest thing on it, and stands up.
-// The inside of the boards is still features/book's painted doublure.
+// The inside of the boards is plain leather of the same hide (see
+// textures/doublureTexture).
 //
-// The paper is the tutorial's own set: white all round, a near-black
-// gutter down the spine edge, and the two faces glossy (roughness 0.1,
-// their value) so the candle catches a leaf as it turns. BoxGeometry's
-// face-group order is +x, -x, +y, -y, +z, -z — -x is the hinge side, and
-// the last two are the faces: +z looks up out of the closed book (the
-// front board's tooled face) and -z down at the table (the back board's).
-// The boards' four edges get flat leather, not the map: a 3mm strip takes
-// the whole texture across itself and would smear a fragment of gilt
-// border along the cut.
-const PAPER_COLOR = 0xffffff
+// The paper is an old book's (see textures/paperTexture): ivory, matte, its
+// cut edges toned darker still, and a near-black gutter down the spine
+// edge. It started as the tutorial's set — white all round and the faces
+// glossy, roughness 0.1, for photographs — which under the candle read as
+// a magazine. BoxGeometry's face-group order is +x, -x, +y, -y, +z, -z —
+// -x is the hinge side, and the last two are the faces: +z looks up out of
+// the closed book (the front board's tooled face) and -z down at the table
+// (the back board's). The boards' four edges get flat leather, not the
+// map: a 3mm strip takes the whole texture across itself and would smear a
+// fragment of gilt border along the cut.
+//
+// The paper's edges: the toned colour old paper takes where it is cut and
+// exposed, darker than the face it bounds.
+const PAPER_EDGE_COLOR = 0xd8c59c
 const GUTTER_COLOR = 0x111111
 // The flat leather on the boards' cut edges. It has no map, so it has to be
 // the red the cover picture is — otherwise the four edges give the binding
@@ -41,9 +48,16 @@ function loadCover(colorSpace) {
 
 export function usePageMaterials() {
   return useMemo(() => {
-    const paper = () => new THREE.MeshStandardMaterial({ color: PAPER_COLOR })
+    const paper = () => new THREE.MeshStandardMaterial({ color: PAPER_EDGE_COLOR, roughness: 0.95 })
     const gutter = new THREE.MeshStandardMaterial({ color: GUTTER_COLOR })
-    const face = new THREE.MeshStandardMaterial({ color: PAPER_COLOR, roughness: 0.1 })
+    const face = new THREE.MeshStandardMaterial({
+      map: createPaperTexture(),
+      bumpMap: createPaperBumpTexture(),
+      bumpScale: 0.002,
+      roughness: 0.9,
+      metalness: 0,
+      color: 0xffffff,
+    })
 
     const tooled = new THREE.MeshStandardMaterial({
       map: loadCover(THREE.SRGBColorSpace),
@@ -54,7 +68,9 @@ export function usePageMaterials() {
       color: 0xffffff,
     })
     const doublure = new THREE.MeshStandardMaterial({
-      map: createCoverInnerTexture(),
+      map: createDoublureTexture('#' + LEATHER_COLOR.toString(16).padStart(6, '0')),
+      bumpMap: createLeatherGrainTexture(),
+      bumpScale: 0.003,
       roughness: 0.88,
       metalness: 0.015,
       color: 0xffffff,

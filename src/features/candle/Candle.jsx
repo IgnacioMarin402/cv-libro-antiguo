@@ -7,8 +7,9 @@ const MODEL_URL = '/models/candle-holder.glb'
 
 // The candlestick, candle and wick, loaded from a file like the wizard.
 // Casts its shadow on the table but doesn't receive any, like the wizard
-// and the helmet: the candle's shadow has no bias, and a double-sided
-// Tripo mesh shadows itself in fine stripes (shadow acne).
+// and the helmet: the candle's shadow has no depth bias (only a normal
+// one, see SHADOW_NORMAL_BIAS), and a double-sided Tripo mesh shadowed
+// itself in fine stripes (shadow acne).
 function CandleModel() {
   const { scene } = useGLTF(MODEL_URL)
 

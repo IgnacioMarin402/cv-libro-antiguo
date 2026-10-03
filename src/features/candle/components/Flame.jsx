@@ -3,7 +3,7 @@ import * as THREE from 'three'
 import { createGlowTexture } from '../textures/glowTexture'
 import { useFlame } from '../hooks/useFlame'
 import { FLAME_SCALE, LIGHT_Y } from '../domain/candle'
-import { FLAME, LIGHT_COLOR, BASE_INTENSITY } from '../domain/flame'
+import { FLAME, LIGHT_COLOR, BASE_INTENSITY, SHADOW_NORMAL_BIAS } from '../domain/flame'
 
 // A candle flame on a wick whose tip stands at `position`: a shader card
 // that turns to face the viewer plus a glow sprite, and — on the flame that
@@ -48,6 +48,7 @@ export default function Flame({
           decay={2}
           castShadow={castShadow}
           shadow-mapSize={[1024, 1024]}
+          shadow-normalBias={SHADOW_NORMAL_BIAS}
         />
       )}
     </group>

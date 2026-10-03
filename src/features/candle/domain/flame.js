@@ -41,6 +41,18 @@ export const BASE_INTENSITY = 6.3
 // orange and are compensated for this one (see features/table/domain/cloth).
 export const LIGHT_COLOR = 0xffbd89
 
+// How far along its own normal a surface looks itself up in the candle's
+// shadow map, in metres. The book's leaves lie 3.2 mm apart, and each one
+// fell in the shadow of the leaf right on top of it in the strip where the
+// upper one ends short — a real shadow, but at 1024 texels a face it came
+// out as a staircase of marks along the pile's edge. Looking up past the
+// neighbour clears it: pixels marked on a close-up of that edge, 0 mm ->
+// 20603, 2 -> 10291, 3 -> 2080, 4 -> 0. A turning leaf, centimetres up,
+// still shadows the page under it. What else moves, on the room's wide
+// view: 0.8% of pixels, the rim of the book's shadow on the cloth drawn in
+// by a few millimetres.
+export const SHADOW_NORMAL_BIAS = 0.004
+
 // How far the draft pushes the tip, in the flame's units: a few
 // millimetres of lean on still air, three times that when the air stirs.
 const CALM_LEAN = 0.003

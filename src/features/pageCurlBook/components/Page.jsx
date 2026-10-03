@@ -2,14 +2,16 @@ import { useMemo, useRef } from 'react'
 import * as THREE from 'three'
 import { createShadowTwin } from '@/shared/three/shadowTwin'
 import { createPageGeometry, createPageSkeleton, BOARD_CUT, PAPER_CUT } from '../geometry/pageGeometry'
+import { leafPose } from '../domain/pile'
 import { usePageCurl } from '../hooks/usePageCurl'
-import { useStackOffset } from '../hooks/useStackOffset'
+import { useLeafRoot } from '../hooks/useLeafRoot'
 
 // One leaf: a skinned sheet bound to its own bone chain, wrapped in a group
 // that IS bone 0 — usePageCurl drives the group's own rotation as if it
 // were the first bone, so the whole leaf swings at the hinge while the
-// rest of the chain curls inside it, and useStackOffset rides that same
-// group to its place in its pile.
+// rest of the chain curls inside it, and useLeafRoot keeps that same group
+// bound to its place on the spine. Both read one pose per reading state
+// (see leafPose), which is worked out once per page, not per frame.
 //
 // `board` picks the cut: the two boards keep the book's full footprint and
 // the paper is trimmed by the square (see SQUARE), so the paper's edge
@@ -39,8 +41,9 @@ export default function Page({ number, page, opened, closedBook, board, hingeRef
     return mesh
   }, [geometry, materials, cut])
 
-  usePageCurl(group, skinnedMeshRef, number, opened, closedBook)
-  useStackOffset(group, number, page)
+  const pose = useMemo(() => leafPose(number, page), [number, page])
+  usePageCurl(group, skinnedMeshRef, pose.angles, opened, closedBook)
+  useLeafRoot(group, pose, page)
 
   return (
     <group ref={group} onClick={onClick} onPointerOver={onPointerOver} onPointerOut={onPointerOut}>

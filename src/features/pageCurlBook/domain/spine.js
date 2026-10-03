@@ -1,4 +1,4 @@
-import { PAGE_COUNT, PAGE_DEPTH, PAGE_WIDTH, CLOSED_PITCH } from './pageCurl'
+import { PAGE_WIDTH } from './pageCurl'
 
 // THE SPINE: the leather that covers the fold and runs a way onto both
 // boards. This binding had none — the two boards hinged on the same line
@@ -11,12 +11,15 @@ import { PAGE_COUNT, PAGE_DEPTH, PAGE_WIDTH, CLOSED_PITCH } from './pageCurl'
 //
 // It is a SKIN, not a structural piece: it is glued to the outer face of
 // each board for the first SPINE_GRIP of its width, and between the two it
-// rounds out by SPINE_BULGE, the way a rounded back does. Nothing else in
-// the book moves for it — the piles keep the stacking that was measured in
-// pageCurl.js. Splitting the two piles apart by the block's thickness was
-// tried first and measured worse everywhere (45.8% of a turn's frames with
-// leaves inside each other, against 6.6%): the fold is not made by where
-// the hinges are, it is made by the sheets rising out of them.
+// runs across the block's back, SPINE_BULGE clear of it. Nothing else in
+// the book moves for it. Splitting the two piles apart by the block's
+// thickness was tried first, and measured worse (45.8% of a turn's frames
+// with leaves inside each other, against 6.6%).
+//
+// Since then every leaf is bound on the spine itself, the open book's in a
+// row across it, the two boards at either end (see domain/pile.js). That
+// took the open boards' hinges from 0.0 mm to 28.8 mm apart, so the strip
+// now covers a real back instead of a knife edge.
 
 // How far along each board the leather runs before it leaves it. A real
 // binding covers the spine plus a strip of each board, but here the strip
@@ -27,11 +30,16 @@ import { PAGE_COUNT, PAGE_DEPTH, PAGE_WIDTH, CLOSED_PITCH } from './pageCurl'
 // a few millimetres of bare cover between the leather and the gilt.
 export const SPINE_GRIP = PAGE_WIDTH * 0.03
 
-// How far the back rounds out past the hinge line, at the middle of the
-// strip. Half the block's own thickness is what a rounded back gives, and
-// it is what turns the knife edge into a back you can see.
-export const SPINE_WIDTH = (PAGE_COUNT - 1) * CLOSED_PITCH + PAGE_DEPTH
-export const SPINE_BULGE = SPINE_WIDTH / 2
+// How far the back stands out past the hinge line, at the middle of the
+// strip. It was half the block's thickness, a rounded back, while the
+// boards hinged on one line and that bulge was the only back there was to
+// see. Once every leaf was bound on the spine it became a hollow instead:
+// 11.4 mm of empty leather between the block and the back, open at the
+// head and tail whether the book was open or closed. Now it only has to
+// clear the leaves' bound edges. Over a whole open-and-close the nearest
+// one passes 0.79 mm inside it; what is left of the hollow is 1.0 mm, open
+// or closed.
+export const SPINE_BULGE = 0.001
 
 // The leather sits this far off the board's own face, so the two never
 // share a plane and fight for the depth buffer.
