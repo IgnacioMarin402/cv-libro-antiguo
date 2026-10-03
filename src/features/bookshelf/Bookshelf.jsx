@@ -1,6 +1,5 @@
 import { Suspense, useLayoutEffect } from 'react'
-import { useLoader } from '@react-three/fiber'
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { useGLTF } from '@/shared/three/useGLTF'
 import { BOOKSHELF_SCALE } from './domain/bookshelf'
 
 // Loaded from a file, like the table.
@@ -9,7 +8,7 @@ const MODEL_URL = '/models/wooden-bookshelf.glb'
 // Casts the candle's shadows and receives them, like the table: its mesh is
 // single-sided too, so it doesn't stripe the way the double-sided props did.
 function BookshelfModel(props) {
-  const { scene } = useLoader(GLTFLoader, MODEL_URL)
+  const { scene } = useGLTF(MODEL_URL)
 
   useLayoutEffect(() => {
     scene.traverse((object) => {

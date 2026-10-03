@@ -1,6 +1,5 @@
 import { Suspense, useLayoutEffect } from 'react'
-import { useLoader } from '@react-three/fiber'
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { useGLTF } from '@/shared/three/useGLTF'
 import { useWizardClips } from './hooks/useWizardClips'
 import { useGemGlow } from './hooks/useGemGlow'
 import { useBreathing } from './hooks/useBreathing'
@@ -13,7 +12,7 @@ import { WIZARD_SCALE } from './domain/wizard'
 const MODEL_URL = '/models/wizard-cat.glb'
 
 function WizardModel({ open, ...props }) {
-  const { scene, animations } = useLoader(GLTFLoader, MODEL_URL)
+  const { scene, animations } = useGLTF(MODEL_URL)
   const { wave, staff, standing } = useWizardClips(scene, animations, open)
   // After the clips, which is the order their frames run in.
   useBreathing(scene, standing)

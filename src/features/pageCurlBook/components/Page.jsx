@@ -1,5 +1,6 @@
 import { useMemo, useRef } from 'react'
 import * as THREE from 'three'
+import { createShadowTwin } from '@/shared/three/shadowTwin'
 import { createPageGeometry, createPageSkeleton, BOARD_CUT, PAPER_CUT } from '../geometry/pageGeometry'
 import { usePageCurl } from '../hooks/usePageCurl'
 import { useStackOffset } from '../hooks/useStackOffset'
@@ -27,11 +28,14 @@ export default function Page({ number, page, opened, closedBook, board, hingeRef
   const skinnedMesh = useMemo(() => {
     const skeleton = createPageSkeleton(cut.segmentWidth)
     const mesh = new THREE.SkinnedMesh(geometry, materials)
-    mesh.castShadow = true
     mesh.receiveShadow = true
     mesh.frustumCulled = false
     mesh.add(skeleton.bones[0])
     mesh.bind(skeleton)
+    // Its shadow is cast by a twin with one material instead of its own
+    // six: the candle's shadow pass draws a leaf once per group per cube
+    // face, and the ten leaves were 360 of the frame's 494 draw calls.
+    mesh.add(createShadowTwin(mesh))
     return mesh
   }, [geometry, materials, cut])
 

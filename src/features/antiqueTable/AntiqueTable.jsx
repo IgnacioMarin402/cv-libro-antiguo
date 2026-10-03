@@ -1,6 +1,5 @@
 import { Suspense, useLayoutEffect } from 'react'
-import { useLoader } from '@react-three/fiber'
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { useGLTF } from '@/shared/three/useGLTF'
 import { ANTIQUE_TABLE_SCALE } from './domain/antiqueTable'
 
 // Loaded from a file, like the shelf.
@@ -9,7 +8,7 @@ const MODEL_URL = '/models/antique-table.glb'
 // Casts the candle's shadows and receives them, like the shelf: its mesh
 // is single-sided too.
 function AntiqueTableModel(props) {
-  const { scene } = useLoader(GLTFLoader, MODEL_URL)
+  const { scene } = useGLTF(MODEL_URL)
 
   useLayoutEffect(() => {
     scene.traverse((object) => {

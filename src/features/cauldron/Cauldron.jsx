@@ -1,6 +1,5 @@
 import { Suspense, useLayoutEffect } from 'react'
-import { useLoader } from '@react-three/fiber'
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { useGLTF } from '@/shared/three/useGLTF'
 import { Flame } from '@/features/candle'
 import Embers from './components/Embers'
 import { CAULDRON_SCALE, CAULDRON_FLAMES, CAULDRON_FLAME_SWAY, CAULDRON_FLAME_PACE } from './domain/cauldron'
@@ -11,7 +10,7 @@ const MODEL_URL = '/models/medieval-cauldron.glb'
 // Casts the candle's shadows and receives them, like the fireplace: its
 // mesh is single-sided too.
 function CauldronModel() {
-  const { scene } = useLoader(GLTFLoader, MODEL_URL)
+  const { scene } = useGLTF(MODEL_URL)
 
   useLayoutEffect(() => {
     scene.traverse((object) => {

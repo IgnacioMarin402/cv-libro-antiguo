@@ -1,6 +1,5 @@
 import { Suspense, useLayoutEffect } from 'react'
-import { useLoader } from '@react-three/fiber'
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { useGLTF } from '@/shared/three/useGLTF'
 import Flame from './components/Flame'
 import { MODEL_SCALE, FLAME_Y, WICK_RADIUS_IN_SCENE } from './domain/candle'
 
@@ -11,7 +10,7 @@ const MODEL_URL = '/models/candle-holder.glb'
 // and the helmet: the candle's shadow has no bias, and a double-sided
 // Tripo mesh shadows itself in fine stripes (shadow acne).
 function CandleModel() {
-  const { scene } = useLoader(GLTFLoader, MODEL_URL)
+  const { scene } = useGLTF(MODEL_URL)
 
   useLayoutEffect(() => {
     scene.traverse((object) => {

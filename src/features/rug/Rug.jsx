@@ -1,6 +1,5 @@
 import { Suspense, useLayoutEffect } from 'react'
-import { useLoader } from '@react-three/fiber'
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { useGLTF } from '@/shared/three/useGLTF'
 import { RUG_SCALE } from './domain/rug'
 import { flattenRug } from './geometry/flattenRug'
 
@@ -11,7 +10,7 @@ const MODEL_URL = '/models/dragon-lion-rug.glb'
 // table and the thrones over it; casts none, lying on the floor with
 // nothing under it but the floor, like the floor itself.
 function RugModel(props) {
-  const { scene } = useLoader(GLTFLoader, MODEL_URL)
+  const { scene } = useGLTF(MODEL_URL)
 
   useLayoutEffect(() => {
     scene.traverse((object) => {

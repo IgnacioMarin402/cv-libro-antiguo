@@ -1,6 +1,5 @@
 import { Suspense, useLayoutEffect } from 'react'
-import { useLoader } from '@react-three/fiber'
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { useGLTF } from '@/shared/three/useGLTF'
 import { HELMET_SCALE } from './domain/helmet'
 
 // Loaded from a file, like the wizard. Its face looks down +z as exported;
@@ -8,7 +7,7 @@ import { HELMET_SCALE } from './domain/helmet'
 const MODEL_URL = '/models/fantasy-helmet.glb'
 
 function HelmetModel(props) {
-  const { scene } = useLoader(GLTFLoader, MODEL_URL)
+  const { scene } = useGLTF(MODEL_URL)
 
   // Casts its shadow on the table but doesn't receive any, like the wizard:
   // the candle's shadow has no bias, and a double-sided Tripo mesh shadows

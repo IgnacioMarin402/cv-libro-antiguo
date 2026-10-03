@@ -1,7 +1,6 @@
 import { useLayoutEffect } from 'react'
 import * as THREE from 'three'
-import { useLoader } from '@react-three/fiber'
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { useGLTF } from '@/shared/three/useGLTF'
 import { wallShade } from '../domain/wall'
 import { WINDOW_SCALE } from '../domain/window'
 
@@ -14,7 +13,7 @@ const MODEL_URL = '/models/gothic-window.glb'
 // Single-sided, so it receives the candle's shadow without striping; it
 // casts none, there's nothing behind it to fall on.
 export default function GothicWindow({ position, rotationY }) {
-  const { scene } = useLoader(GLTFLoader, MODEL_URL)
+  const { scene } = useGLTF(MODEL_URL)
 
   useLayoutEffect(() => {
     scene.traverse((object) => {

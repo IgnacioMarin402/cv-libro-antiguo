@@ -1,6 +1,5 @@
 import { Suspense, useLayoutEffect, useMemo } from 'react'
-import { useLoader } from '@react-three/fiber'
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { useGLTF } from '@/shared/three/useGLTF'
 import { THRONE_SCALE } from './domain/throne'
 
 // Loaded from a file, like the table.
@@ -10,7 +9,7 @@ const MODEL_URL = '/models/ornate-throne.glb'
 // the meshes' geometry and material, like the sconces. Casts the candle's
 // shadows and receives them, like the table: its mesh is single-sided too.
 function ThroneModel(props) {
-  const { scene } = useLoader(GLTFLoader, MODEL_URL)
+  const { scene } = useGLTF(MODEL_URL)
   const model = useMemo(() => scene.clone(), [scene])
 
   useLayoutEffect(() => {

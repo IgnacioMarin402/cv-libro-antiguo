@@ -60,7 +60,18 @@ npm run preview
 npm start               # producción: server/server.js sirve dist/ y /api/love (build antes)
 node scripts/probe.mjs  # mide el libro sin navegador (ver Medir antes de tocar)
 node scripts/shrink-glb.mjs [archivo.glb ...]  # texturas de los GLB a 2048, rugosidad/metal a JPG; sin argumentos, todo public/models
+node scripts/pack-glb.mjs [archivo.glb ...]    # después del anterior: malla comprimida con meshopt; --ktx2 también las texturas
 ```
+
+**Un GLB nuevo pasa por los dos scripts, en ese orden**, y se carga con `useGLTF`
+(`@/shared/three/useGLTF`), no con `useLoader(GLTFLoader, …)`: es el que trae el
+decodificador de meshopt. `pack-glb` necesita `gltfpack`, que vive en `.tools/`
+(ignorado por git; se baja de las releases de zeux/meshoptimizer). Su cabecera
+tiene lo medido: comprimir la malla no cambia el aspecto (≥45 dB contra la escena
+original), y **simplificar o pasar a KTX2 sí** — el mantel en primer plano cayó a
+31–34 dB —, por eso no se usan por defecto. `public/basis/` es el transcodificador
+de KTX2 copiado de `three/examples/jsm/libs/basis`: sólo se descarga si algún
+modelo trae KTX2, y hay que volver a copiarlo al actualizar three.
 
 No hay tests, linter ni type-checking, y **`npm run build` no vale como verificación**
 (ver Verificación, abajo).
@@ -165,7 +176,12 @@ que estableció esta estructura.
   environment) y `features/lighting/domain/lightingRig.js`, no en los materiales.
 - **Palancas de rendimiento:** `PAGE_COUNT` (cada hoja del libro es una cadena de 31
   huesos), `MOTE_COUNT`, `DUST_COUNT`, el `shadow-mapSize` de la vela, el `dpr` del
-  canvas.
+  canvas — que `app/scene/resolution.js` baja solo, de a 0,25 y nunca bajo 1, si la
+  mediana del frame pasa de 22 ms; en una máquina rápida no hace nada.
+- **La sombra de la vela es el pase caro:** una luz puntual dibuja la escena seis
+  veces, y un mesh con array de materiales, una vez por grupo y por cara. Las hojas
+  proyectan con un gemelo de un solo material (`shared/three/shadowTwin`): pasaron
+  de 360 draw calls a 60.
 
 ## Estilo
 

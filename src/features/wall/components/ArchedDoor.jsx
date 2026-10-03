@@ -1,7 +1,6 @@
 import { useLayoutEffect } from 'react'
 import * as THREE from 'three'
-import { useLoader } from '@react-three/fiber'
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { useGLTF } from '@/shared/three/useGLTF'
 import { wallShade } from '../domain/wall'
 import { DOOR_SCALE } from '../domain/door'
 
@@ -16,7 +15,7 @@ const MODEL_URL = '/models/arched-door.glb'
 // receives the candle's shadow without striping; it casts none, like the
 // window.
 export default function ArchedDoor({ position, rotationY }) {
-  const { scene } = useLoader(GLTFLoader, MODEL_URL)
+  const { scene } = useGLTF(MODEL_URL)
 
   useLayoutEffect(() => {
     scene.traverse((object) => {

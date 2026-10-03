@@ -31,12 +31,14 @@ const TYPES = {
   '.ico': 'image/x-icon',
   '.glb': 'model/gltf-binary',
   '.mp3': 'audio/mpeg',
+  '.wasm': 'application/wasm',
 }
 
 // Text is gzipped once and kept: the bundle is a megabyte of three.js that
-// goes down to about a quarter. The models (43 MB of them) are streamed
-// from disk as they are — their textures are already compressed images.
-const COMPRESSIBLE = new Set(['.html', '.js', '.css', '.json', '.svg'])
+// goes down to about a quarter. So is the KTX2 transcoder's wasm (527 KB
+// to 245). The models are streamed from disk as they are: packed by
+// scripts/pack-glb.mjs, gzip takes 2-3% more off them.
+const COMPRESSIBLE = new Set(['.html', '.js', '.css', '.json', '.svg', '.wasm'])
 const gzipped = new Map()
 
 const love = loveApi()

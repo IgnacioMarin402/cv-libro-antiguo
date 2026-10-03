@@ -1,6 +1,5 @@
 import { Suspense, useLayoutEffect } from 'react'
-import { useLoader } from '@react-three/fiber'
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { useGLTF } from '@/shared/three/useGLTF'
 import { Flame, FireAudio } from '@/features/candle'
 import {
   FIREPLACE_SCALE,
@@ -17,7 +16,7 @@ const MODEL_URL = '/models/brick-fireplace.glb'
 // Casts the candle's shadows and receives them, like the bookshelf: its mesh
 // is single-sided too.
 function FireplaceModel() {
-  const { scene } = useLoader(GLTFLoader, MODEL_URL)
+  const { scene } = useGLTF(MODEL_URL)
 
   useLayoutEffect(() => {
     scene.traverse((object) => {

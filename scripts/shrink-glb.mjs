@@ -127,6 +127,13 @@ async function check(file, original, written) {
 async function shrinkGlb(file) {
   const original = fs.readFileSync(file)
   const { json, bin } = readGlb(original)
+  // Packed by scripts/pack-glb.mjs, which runs after this: its meshopt data
+  // sits in a second buffer this doesn't lay out, and with --ktx2 its maps
+  // are KTX2, which sharp can't read.
+  if ((json.extensionsUsed ?? []).includes('EXT_meshopt_compression')) {
+    console.log(`${path.basename(file)}: packed, nothing to shrink`)
+    return
+  }
   if (json.bufferViews.some((view) => (view.buffer ?? 0) !== 0)) throw new Error(`${file}: more than one buffer`)
   const slots = imageSlots(json)
   const replaced = new Map()

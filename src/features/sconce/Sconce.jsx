@@ -1,6 +1,5 @@
 import { Suspense, useLayoutEffect, useMemo } from 'react'
-import { useLoader } from '@react-three/fiber'
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { useGLTF } from '@/shared/three/useGLTF'
 import { Flame } from '@/features/candle'
 import {
   SCONCE_SCALE,
@@ -18,7 +17,7 @@ const MODEL_URL = '/models/wrought-iron-sconce.glb'
 // shadow and receives none, like the candlestick: the candle's shadow has
 // no bias, and a Tripo mesh stripes itself with it.
 function SconceModel() {
-  const { scene } = useLoader(GLTFLoader, MODEL_URL)
+  const { scene } = useGLTF(MODEL_URL)
   const model = useMemo(() => scene.clone(), [scene])
 
   useLayoutEffect(() => {

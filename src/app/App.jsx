@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
 import Scene from './Scene'
 import { configureScene } from './scene/renderer'
+import AdaptiveResolution from './scene/AdaptiveResolution'
 import { CAMERA, SHOTS } from '@/features/camera'
 import { LoadingScreen, SceneWarmup } from '@/features/loader'
 import { LoveCounter, useLove } from '@/features/love'
@@ -45,6 +46,7 @@ export default function App() {
       >
         <Scene open={isOpen} onOpenChange={setIsOpen} revealed={revealed} onLove={love.give} />
         <SceneWarmup progressRef={warmup} onReady={() => setReady(true)} />
+        <AdaptiveResolution active={revealed} />
       </Canvas>
       <div className="vignette" />
       <div className="hint">{isOpen ? HINTS.open : HINTS.closed}</div>

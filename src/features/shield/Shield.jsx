@@ -1,6 +1,5 @@
 import { Suspense, useLayoutEffect } from 'react'
-import { useLoader } from '@react-three/fiber'
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { useGLTF } from '@/shared/three/useGLTF'
 import { SHIELD_SCALE } from './domain/shield'
 
 // Loaded from a file, like the shelf.
@@ -9,7 +8,7 @@ const MODEL_URL = '/models/medieval-shield.glb'
 // Casts the candle's shadows and receives them, like the shelf: its mesh
 // is single-sided too.
 function ShieldModel(props) {
-  const { scene } = useLoader(GLTFLoader, MODEL_URL)
+  const { scene } = useGLTF(MODEL_URL)
 
   useLayoutEffect(() => {
     scene.traverse((object) => {

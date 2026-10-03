@@ -1,6 +1,5 @@
 import { Suspense, useLayoutEffect } from 'react'
-import { useLoader } from '@react-three/fiber'
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { useGLTF } from '@/shared/three/useGLTF'
 import { TABLE_SCALE, TABLE_OFFSET_Y } from './domain/table'
 import { recolorCloth } from './shaders/clothRecolor'
 
@@ -13,7 +12,7 @@ const MODEL_URL = '/models/ornate-table.glb'
 // and the cloth doesn't stripe the way the double-sided props did. Its
 // cloth is repainted in the wizard cat's colours on load (see domain/cloth).
 function TableModel() {
-  const { scene } = useLoader(GLTFLoader, MODEL_URL)
+  const { scene } = useGLTF(MODEL_URL)
 
   useLayoutEffect(() => {
     scene.traverse((object) => {
