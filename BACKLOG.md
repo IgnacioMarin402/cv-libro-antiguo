@@ -22,15 +22,10 @@ Lo que queda por hacer, anotado el 2026-10-03 y actualizado el 2026-10-04. Sólo
 - Mismo botón de regreso que el cuadro.
 - Se puede volver a hacer cada vez que se recarga la página.
 
-## 8. Botón de regreso: componente y brillo
-
-- El botón de regreso del cuadro, y los que vendrán para el busto y la jarra, queda como un componente.
-- Tiene que llamar la atención con el mismo brillo que la lupa y el CV cuando se abre el libro.
-- Es por donde se empieza.
-
 ## Shipped
 
 - 1. Retrato de los perros: zoom al hacer clic, nombres «mágicos» (Cinzel Decorative) y botón para volver.
 - 2. Corazón: se agranda y brilla al pasar el mouse, con un aviso sobre el like.
 - 3. Contador de likes: crece al pasar el mouse y dice «Likes totales».
 - 5. GLB que faltaban: la pluma con su tintero y la jarra del dragón, en la mesa; el casco, encima del aparador.
+- 8. Botón de regreso: componente compartido (`shared/ui/BackButton`) con el brillo de la lupa y el CV.

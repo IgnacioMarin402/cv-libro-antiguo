@@ -70,7 +70,7 @@ function FrameFace({ focused, onFocus }) {
 // A click on it calls onFocus: the visitor wants to look at it up close.
 // While they do (`focused`), once the camera has come, the dogs' names show
 // over the painting and `backRef` — the way back, a button over the canvas
-// (see PortraitBack) — is shown and placed beside the frame.
+// (see shared/ui/BackButton) — is shown and placed beside the frame.
 export default function Portrait({ focused = false, onFocus, backRef, ...props }) {
   const root = useRef()
   const squareSince = useLensSquare(focused, root)

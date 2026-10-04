@@ -15,8 +15,8 @@ const GAP_PX = 14
 const EDGE_PX = 16
 
 // Places the way back (`button`, a DOM element over the canvas, see
-// PortraitBack) beside the portrait's frame as the camera sees it, and
-// shows it once the lens stands square in front of the painting
+// shared/ui/BackButton) beside the portrait's frame as the camera sees it,
+// and shows it once the lens stands square in front of the painting
 // (`squareSince`, see useLensSquare): it arrives with the names, and stays
 // with the frame if the window changes size.
 //

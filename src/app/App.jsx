@@ -8,7 +8,7 @@ import { LoadingScreen, SceneWarmup } from '@/features/loader'
 import { LoveCounter, LoveHeartTip, useLove } from '@/features/love'
 import { BookReader } from '@/features/pageCurlBook'
 import { BOOK_PAGES, CvLink } from '@/features/cv'
-import { PortraitBack } from '@/features/portrait'
+import BackButton from '@/shared/ui/BackButton'
 
 // What the visitor can do right now, which is not the same before and after
 // the book opens: an open book takes the keyboard and lets the lens much
@@ -44,10 +44,20 @@ export default function App() {
   // the room says so, the way back over the canvas says they're done. That
   // button is placed beside the frame by the portrait, inside the canvas;
   // the ref joins the two, like the warm-up's.
+  //
+  // One scene at a time: going to the portrait from the open book is the
+  // same as closing the book's scene — asked, after the magnifier and the
+  // CV link stayed up over the portrait. So it closes the book, and the
+  // book's buttons go with the click rather than when its last leaf lands
+  // (the leaves turn back one after another, over a second or so).
   const [viewingPortrait, setViewingPortrait] = useState(false)
-  const viewPortrait = useCallback(() => setViewingPortrait(true), [])
+  const viewPortrait = useCallback(() => {
+    setViewingPortrait(true)
+    setPage(0)
+  }, [])
   const leavePortrait = useCallback(() => setViewingPortrait(false), [])
   const portraitBack = useRef(null)
+  const inBook = isOpen && !viewingPortrait
 
   return (
     <div className="scene-wrap">
@@ -80,12 +90,12 @@ export default function App() {
       <div className="vignette" />
       <div className="hint">{viewingPortrait ? HINTS.portrait : isOpen ? HINTS.open : HINTS.closed}</div>
       <div className="corner">
-        <BookReader pages={BOOK_PAGES} page={page} onPageChange={setPage} open={isOpen} />
-        <CvLink open={isOpen} />
+        <BookReader pages={BOOK_PAGES} page={page} onPageChange={setPage} open={inBook} />
+        <CvLink open={inBook} />
         <LoveCounter count={love.count} loved={love.loved} />
       </div>
       <LoveHeartTip ref={heartTip} count={love.count} loved={love.loved} />
-      <PortraitBack ref={portraitBack} open={viewingPortrait} onBack={leavePortrait} />
+      <BackButton ref={portraitBack} open={viewingPortrait} onBack={leavePortrait} label="Volver al libro" />
       <LoadingScreen ready={ready} warmupRef={warmup} onReveal={() => setRevealed(true)} />
     </div>
   )

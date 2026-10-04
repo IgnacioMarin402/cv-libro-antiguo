@@ -39,6 +39,10 @@ No hay un `geometry.js` genérico: cada malla dice de qué es geometría.
 `latheFromProfile`); `features/*/geometry/` las configura con las medidas de
 su propio objeto (`coverGeometry`, `spineGeometry`, `pageGeometry`).
 
+`shared/ui/` es lo mismo para la interfaz sobre el canvas: `BackButton`, el
+botón para volver de una vista que la cámara fija (hoy, el cuadro), no sabe de
+qué vista vuelve; quien lleva al visitante ahí lo coloca y lo muestra.
+
 ## Importar
 
 `@` es `src/`. Una feature se importa por lo que es y siempre por su barrel:

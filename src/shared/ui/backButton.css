@@ -1,0 +1,95 @@
+/* The way back (see BackButton), drawn like the magnifier's buttons
+   (features/pageCurlBook/reader.css) — the heart counter's parchment gold,
+   on its dark — a size up from the corner's. What placed it writes its
+   transform and data-shown every frame; until then it's there but unseen
+   and out of reach. Under the loading screen (z-index 10) like the
+   corner. */
+
+.back-button {
+  --gold: 214, 190, 150;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid rgba(var(--gold), 0.35);
+  border-radius: 999px;
+  background: rgba(18, 11, 5, 0.6);
+  color: rgba(var(--gold), 0.9);
+  cursor: pointer;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 0.6s ease,
+    visibility 0s linear 0.6s,
+    border-color 0.3s ease,
+    color 0.3s ease;
+}
+
+.back-button[data-shown='true'] {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition:
+    opacity 0.6s ease,
+    visibility 0s,
+    border-color 0.3s ease,
+    color 0.3s ease;
+}
+
+.back-button:hover,
+.back-button:focus-visible {
+  border-color: rgba(var(--gold), 0.65);
+  color: #f3dfb8;
+  outline: none;
+}
+
+.back-button__icon {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Until it's been clicked once (see BackButton): the magnifier's glow,
+   breathing round it (see features/pageCurlBook/reader.css) — the heart
+   counter's when it's lit — and its ring and arrow brighter. */
+.back-button--new {
+  border-color: rgba(var(--gold), 0.6);
+  color: #f3dfb8;
+  animation: back-button-glow 2.4s ease-in-out infinite;
+}
+
+.back-button--new .back-button__icon {
+  filter: drop-shadow(0 0 3px rgba(255, 200, 120, 0.8));
+}
+
+@keyframes back-button-glow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 4px 0 rgba(255, 180, 90, 0.2),
+      inset 0 0 2px 0 rgba(255, 220, 160, 0.15);
+  }
+  50% {
+    box-shadow:
+      0 0 16px 4px rgba(255, 180, 90, 0.6),
+      inset 0 0 6px 1px rgba(255, 220, 160, 0.45);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .back-button--new {
+    animation: none;
+    box-shadow: 0 0 12px 3px rgba(255, 180, 90, 0.5);
+  }
+}
