@@ -26,8 +26,8 @@ body {
   background: radial-gradient(ellipse at 50% 58%, transparent 62%, rgba(0, 0, 0, 0.26) 100%);
 }
 
-/* The top-right corner over the canvas: the magnifier while the book is
-   open, the link to the CV's page, then the heart counter. Under the loading screen (z-index 10),
+/* The top-right corner over the canvas: the magnifier and the link to the
+   CV's page while the book is open, then the heart counter. Under the loading screen (z-index 10),
    which covers it until the room is up. */
 .corner {
   position: absolute;

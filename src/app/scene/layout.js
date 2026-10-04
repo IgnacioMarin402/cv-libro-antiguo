@@ -15,6 +15,7 @@ import { SHELF_WIDTH, SHELF_BACK_OFFSET, SHELF_FLOOR_OFFSET } from '@/features/s
 import { SOFA_BACK_OFFSET, SOFA_SIDE_OFFSET } from '@/features/sofa'
 import { CABINET_WIDTH, CABINET_BACK_OFFSET, CABINET_TOP_HEIGHT } from '@/features/cabinet'
 import { SHOTS } from '@/features/camera'
+import { QUILL_HEADING } from '@/features/quill'
 import { SHIELD_WIDTH, SHIELD_BACK_OFFSET, SHIELD_FLOOR_OFFSET } from '@/features/shield'
 import {
   PORTRAIT_WIDTH,
@@ -83,14 +84,21 @@ const MUG_TO_CAMERA = Math.atan2(SHOTS.rest.position.x - MUG_POSITION[0], SHOTS.
 const MUG_TO_BOOK = Math.atan2(BOOK_POSITION[0] - MUG_POSITION[0], BOOK_POSITION[2] - MUG_POSITION[2])
 export const MUG_ROTATION = [0, (MUG_TO_CAMERA + MUG_TO_BOOK) / 2, 0]
 
-// The quill and its inkwell west of the book, toward the reader, where they
-// were marked on the same screenshot as the tankard. They keep 15.5 cm from
-// the book's reach on this side and 33.6 cm from the wizard, and the lens
-// never touches them (3.8 cm at the nearest, before their last 10%). Turned
-// to face the south-west, on the diagonal, as asked. The intro takes them
-// whole and the open shot 83%; the resting shot doesn't reach them.
-export const QUILL_POSITION = [-0.61, 0, 0.32]
-export const QUILL_ROTATION = [0, -Math.PI / 4, 0]
+// The quill and its inkwell in front of the book's right-hand side, toward
+// the reader, where they were marked on a screenshot (the camera rebuilt
+// from the book's corners and the candle, to 3.2 px). They stood west of
+// the book first, on another mark, and were brought here as they lay there:
+// the quill 55° off the east–west line of the cloth's border, its tip to the
+// north-east — faced south-west it had lain square across that border, at
+// 90°, and was asked to 55°. They keep 12.9 cm from the book's reach on
+// this side and 58 cm from the tankard, and the lens never touches them,
+// 3 cm at the nearest over every orbit and aim (measured with the polar
+// limit). The intro takes them whole, the open shot 75% and the resting
+// shot 59%.
+export const QUILL_POSITION = [0.53, 0, 0.36]
+const QUILL_ANGLE = (55 * Math.PI) / 180
+const QUILL_TIP_HEADING = Math.atan2(Math.cos(QUILL_ANGLE), -Math.sin(QUILL_ANGLE))
+export const QUILL_ROTATION = [0, QUILL_TIP_HEADING - QUILL_HEADING, 0]
 
 // The love heart, behind the book on the candle's right: the middle of its
 // lap (8 cm round, see features/love), 20 cm over the table. Chosen by

@@ -12,9 +12,17 @@ const MODEL_HALF_DEPTH = 0.468
 
 // Sized by what the two are, there being nothing in the room to fit them
 // to: at 0.2 the inkwell stood 7.2 cm and the quill ran 25.5 cm, a goose
-// quill's length. Asked 10% bigger, and then 10% again: 8.7 and 30.9 cm.
-export const QUILL_SCALE = 0.2 * 1.1 * 1.1
+// quill's length. Asked 10% bigger three times over: 9.6 and 34 cm.
+export const QUILL_SCALE = 0.2 * 1.1 * 1.1 * 1.1
 
-// Half its footprint once scaled, across and deep: 11.9 by 11.3 cm.
+// Half its footprint once scaled, across and deep: 13 by 12.5 cm.
 export const QUILL_HALF_WIDTH = MODEL_HALF_WIDTH * QUILL_SCALE
 export const QUILL_HALF_DEPTH = MODEL_HALF_DEPTH * QUILL_SCALE
+
+// Which way the quill lies in the model, nib to tip — the nib at
+// (0.4, 0.467), the tip at (-0.478, -0.458), measured on its vertices — as
+// an angle round y from +z, the way the layout turns things. Turning the
+// model by r lays the quill at QUILL_HEADING + r.
+const NIB = [0.4, 0.467]
+const TIP = [-0.478, -0.458]
+export const QUILL_HEADING = Math.atan2(TIP[0] - NIB[0], TIP[1] - NIB[1])

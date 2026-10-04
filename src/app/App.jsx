@@ -81,7 +81,7 @@ export default function App() {
       <div className="hint">{viewingPortrait ? HINTS.portrait : isOpen ? HINTS.open : HINTS.closed}</div>
       <div className="corner">
         <BookReader pages={BOOK_PAGES} page={page} onPageChange={setPage} open={isOpen} />
-        <CvLink />
+        <CvLink open={isOpen} />
         <LoveCounter count={love.count} loved={love.loved} />
       </div>
       <LoveHeartTip ref={heartTip} count={love.count} loved={love.loved} />

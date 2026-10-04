@@ -28,3 +28,35 @@
   color: #f3dfb8;
   outline: none;
 }
+
+/* New to the visitor until they've used it once (see CvLink): the
+   magnifier's glow, breathing round it (see pageCurlBook/reader.css) — the
+   heart counter's when it's lit — and its ring and letters brighter. */
+.cv-link--new {
+  border-color: rgba(var(--gold), 0.6);
+  color: #f3dfb8;
+  animation:
+    fadeIn 1.2s ease,
+    cv-link-glow 2.4s ease-in-out 1.2s infinite;
+}
+
+@keyframes cv-link-glow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 4px 0 rgba(255, 180, 90, 0.2),
+      inset 0 0 2px 0 rgba(255, 220, 160, 0.15);
+  }
+  50% {
+    box-shadow:
+      0 0 16px 4px rgba(255, 180, 90, 0.6),
+      inset 0 0 6px 1px rgba(255, 220, 160, 0.45);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cv-link--new {
+    animation: fadeIn 1.2s ease;
+    box-shadow: 0 0 12px 3px rgba(255, 180, 90, 0.5);
+  }
+}

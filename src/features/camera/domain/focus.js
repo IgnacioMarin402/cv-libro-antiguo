@@ -42,7 +42,7 @@ export const FOCUS_DURATION = 2600
 // (aim panned to the spread's corners), both in the first 7% of the move,
 // beside where the lens already stood; on the way back to the book, the
 // north-east throne keeps 39 cm. The tankard and the quill, on the table
-// since, keep 24.6 cm from every route there and 60 from the way back.
+// since, keep 17.5 cm from every route there and 59 from the way back.
 export const CLIMB_SHARE = 0.2
 
 // How far through its change of height the lens is, `t` (0..1) of the way
