@@ -34,6 +34,24 @@ function openStore(file) {
   db.prepare(`INSERT OR IGNORE INTO meta (key, value) VALUES ('salt', ?)`).run(randomBytes(32).toString('hex'))
   const salt = db.prepare(`SELECT value FROM meta WHERE key = 'salt'`).get().value
 
+  // The table was called cookies until ad blockers made "cookie" unusable in
+  // the browser (see 1cfce25). The rename left every treat given before it
+  // in the old table and started the count again at 0, so a database that
+  // still has it hands its rows over, once, and drops it. Same visitors
+  // (same salt), so today's limit carries over too. A visitor who gave on
+  // both sides of the rename today is summed past it rather than losing
+  // any: left() counts that as none left.
+  const legacy = db.prepare(`SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'cookies'`).get()
+  if (legacy) {
+    db.exec(`
+      BEGIN;
+      INSERT INTO treats (visitor, day, n) SELECT visitor, day, n FROM cookies WHERE true
+        ON CONFLICT (visitor, day) DO UPDATE SET n = n + excluded.n;
+      DROP TABLE cookies;
+      COMMIT;
+    `)
+  }
+
   // One statement, so two treats sent at once can't both slip under the
   // limit: the row only grows while it's under it, and when it doesn't,
   // nothing changed.
@@ -47,7 +65,7 @@ function openStore(file) {
   return {
     visitor: (ip) => createHmac('sha256', salt).update(visitorKey(ip)).digest('base64url'),
     give: (visitor) => give.run(visitor).changes > 0,
-    left: (visitor) => DAILY_LIMIT - (today.get(visitor)?.n ?? 0),
+    left: (visitor) => Math.max(0, DAILY_LIMIT - (today.get(visitor)?.n ?? 0)),
     count: () => total.get().n,
   }
 }
