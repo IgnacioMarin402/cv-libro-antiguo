@@ -117,6 +117,12 @@ en los dos); los monta `server/server.js` en producción y Vite en `dev`/`previe
   `X-Forwarded-For`: en una VPS, el proxy apunta a `127.0.0.1:PORT`. Si el proxy está
   en otra máquina (Railway, Fly, Render), además `HOST=0.0.0.0`. Para ver la cuenta:
   `node -e "console.log(new (require('node:sqlite').DatabaseSync)('data/love.db').prepare('select count(*) n from love').get())"`.
+- **Producción es un VPS** con Docker: `Dockerfile` (la app), `deploy/` (compose con Caddy,
+  respaldo diario, preparación de la máquina) y `.github/workflows/deploy.yml`, que despliega
+  cada push a `master` una vez que el repo tiene la variable `VPS_HOST`. La base vive en el
+  volumen `libro-data`, no en la imagen. Todo en `deploy/README.md`.
+- **No renombrar una tabla sin migrarla.** El paso de `cookies` a `treats` dejó las galletas
+  dadas en la tabla vieja y el contador volvió a 0; `server/treats.js` las traspasa al abrir.
 - Sin servidor detrás (hosting estático), los contadores no aparecen, el corazón sólo
   anima y la galleta se lanza sin límite.
 - `server/server.js` manda en cada respuesta `frame-ancestors 'none'` + `X-Frame-Options`

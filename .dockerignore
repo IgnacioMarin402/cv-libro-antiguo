@@ -1,0 +1,12 @@
+# The database never goes in the image: it lives in the volume.
+data
+node_modules
+dist
+.env
+.env.*
+.git
+.github
+.tools
+.claude
+legacy-canvas-artifact
+deploy

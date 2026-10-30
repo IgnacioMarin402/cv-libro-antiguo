@@ -1,0 +1,15 @@
+# HTTPS for DOMAIN (from /opt/libro/.env), the certificate from Let's
+# Encrypt on its own, and everything passed to the app. Caddy trusts no
+# X-Forwarded-For from outside: it sets the header to the visitor's address,
+# which is the last entry the server reads (see server/love.js).
+#
+# No encode here: the server already gzips the text and streams the packed
+# models as they are (see server/server.js).
+
+{$DOMAIN} {
+	reverse_proxy 127.0.0.1:3000
+}
+
+www.{$DOMAIN} {
+	redir https://{$DOMAIN}{uri} permanent
+}

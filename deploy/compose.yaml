@@ -1,0 +1,57 @@
+# The site on the VPS: the app, and Caddy in front of it for HTTPS.
+# Lives in /opt/libro beside its .env (DOMAIN, IMAGE); the deploy workflow
+# copies this file there, and the Caddyfile to caddy/, and replaces the app container.
+# Neither volume is touched by that: libro-data keeps love.db, caddy-data
+# the certificates.
+
+services:
+  app:
+    image: ${IMAGE:?set IMAGE in /opt/libro/.env}
+    restart: unless-stopped
+    # Node isn't PID 1, so docker's SIGTERM stops it at once instead of
+    # waiting out the 10 s and killing it.
+    init: true
+    environment:
+      # Caddy appends the visitor's address to X-Forwarded-For.
+      TRUST_PROXY: '1'
+      # Inside the container: with TRUST_PROXY the server would listen on its
+      # own loopback, which nothing outside the container reaches. The port
+      # is published on the host's loopback alone, below — the guard the
+      # loopback default is for (no one skips the proxy) holds there.
+      HOST: 0.0.0.0
+      # A visitor's three treats a day are counted by the server's day
+      # (see server/treats.js), and a container's clock is UTC: without
+      # this, Chile's day would turn at 21:00.
+      TZ: America/Santiago
+    ports:
+      - 127.0.0.1:3000:3000
+    volumes:
+      - libro-data:/data
+      - ./backups:/backups
+    healthcheck:
+      test: ['CMD', 'node', '-e', "fetch('http://127.0.0.1:3000/api/love').then((r) => process.exit(r.ok ? 0 : 1), () => process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    # On the host's network, not docker's: published ports reach a bridged
+    # container through docker-proxy for IPv6, and every IPv6 visitor would
+    # arrive as the bridge's gateway — one address, one heart, for all of
+    # them. Here Caddy sees each visitor's own address.
+    network_mode: host
+    environment:
+      DOMAIN: ${DOMAIN:?set DOMAIN in /opt/libro/.env}
+    volumes:
+      # The folder, not the file: scp replaces the file with a new one, and
+      # a file mounted alone would keep showing Caddy the old.
+      - ./caddy:/etc/caddy:ro
+      - caddy-data:/data
+      - caddy-config:/config
+
+volumes:
+  libro-data:
+  caddy-data:
+  caddy-config:
