@@ -10,6 +10,7 @@ import { BookReader } from '@/features/pageCurlBook'
 import { BOOK_PAGES, CvLink } from '@/features/cv'
 import { CookieButton, CookieCounter, useCookies } from '@/features/bust'
 import BackButton from '@/shared/ui/BackButton'
+import { GpuNotice } from '@/features/gpuNotice'
 
 // What the visitor can do right now, which is not the same before and after
 // the book opens: an open book takes the keyboard and lets the lens much
@@ -40,6 +41,9 @@ export default function App() {
   const [ready, setReady] = useState(false)
   const [revealed, setRevealed] = useState(false)
   const warmup = useRef(null)
+  // The canvas's renderer, for the note on which graphics card draws the
+  // room (see features/gpuNotice), read once the room is up.
+  const renderer = useRef(null)
   // The project's hearts: given by the heart in the room, counted in the
   // corner over it. Under the pointer the heart shows what it's for, a tip
   // over the canvas that the heart places beside itself — the ref joins them.
@@ -91,7 +95,10 @@ export default function App() {
         dpr={[1, 2]}
         gl={{ antialias: true, alpha: false }}
         camera={{ ...CAMERA, position: SHOTS.intro.position.toArray() }}
-        onCreated={configureScene}
+        onCreated={(state) => {
+          configureScene(state)
+          renderer.current = state.gl
+        }}
       >
         <Scene
           open={isOpen}
@@ -133,6 +140,7 @@ export default function App() {
         label="Volver al libro"
       />
       <CookieButton ref={cookieButton} open={view === 'bust'} cookies={cookies} throwRef={cookieThrow} />
+      <GpuNotice glRef={renderer} revealed={revealed} />
       <LoadingScreen ready={ready} warmupRef={warmup} onReveal={() => setRevealed(true)} />
     </div>
   )

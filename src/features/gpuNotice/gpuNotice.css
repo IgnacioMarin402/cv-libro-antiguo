@@ -1,0 +1,72 @@
+/* The graphics card note, in the corner's colours — the heart counter's
+   parchment gold on its dark (see features/love/love.css) — top left, where
+   nothing else sits. Under the loading screen (z-index 10) like the corner,
+   and in after it lifts. */
+
+.gpu-notice {
+  --gold: 214, 190, 150;
+  position: absolute;
+  top: 18px;
+  left: 20px;
+  z-index: 5;
+  max-width: 330px;
+  padding: 14px 18px 14px;
+  border: 1px solid rgba(var(--gold), 0.3);
+  border-radius: 10px;
+  background: rgba(18, 11, 5, 0.85);
+  color: rgba(var(--gold), 0.9);
+  font: 400 13px/1.45 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+  animation: fadeIn 0.8s ease 0.6s both;
+}
+
+.gpu-notice p {
+  margin: 0 0 8px;
+}
+
+.gpu-notice__title {
+  font-style: italic;
+  font-size: 15px;
+  color: #f3dfb8;
+}
+
+.gpu-notice strong {
+  font-weight: 400;
+  color: #f3dfb8;
+}
+
+.gpu-notice__steps {
+  font-size: 12px;
+  color: rgba(var(--gold), 0.75);
+}
+
+.gpu-notice__steps em {
+  color: #f3dfb8;
+}
+
+.gpu-notice__close {
+  margin-top: 2px;
+  padding: 6px 14px 7px;
+  border: 1px solid rgba(var(--gold), 0.45);
+  border-radius: 999px;
+  background: transparent;
+  color: #f3dfb8;
+  font: italic 400 13px/1 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+  cursor: pointer;
+  transition: border-color 0.3s ease;
+}
+
+.gpu-notice__close:hover,
+.gpu-notice__close:focus-visible {
+  border-color: rgba(var(--gold), 0.85);
+  outline: none;
+}
+
+/* On a phone it spans the top, under the corner's row. */
+@media (max-width: 600px) {
+  .gpu-notice {
+    top: 66px;
+    left: 16px;
+    right: 16px;
+    max-width: none;
+  }
+}

@@ -219,6 +219,11 @@ que estableció esta estructura.
   huesos), `MOTE_COUNT`, `DUST_COUNT`, el `shadow-mapSize` de la vela, el `dpr` del
   canvas — que `app/scene/resolution.js` baja solo, de a 0,25 y nunca bajo 1, si la
   mediana del frame pasa de 22 ms; en una máquina rápida no hace nada.
+- **Qué GPU dibuja no lo decide la página:** R3F ya pide `powerPreference:
+  'high-performance'`, pero en Windows el navegador usa la gráfica que Windows le dio, y
+  en un portátil con dos suele ser la integrada. `features/gpuNotice` lo detecta
+  (`WEBGL_debug_renderer_info`) y, una vez levantada la carga, le dice al visitante cómo
+  dársela al navegador; al cerrarlo se recuerda en `localStorage`.
 - **La sombra de la vela es el pase caro:** una luz puntual dibuja la escena seis
   veces, y un mesh con array de materiales, una vez por grupo y por cara. Las hojas
   proyectan con un gemelo de un solo material (`shared/three/shadowTwin`): pasaron
