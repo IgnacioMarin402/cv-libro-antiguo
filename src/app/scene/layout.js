@@ -27,6 +27,7 @@ import {
 import { BUST_WIDTH, BUST_BACK_OFFSET, BUST_FRAMING } from '@/features/bust'
 import { ANTIQUE_TABLE_BACK_OFFSET, ANTIQUE_TABLE_HALF_WIDTH } from '@/features/antiqueTable'
 import { CAULDRON_RADIUS } from '@/features/cauldron'
+import { mugFocus } from '@/features/mug'
 
 // Where each prop stands on the table. The book holds the origin — it's what
 // the scene is about and what the camera frames against — and everything
@@ -83,6 +84,16 @@ export const MUG_POSITION = [0.61, 0, -0.46]
 const MUG_TO_CAMERA = Math.atan2(SHOTS.rest.position.x - MUG_POSITION[0], SHOTS.rest.position.z - MUG_POSITION[2])
 const MUG_TO_BOOK = Math.atan2(BOOK_POSITION[0] - MUG_POSITION[0], BOOK_POSITION[2] - MUG_POSITION[2])
 export const MUG_ROTATION = [0, (MUG_TO_CAMERA + MUG_TO_BOOK) / 2, 0]
+
+// What the camera goes to look at when it's clicked: the tankard whole with
+// its head of foam, from 35° above, from the side its relief faces (see
+// features/mug's domain/beer). The lens stops 54.5 cm from anything on a
+// wide screen, over the book's right-hand side, and further back and up on
+// a phone held upright. Over the routes there from 288 places, book open and
+// closed (see CROSSING_HEIGHT in features/camera), none comes inside the
+// near plane; past the first 8% of the move the closest is the wizard,
+// 14.1 cm with the book closed and 22.4 open, and the way back keeps 30.
+export const MUG_FOCUS = mugFocus(MUG_POSITION, MUG_ROTATION[1])
 
 // The quill and its inkwell in front of the book's right-hand side, toward
 // the reader, where they were marked on a screenshot (the camera rebuilt

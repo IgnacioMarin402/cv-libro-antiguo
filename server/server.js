@@ -115,7 +115,20 @@ async function serveStatic(req, res) {
   createReadStream(path).pipe(res)
 }
 
+// On every answer, page and API alike. No other site may frame the page:
+// framed out of sight, a visitor's click could be steered onto the heart or
+// the cookie and counted as theirs. The browser takes each file as the type
+// it's sent as, never sniffs one into a script. And another site the page
+// links to is told where the visitor came from, not which page.
+const SECURITY_HEADERS = {
+  'Content-Security-Policy': "frame-ancestors 'none'",
+  'X-Frame-Options': 'DENY',
+  'X-Content-Type-Options': 'nosniff',
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+}
+
 createServer((req, res) => {
+  for (const [name, value] of Object.entries(SECURITY_HEADERS)) res.setHeader(name, value)
   love(req, res, () =>
     cookies(req, res, () => {
       serveStatic(req, res).catch((error) => {

@@ -1,8 +1,9 @@
-/* The magnifier and the pages it opens, in the heart counter's colours (see
+/* The magnifier — an eye, today — and the pages it opens, in the heart counter's colours (see
    features/love): its parchment gold for lines and marks, on its dark. */
 
 .reader-button {
   --gold: 214, 190, 150;
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -17,15 +18,44 @@
   pointer-events: auto;
   animation: fadeIn 0.8s ease;
   transition:
+    transform 0.25s ease,
     border-color 0.3s ease,
     color 0.3s ease;
 }
 
+/* Under the pointer it grows as the heart counter does, 12%, and says what
+   it does (the tip, below). */
 .reader-button:hover,
 .reader-button:focus-visible {
+  transform: scale(1.12);
   border-color: rgba(var(--gold), 0.55);
   color: #f3dfb8;
   outline: none;
+}
+
+/* What it does, hung under it from its left end — it's the first in the
+   corner's row, so the tip runs inward, under the others, and never off the
+   screen. Drawn as the counter's (see features/love/love.css). */
+.reader-tip {
+  position: absolute;
+  top: calc(100% + 9px);
+  left: 0;
+  padding: 6px 13px 7px;
+  border: 1px solid rgba(var(--gold), 0.3);
+  border-radius: 999px;
+  background: rgba(18, 11, 5, 0.8);
+  color: rgba(var(--gold), 0.95);
+  font: italic 400 13px/1.2 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.reader-button:hover .reader-tip,
+.reader-button:focus-visible .reader-tip {
+  opacity: 1;
 }
 
 /* New to the visitor until they've used it once (see BookReader): a gold
@@ -66,12 +96,13 @@
 }
 
 .reader-button__icon {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   fill: none;
   stroke: currentColor;
-  stroke-width: 1.7;
+  stroke-width: 1.6;
   stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .reader {

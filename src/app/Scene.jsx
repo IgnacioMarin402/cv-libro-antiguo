@@ -58,11 +58,15 @@ import {
   QUILL_ROTATION,
   MUG_POSITION,
   MUG_ROTATION,
+  MUG_FOCUS,
   WIZARD_POSITION,
   WIZARD_ROTATION,
   BOOK_POSITION,
   LOVE_HEART_POSITION,
 } from './scene/layout'
+
+// What the camera frames for each thing the visitor can look at up close.
+const FOCUS = { portrait: PORTRAIT_FOCUS, bust: BUST_FOCUS, mug: MUG_FOCUS }
 
 // The scene assembled from its features. The one piece of state that
 // crosses a feature boundary — whether the book is open, which the book
@@ -72,12 +76,12 @@ import {
 // And so is what a click on the love heart does, since the count it adds
 // to is drawn over the canvas — as is the tip the heart shows beside itself
 // under the pointer (heartTipRef). And what the visitor is looking at up
-// close (`view`), the portrait or the bust: a click on either asks for it
-// — while nothing else is — and the camera goes to it. The portrait's
-// names show; the bust is given cookies, by a button over the canvas that
-// throws them in here (cookieRef, cookieThrowRef). And the way back is a
-// button over the canvas too, which each places beside itself
-// (portraitBackRef, bustBackRef).
+// close (`view`), the portrait, the bust or the tankard: a click on one
+// asks for it — while nothing else is — and the camera goes to it. The
+// portrait's names show; the bust is given cookies, by a button over the
+// canvas that throws them in here (cookieRef, cookieThrowRef); the tankard
+// fills with beer. And the way back is a button over the canvas too, which
+// each places beside itself (portraitBackRef, bustBackRef, mugBackRef).
 //
 // The book is features/pageCurlBook. features/book — the from-scratch
 // vertex-displacement one this scene opened with — is no longer mounted;
@@ -98,6 +102,8 @@ export default function Scene({
   bustBackRef,
   cookieRef,
   cookieThrowRef,
+  onViewMug,
+  mugBackRef,
 }) {
   return (
     <>
@@ -138,7 +144,13 @@ export default function Scene({
       ))}
       <Helmet position={HELMET_POSITION} rotation={HELMET_ROTATION} />
       <Quill position={QUILL_POSITION} rotation={QUILL_ROTATION} />
-      <Mug position={MUG_POSITION} rotation={MUG_ROTATION} />
+      <Mug
+        position={MUG_POSITION}
+        rotation={MUG_ROTATION}
+        focused={view === 'mug'}
+        onFocus={view ? null : onViewMug}
+        backRef={mugBackRef}
+      />
       <Wizard position={WIZARD_POSITION} rotation={WIZARD_ROTATION} open={open} />
       <PageCurlBook
         position={BOOK_POSITION}
@@ -149,7 +161,7 @@ export default function Scene({
       />
       <LoveHeart position={LOVE_HEART_POSITION} onLove={onLove} tipRef={heartTipRef} />
       <DustParticles />
-      <CameraRig open={open} ready={revealed} focus={view === 'portrait' ? PORTRAIT_FOCUS : view === 'bust' ? BUST_FOCUS : null} />
+      <CameraRig open={open} ready={revealed} focus={FOCUS[view] ?? null} />
     </>
   )
 }

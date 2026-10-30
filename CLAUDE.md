@@ -115,6 +115,10 @@ en los dos); los monta `server/server.js` en producción y Vite en `dev`/`previe
   `node -e "console.log(new (require('node:sqlite').DatabaseSync)('data/love.db').prepare('select count(*) n from love').get())"`.
 - Sin servidor detrás (hosting estático), los contadores no aparecen, el corazón sólo
   anima y la galleta se lanza sin límite.
+- `server/server.js` manda en cada respuesta `frame-ancestors 'none'` + `X-Frame-Options`
+  (que nadie enmarque la página para robar clics al corazón o a la galleta), `nosniff` y
+  `Referrer-Policy`. No hay CSP de scripts: el decodificador de meshopt usa WebAssembly
+  y el de KTX2 workers en `blob:`; antes de añadirla, probarla con todos los modelos.
 
 ### El CV
 

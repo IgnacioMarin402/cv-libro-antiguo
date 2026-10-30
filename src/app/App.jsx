@@ -15,12 +15,14 @@ import BackButton from '@/shared/ui/BackButton'
 // the book opens: an open book takes the keyboard and lets the lens much
 // closer in (see features/camera). In front of the portrait none of that
 // works — the camera is held there — and the only thing left is to go back.
-// In front of Shourdo's bust, that and his cookie.
+// In front of Shourdo's bust, that and his cookie; in front of the
+// tankard, that and watching it fill.
 const HINTS = {
   closed: 'Arrastra para observar · Haz clic en la tapa para abrir el manuscrito',
   open: 'WASD para desplazarte · Arrastra para girar · Rueda para acercarte · Clic para pasar página',
   portrait: 'Flecha o Esc para volver al libro',
   bust: 'Dale una galleta a Shourdo · Flecha o Esc para volver al libro',
+  mug: 'Flecha o Esc para volver al libro',
 }
 
 export default function App() {
@@ -44,7 +46,7 @@ export default function App() {
   const love = useLove()
   const heartTip = useRef(null)
   // What the visitor is looking at up close, if anything: the dogs'
-  // portrait ('portrait') or Shourdo's bust ('bust'). A click on either in
+  // portrait ('portrait'), Shourdo's bust ('bust') or the tankard ('mug'). A click on either in
   // the room says so, the way back over the canvas says they're done. That
   // button is placed beside the frame, or beside him, from inside the
   // canvas; the refs join the two, like the warm-up's — one each, since the
@@ -64,9 +66,12 @@ export default function App() {
     setView('bust')
     setPage(0)
   }, [])
+  const viewMug = useCallback(() => {
+    setView('mug')
+    setPage(0)
+  }, [])
   const leaveView = useCallback(() => setView(null), [])
-  const portraitBack = useRef(null)
-  const bustBack = useRef(null)
+  const backRefs = { portrait: useRef(null), bust: useRef(null), mug: useRef(null) }
   const inBook = isOpen && !view
   // Shourdo's cookies: given by the button beside him, which throws one in
   // the room through `cookieThrow` (see features/bust), and counted in the
@@ -99,10 +104,12 @@ export default function App() {
           view={view}
           onViewPortrait={viewPortrait}
           onViewBust={viewBust}
-          portraitBackRef={portraitBack}
-          bustBackRef={bustBack}
+          portraitBackRef={backRefs.portrait}
+          bustBackRef={backRefs.bust}
           cookieRef={cookieButton}
           cookieThrowRef={cookieThrow}
+          onViewMug={viewMug}
+          mugBackRef={backRefs.mug}
         />
         <SceneWarmup progressRef={warmup} onReady={() => setReady(true)} />
         <AdaptiveResolution active={revealed} />
@@ -120,7 +127,7 @@ export default function App() {
       </div>
       <LoveHeartTip ref={heartTip} count={love.count} loved={love.loved} />
       <BackButton
-        ref={view === 'bust' ? bustBack : portraitBack}
+        ref={backRefs[view ?? 'portrait']}
         open={!!view}
         onBack={leaveView}
         label="Volver al libro"

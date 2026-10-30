@@ -1,3 +1,5 @@
+import { FRAMING, LOOK_DOWN } from './beer'
+
 // The dragon tankard on the table: a mesh generated in Tripo, like the
 // helmet, and not built in code (see Mug.jsx) — copper, a dragon in relief
 // on its front and another coiled into its handle.
@@ -12,3 +14,24 @@ const MODEL_HEIGHT = 0.975
 // and 22 cm deep — a tankard for a table this size.
 export const MUG_HEIGHT = 0.15 * 2
 export const MUG_SCALE = MUG_HEIGHT / MODEL_HEIGHT
+
+// What a click on it lands on: a box round it, handle and all, up to the
+// top of the foam it gets (see domain/beer).
+export const HIT_BOX = { center: [0, 0.5, 0], size: [0.98, 1, 0.72] }
+
+// What the camera goes to look at when it's clicked (see FOCUS in
+// features/camera): the framing (see domain/beer), placed with the tankard
+// at `position` turned by `heading` about the vertical, in metres — its
+// middle, the way the lens looks back down at it, and its size.
+export function mugFocus(position, heading) {
+  const [x, y, z] = FRAMING.center.map((v) => v * MUG_SCALE)
+  const cos = Math.cos(heading)
+  const sin = Math.sin(heading)
+  const level = Math.cos(LOOK_DOWN)
+  return {
+    center: [position[0] + x * cos + z * sin, position[1] + y, position[2] - x * sin + z * cos],
+    normal: [level * sin, Math.sin(LOOK_DOWN), level * cos],
+    width: FRAMING.size * MUG_SCALE,
+    height: FRAMING.size * MUG_SCALE,
+  }
+}

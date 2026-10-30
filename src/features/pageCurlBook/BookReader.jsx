@@ -10,6 +10,10 @@ import './reader.css'
 // 8 px from where the camera stands (see domain/typography); here it is the
 // page as it was printed, the very same sheets (see printBook).
 //
+// Its mark is an eye, and under the pointer it says what it does — "Cambiar
+// vista", as the counter beside it says what it counts — where it was a
+// magnifier with only the browser's own tooltip, which went unread.
+//
 // It wasn't there before the book opened, and up in the corner it went
 // unseen; so until the visitor has used it once it glows, gold breathing
 // round it, and from then on it's a button like the others. It hung beside
@@ -75,13 +79,15 @@ export default function BookReader({ pages, page, onPageChange, open }) {
             setUsed(true)
             setReading(true)
           }}
-          aria-label="Leer las páginas en grande"
-          title="Leer las páginas en grande"
+          aria-label="Cambiar vista: leer las páginas en grande"
         >
           <svg className="reader-button__icon" viewBox="0 0 24 24" aria-hidden="true">
-            <circle cx="10" cy="10" r="6" />
-            <line x1="14.5" y1="14.5" x2="20.5" y2="20.5" />
+            <path d="M2.5 12 C 5.5 6.5, 18.5 6.5, 21.5 12 C 18.5 17.5, 5.5 17.5, 2.5 12 Z" />
+            <circle cx="12" cy="12" r="3" />
           </svg>
+          <span className="reader-tip" aria-hidden="true">
+            Cambiar vista
+          </span>
         </button>
       )}
       {reading && (
