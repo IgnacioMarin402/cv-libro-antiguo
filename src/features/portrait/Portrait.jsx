@@ -34,15 +34,17 @@ function Frame() {
 function FrameFace({ focused, onFocus }) {
   const material = useMemo(() => new THREE.MeshBasicMaterial({ visible: false }), [])
 
-  // Once the visitor is looking at it, it's no longer something to click.
+  // Once the visitor is looking at it, or at something else (no onFocus),
+  // it's no longer something to click.
+  const live = !focused && !!onFocus
   const handleClick = (e) => {
-    if (focused) return
+    if (!live) return
     e.stopPropagation()
     document.body.style.cursor = 'auto'
-    onFocus?.()
+    onFocus()
   }
   const handlePointerOver = (e) => {
-    if (focused) return
+    if (!live) return
     e.stopPropagation()
     document.body.style.cursor = 'pointer'
   }
@@ -67,7 +69,8 @@ function FrameFace({ focused, onFocus }) {
 // scene; the painting and its frame wait for each other, so neither hangs
 // on the wall alone. The names wait on their font apart.
 //
-// A click on it calls onFocus: the visitor wants to look at it up close.
+// A click on it calls onFocus: the visitor wants to look at it up close
+// (none while they're looking at something else).
 // While they do (`focused`), once the camera has come, the dogs' names show
 // over the painting and `backRef` — the way back, a button over the canvas
 // (see shared/ui/BackButton) — is shown and placed beside the frame.

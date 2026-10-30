@@ -3,9 +3,9 @@ import { easeInOutCubic } from '@/shared/math/easing'
 // Going to look at something on a wall, and coming back to the book.
 //
 // A focus is something flat and upright the visitor has asked to see up
-// close — today the dogs' portrait, which the layout describes (see
-// PORTRAIT_FOCUS in app/scene/layout): its middle, the way its face points,
-// and its width and height, in metres. The lens stands square in front of
+// close — the dogs' portrait, or Shourdo's head and shoulders, which the
+// layout describes (see PORTRAIT_FOCUS and BUST_FOCUS in app/scene/layout):
+// its middle, the way its face points, and its width and height, in metres. The lens stands square in front of
 // it, level with its middle, so nothing of it is foreshortened.
 
 // How much of the screen it takes, in whichever dimension is tighter: four
@@ -51,4 +51,28 @@ export const CLIMB_SHARE = 0.2
 export function climbProgress(t, rising) {
   const share = rising ? t / CLIMB_SHARE : (t - (1 - CLIMB_SHARE)) / CLIMB_SHARE
   return easeInOutCubic(Math.min(1, Math.max(0, share)))
+}
+
+// The least height the lens crosses the room at: just under the portrait's
+// middle (83.7 cm over the table), which is what cleared everything on the
+// table and round it. Shourdo's bust is lower than where the lens may stand
+// — his head is level with the table's top — and crossing at the higher end
+// alone, from low beside the table, ran the lens through a throne, the
+// dragon tankard and the candle's flame: 97 of 576 routes there came inside
+// the near plane (2 cm), from 288 places with the book open and closed, on
+// a wide screen and on a phone held upright. Crossing at least this high,
+// it climbs first, crosses, and comes down to him at the end: none comes
+// inside it. Past the first 8% of the move, the closest is the candle —
+// 6.4 cm from its flame, 10.4 from its holder, rising from beside it with
+// the book closed — and 20.4 cm from a throne with the book open, coming
+// down to him; the way back keeps 21.9 cm from a throne. For the portrait
+// it changes nothing: its end is already higher.
+export const CROSSING_HEIGHT = 0.83
+
+// The lens's height `t` (0..1) of the way through a move across the room
+// from `fromY` to `toY`: up to the crossing height early (if it's under
+// it), down from it late.
+export function routeHeight(t, fromY, toY) {
+  const crossing = Math.max(fromY, toY, CROSSING_HEIGHT)
+  return fromY + (crossing - fromY) * climbProgress(t, true) + (toY - crossing) * climbProgress(t, false)
 }

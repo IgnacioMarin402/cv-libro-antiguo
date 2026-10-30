@@ -24,7 +24,7 @@ import {
   PORTRAIT_FLOOR_OFFSET,
   PORTRAIT_FRONT_OFFSET,
 } from '@/features/portrait'
-import { BUST_WIDTH, BUST_BACK_OFFSET } from '@/features/bust'
+import { BUST_WIDTH, BUST_BACK_OFFSET, BUST_FRAMING } from '@/features/bust'
 import { ANTIQUE_TABLE_BACK_OFFSET, ANTIQUE_TABLE_HALF_WIDTH } from '@/features/antiqueTable'
 import { CAULDRON_RADIUS } from '@/features/cauldron'
 
@@ -286,6 +286,15 @@ export const BUST_POSITION = [
   WALL_POSITION[1],
   WALL_POSITION[2] - WALL_HALF_SPAN + BUST_BACK_OFFSET,
 ]
+
+// What the camera goes to look at when he's clicked, as for the portrait:
+// his head and the top of his cape, facing the room (see BUST_FRAMING).
+export const BUST_FOCUS = {
+  center: BUST_FRAMING.center.map((c, i) => BUST_POSITION[i] + c),
+  normal: [0, 0, 1],
+  width: BUST_FRAMING.width,
+  height: BUST_FRAMING.height,
+}
 
 // The fireplace on the east wall, the one that stood bare — across the room
 // from the bookshelf's — centred on it, its back on the wall and turned with

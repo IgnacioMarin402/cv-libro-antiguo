@@ -38,6 +38,7 @@ import {
   PORTRAIT_POSITION,
   PORTRAIT_FOCUS,
   BUST_POSITION,
+  BUST_FOCUS,
   ANTIQUE_TABLE_POSITION,
   ANTIQUE_TABLE_ROTATION,
   SCONCES,
@@ -70,10 +71,13 @@ import {
 // whether the loading screen has lifted, which only the camera waits on.
 // And so is what a click on the love heart does, since the count it adds
 // to is drawn over the canvas — as is the tip the heart shows beside itself
-// under the pointer (heartTipRef). And whether the visitor is looking at the
-// portrait: a click on it asks for that, the camera goes to it and its
-// names show — and the way back is a button over the canvas, which the
-// portrait places beside its frame (portraitBackRef).
+// under the pointer (heartTipRef). And what the visitor is looking at up
+// close (`view`), the portrait or the bust: a click on either asks for it
+// — while nothing else is — and the camera goes to it. The portrait's
+// names show; the bust is given cookies, by a button over the canvas that
+// throws them in here (cookieRef, cookieThrowRef). And the way back is a
+// button over the canvas too, which each places beside itself
+// (portraitBackRef, bustBackRef).
 //
 // The book is features/pageCurlBook. features/book — the from-scratch
 // vertex-displacement one this scene opened with — is no longer mounted;
@@ -87,9 +91,13 @@ export default function Scene({
   revealed,
   onLove,
   heartTipRef,
-  viewingPortrait,
+  view,
   onViewPortrait,
+  onViewBust,
   portraitBackRef,
+  bustBackRef,
+  cookieRef,
+  cookieThrowRef,
 }) {
   return (
     <>
@@ -102,11 +110,18 @@ export default function Scene({
       <Shield position={SHIELD_POSITION} />
       <Portrait
         position={PORTRAIT_POSITION}
-        focused={viewingPortrait}
-        onFocus={onViewPortrait}
+        focused={view === 'portrait'}
+        onFocus={view ? null : onViewPortrait}
         backRef={portraitBackRef}
       />
-      <Bust position={BUST_POSITION} />
+      <Bust
+        position={BUST_POSITION}
+        focused={view === 'bust'}
+        onFocus={view ? null : onViewBust}
+        backRef={bustBackRef}
+        cookieRef={cookieRef}
+        throwRef={cookieThrowRef}
+      />
       <Fireplace position={FIREPLACE_POSITION} rotation={FIREPLACE_ROTATION} />
       <Cauldron position={CAULDRON_POSITION} rotation={CAULDRON_ROTATION} />
       <Shelf position={SHELF_POSITION} rotation={SHELF_ROTATION} />
@@ -134,7 +149,7 @@ export default function Scene({
       />
       <LoveHeart position={LOVE_HEART_POSITION} onLove={onLove} tipRef={heartTipRef} />
       <DustParticles />
-      <CameraRig open={open} ready={revealed} focus={viewingPortrait ? PORTRAIT_FOCUS : null} />
+      <CameraRig open={open} ready={revealed} focus={view === 'portrait' ? PORTRAIT_FOCUS : view === 'bust' ? BUST_FOCUS : null} />
     </>
   )
 }

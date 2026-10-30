@@ -30,3 +30,30 @@ export const BUST_WIDTH = MODEL_WIDTH * BUST_SCALE
 // How far the model's origin stands, once scaled, from the wall it's set
 // against — the back of the hem on it.
 export const BUST_BACK_OFFSET = -MODEL_BACK_Z * BUST_SCALE
+
+// What the camera frames when he's clicked: his head and the top of his
+// cape, from y = 40 (the medallion's top) to 88, over his skull, and as
+// wide, 48 units from x = -19.6 to 28.4 — the ears reach -16 and 22 —
+// centred between his eyes. Its face is at z = 44, the nose's tip 2.7 in
+// front of it. From the model's units to metres off his origin, for the
+// layout to place (see FOCUS in features/camera).
+const FRAMING = { center: [4.4, 64, 44], size: 48 }
+export const BUST_FRAMING = {
+  center: FRAMING.center.map((c) => c * BUST_SCALE),
+  width: FRAMING.size * BUST_SCALE,
+  height: FRAMING.size * BUST_SCALE,
+}
+
+// When the visitor has arrived in front of him: the lens within 3 cm of the
+// line out of the framing's middle and within 2° of looking straight down
+// it, as for the portrait — it comes as the camera settles. In the model's
+// units, which is what the bust's group is in.
+export const ARRIVED = {
+  center: FRAMING.center,
+  offset: 0.03 / BUST_SCALE,
+  angle: (2 * Math.PI) / 180,
+}
+
+// What a click on him lands on: a box round the whole of him, never drawn —
+// 12 triangles, where a ray through the mesh itself tests 95 thousand.
+export const HIT_BOX = { center: [0, MODEL_HEIGHT / 2, 0], size: [MODEL_WIDTH, MODEL_HEIGHT, -2 * MODEL_BACK_Z] }

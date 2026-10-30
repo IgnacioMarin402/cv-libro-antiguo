@@ -5,7 +5,7 @@ import { easeInOutCubic } from '@/shared/math/easing'
 import { useOrbitControls } from './hooks/useOrbitControls'
 import { useKeyboardPan } from './hooks/useKeyboardPan'
 import { SHOTS, shotFor, INTRO_DURATION, OPEN_ZOOM_DURATION, ORBIT_LIMITS } from './domain/shots'
-import { focusShot, FOCUS_DURATION, climbProgress } from './domain/focus'
+import { focusShot, FOCUS_DURATION, routeHeight } from './domain/focus'
 
 // Orbits the book once idle. Opens on a slow dolly-in from a wide shot, then
 // dollies to a closer, frontal framing whenever the book is opened, and back
@@ -130,10 +130,7 @@ export default function CameraRig({ open = false, ready = true, focus = null }) 
       camera.position.lerpVectors(anim.fromPos, anim.toPos, p)
       // Across the room, the height changes first going up and last coming
       // down, so the lens passes over what's in the way (see domain/focus).
-      if (anim.climb) {
-        const rise = anim.toPos.y - anim.fromPos.y
-        camera.position.y = anim.fromPos.y + rise * climbProgress(t, rise > 0)
-      }
+      if (anim.climb) camera.position.y = routeHeight(t, anim.fromPos.y, anim.toPos.y)
       tmpTarget.lerpVectors(anim.fromTarget, anim.toTarget, p)
       camera.lookAt(tmpTarget)
       controls.target.copy(tmpTarget)

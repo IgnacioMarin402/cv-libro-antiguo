@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import './backButton.css'
 
-// A way back out of a view the camera holds — the portrait's today — as a
+// A way back out of a view the camera holds — the portrait's, the bust's — as a
 // round button with an arrow pointing back, over the canvas. It knows
 // nothing of what it leaves: where it hangs and when it shows are the
 // business of what took the visitor there, which writes its transform and

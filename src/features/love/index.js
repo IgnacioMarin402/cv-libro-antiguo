@@ -8,3 +8,7 @@ export { default as LoveHeart } from './LoveHeart'
 export { default as LoveCounter } from './LoveCounter'
 export { default as LoveHeartTip } from './LoveHeartTip'
 export { useLove } from './hooks/useLove'
+// The heart's shape and its light, for anything else in the room that gives
+// hearts (Shourdo's bust, for a cookie).
+export { createEmberGeometry as createHeartGeometry } from './geometry/heartGeometry'
+export { createHeartTexture } from './textures/glowTextures'

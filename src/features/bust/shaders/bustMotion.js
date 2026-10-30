@@ -11,6 +11,7 @@ import {
   FUR_STRANDS,
   LASH_WIDTH,
 } from '../domain/eyes'
+import { JAW_HINGE, JAW_ANGLE, JAW_SHARE, MOUTH_STRETCH, MOUTH_COLOR, MOUTH_ROUGHNESS } from '../domain/jaw'
 
 const glslFloat = (x) => (Number.isInteger(x) ? `${x}.0` : `${x}`)
 const glslVec3 = (v) => `vec3(${v.map(glslFloat).join(', ')})`
@@ -25,6 +26,37 @@ const eyeAxes = ({ normal }) => {
 }
 
 const lid = new THREE.Color(LID_COLOR) // three decodes the hex from sRGB to linear
+const mouth = new THREE.Color(MOUTH_COLOR)
+
+// The jaw's drop, in the bind pose, before the head turns it: each vertex
+// takes its share of uJaw (0..1, how open the mouth is) of the full drop,
+// a turn about the hinge across the muzzle (see domain/jaw). Its share is
+// read off the bind pose's normal and position, so it's the same shape at
+// every frame.
+const JAW = /* glsl */ `
+uniform float uJaw;
+
+float bustJawShare(vec3 p, vec3 n) {
+  float s = smoothstep(${glslFloat(JAW_SHARE.facing[0])}, ${glslFloat(JAW_SHARE.facing[1])}, n.y);
+  s *= 1.0 - smoothstep(${glslFloat(JAW_SHARE.across[0])}, ${glslFloat(JAW_SHARE.across[1])}, abs(p.x - ${glslFloat(JAW_SHARE.middleX)}));
+  s *= smoothstep(${glslFloat(JAW_SHARE.back[0])}, ${glslFloat(JAW_SHARE.back[1])}, p.z);
+  s *= 1.0 - smoothstep(${glslFloat(JAW_SHARE.front[0])}, ${glslFloat(JAW_SHARE.front[1])}, p.z);
+  s *= smoothstep(${glslFloat(JAW_SHARE.below[0])}, ${glslFloat(JAW_SHARE.below[1])}, p.y);
+  s *= 1.0 - smoothstep(${glslFloat(JAW_SHARE.above[0])}, ${glslFloat(JAW_SHARE.above[1])}, p.y);
+  return s;
+}
+
+// Turned about x by the vertex's share of the drop: its front goes down.
+vec3 bustJawTurn(vec3 v, float share) {
+  float a = ${glslFloat(JAW_ANGLE)} * uJaw * share;
+  float c = cos(a);
+  float s = sin(a);
+  return vec3(v.x, v.y * c - v.z * s, v.y * s + v.z * c);
+}
+`
+const JAW_HINGE_POINT = `vec3(0.0, ${glslFloat(JAW_HINGE.y)}, ${glslFloat(JAW_HINGE.z)})`
+const JAW_NORMAL = 'objectNormal = bustJawTurn(objectNormal, bustJawShare(position, normal));'
+const JAW_POSITION = `transformed = ${JAW_HINGE_POINT} + bustJawTurn(transformed - ${JAW_HINGE_POINT}, bustJawShare(position, normal));`
 
 // The head's turn: an axis and an angle, which each vertex takes its share
 // of (Rodrigues' rotation), about the pivot in the neck.
@@ -105,24 +137,44 @@ if (uBlink > 0.0) {
 }
 `
 
-const LID_ROUGH = `roughnessFactor = mix(roughnessFactor, ${glslFloat(LID_ROUGHNESS)}, bustDry);`
-const LID_FLAT = 'normal = normalize(mix(normal, nonPerturbedNormal, bustDry));'
+// The open mouth: where the drop has stretched the surface, its area grown
+// past its own in the bind pose — the lips' edge, pulled down after the jaw.
+// The rest of the jaw only turns. Only while it's open, like the lid.
+const MOUTH = /* glsl */ `
+float bustMouth = 0.0;
+if (uJaw > 0.0) {
+  vec3 jawedArea = cross(dFdx(vBustJawed), dFdy(vBustJawed));
+  vec3 bindArea = cross(dFdx(vBustPosition), dFdy(vBustPosition));
+  float stretch = length(jawedArea) / max(length(bindArea), 1e-8);
+  bustMouth = smoothstep(${glslFloat(MOUTH_STRETCH[0])}, ${glslFloat(MOUTH_STRETCH[1])}, stretch);
+  diffuseColor.rgb = mix(diffuseColor.rgb, ${glslVec3(mouth.toArray())}, bustMouth);
+}
+`
 
-// The bust's head turning and its eyes blinking, on its own material and,
-// for the candle's shadow, on a distance material of its own that turns
-// the head the same way. The uniforms are the hook's, shared by both, so
-// writing them each frame moves both (see hooks/useBustMotion).
+const LID_ROUGH = `roughnessFactor = mix(roughnessFactor, ${glslFloat(LID_ROUGHNESS)}, bustDry);
+roughnessFactor = mix(roughnessFactor, ${glslFloat(MOUTH_ROUGHNESS)}, bustMouth);`
+const LID_FLAT = 'normal = normalize(mix(normal, nonPerturbedNormal, max(bustDry, bustMouth)));'
+
+// The bust's head turning, its eyes blinking and its jaw snapping, on its
+// own material and, for the candle's shadow, on a distance material of its
+// own that turns the head and drops the jaw the same way. The uniforms are
+// the hook's, shared by both, so writing them each frame moves both (see
+// hooks/useBustMotion). The jaw drops in the bind pose and the head turns
+// what it dropped: the mouth turns with the head.
 export function animateBust(mesh, uniforms) {
   const { material } = mesh
   material.onBeforeCompile = (shader) => {
     Object.assign(shader.uniforms, uniforms)
     shader.vertexShader = shader.vertexShader
-      .replace('#include <common>', `#include <common>\n${HEAD}\nvarying vec3 vBustPosition;`)
-      .replace('#include <beginnormal_vertex>', `#include <beginnormal_vertex>\n${TURN_NORMAL}`)
-      .replace('#include <begin_vertex>', `#include <begin_vertex>\nvBustPosition = position;\n${TURN_POSITION}`)
+      .replace('#include <common>', `#include <common>\n${HEAD}\n${JAW}\nvarying vec3 vBustPosition;\nvarying vec3 vBustJawed;`)
+      .replace('#include <beginnormal_vertex>', `#include <beginnormal_vertex>\n${JAW_NORMAL}\n${TURN_NORMAL}`)
+      .replace(
+        '#include <begin_vertex>',
+        `#include <begin_vertex>\nvBustPosition = position;\n${JAW_POSITION}\nvBustJawed = transformed;\n${TURN_POSITION}`
+      )
     shader.fragmentShader = shader.fragmentShader
-      .replace('#include <common>', `#include <common>\n${LID}`)
-      .replace('#include <map_fragment>', `#include <map_fragment>\n${SHUT}`)
+      .replace('#include <common>', `#include <common>\n${LID}\nuniform float uJaw;\nvarying vec3 vBustJawed;`)
+      .replace('#include <map_fragment>', `#include <map_fragment>\n${SHUT}\n${MOUTH}`)
       .replace('#include <roughnessmap_fragment>', `#include <roughnessmap_fragment>\n${LID_ROUGH}`)
       .replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>\n${LID_FLAT}`)
   }
@@ -133,8 +185,8 @@ export function animateBust(mesh, uniforms) {
   distance.onBeforeCompile = (shader) => {
     Object.assign(shader.uniforms, uniforms)
     shader.vertexShader = shader.vertexShader
-      .replace('#include <common>', `#include <common>\n${HEAD}`)
-      .replace('#include <begin_vertex>', `#include <begin_vertex>\n${TURN_POSITION}`)
+      .replace('#include <common>', `#include <common>\n${HEAD}\n${JAW}`)
+      .replace('#include <begin_vertex>', `#include <begin_vertex>\n${JAW_POSITION}\n${TURN_POSITION}`)
   }
   distance.customProgramCacheKey = () => 'shourdo-bust-distance'
   mesh.customDistanceMaterial = distance

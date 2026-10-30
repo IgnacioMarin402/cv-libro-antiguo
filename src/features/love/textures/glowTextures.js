@@ -1,5 +1,5 @@
 import { canvasTexture } from '@/shared/three/canvasTexture'
-import { EMBER_STOPS, EMBER_DROP, EMBER_RADIUS } from '../domain/heart'
+import { EMBER_STOPS, EMBER_DROP, EMBER_RADIUS, HEART_ASPECT } from '../domain/heart'
 
 // The ember's light, laid over it flat across its box (see
 // geometry/heartGeometry): the counter's gradient, the same circle on the
@@ -19,6 +19,10 @@ export function createEmberTexture(aspect) {
     ctx.fillRect(-s, -2 * s * aspect, 2 * s, 4 * s * aspect)
   }, 256)
 }
+
+// The same, for the ember's own shape (see createEmberGeometry), as the
+// heart in the room lays it — for the hearts the bust gives.
+export const createHeartTexture = () => createEmberTexture(HEART_ASPECT)
 
 // The light around the heart: the candle's own glow (see features/candle),
 // trailing off with no rim — a two-stop ramp reads as a disc.

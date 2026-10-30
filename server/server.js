@@ -5,14 +5,16 @@ import { extname, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { gzipSync } from 'node:zlib'
 import { loveApi } from './love.js'
+import { cookiesApi } from './cookies.js'
 
 // The site in production: the built scene out of dist/ (`npm run build`
-// first) and the love counter's /api/love, in one process with no
-// dependencies. `npm start` runs it.
+// first), the love counter's /api/love and the bust's /api/cookies, in one
+// process with no dependencies. `npm start` runs it.
 //
 //   PORT         where it listens (3000 if unset); hosts usually set it
-//   LOVE_DB      the SQLite file (data/love.db) — on a host, a path on a
-//                persistent volume, or every deploy starts the count at 0
+//   LOVE_DB      the SQLite file (data/love.db), hearts and cookies both —
+//                on a host, a path on a persistent volume, or every deploy
+//                starts the counts at 0
 //   TRUST_PROXY  set it to 1 when a reverse proxy sits in front, or every
 //                visitor shares the proxy's IP (see server/love.js)
 //   HOST         the interface it listens on; see below
@@ -53,6 +55,7 @@ const COMPRESSIBLE = new Set(['.html', '.js', '.css', '.json', '.svg', '.wasm'])
 const gzipped = new Map()
 
 const love = loveApi({ trustProxy: TRUST_PROXY })
+const cookies = cookiesApi({ trustProxy: TRUST_PROXY })
 
 async function serveStatic(req, res) {
   if (req.method !== 'GET' && req.method !== 'HEAD') {
@@ -113,13 +116,15 @@ async function serveStatic(req, res) {
 }
 
 createServer((req, res) => {
-  love(req, res, () => {
-    serveStatic(req, res).catch((error) => {
-      console.error(error)
-      if (!res.headersSent) res.writeHead(500)
-      res.end()
+  love(req, res, () =>
+    cookies(req, res, () => {
+      serveStatic(req, res).catch((error) => {
+        console.error(error)
+        if (!res.headersSent) res.writeHead(500)
+        res.end()
+      })
     })
-  })
+  )
 }).listen(PORT, HOST, () => {
   console.log(`Libro antiguo en http://${HOST || 'localhost'}:${PORT}`)
 })
