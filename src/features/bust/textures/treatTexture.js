@@ -1,17 +1,17 @@
 import { canvasTexture } from '@/shared/three/canvasTexture'
-import { COOKIE_COLORS, COOKIE_CHIPS } from '../domain/cookie'
+import { TREAT_COLORS, TREAT_CHIPS } from '../domain/treat'
 
-// The cookie's face, seen from above (see geometry/cookieGeometry): the
+// The treat's face, seen from above (see geometry/treatGeometry): the
 // dough baked darker toward the rim, a fine speckle of crumbs, and its
 // chocolate chips — irregular, in the middle four-fifths, where the face is
 // flat.
-export function createCookieTexture() {
+export function createTreatTexture() {
   return canvasTexture((ctx, s) => {
     const r = s / 2
     const g = ctx.createRadialGradient(r, r, 0, r, r, r)
-    g.addColorStop(0, COOKIE_COLORS.dough)
-    g.addColorStop(0.7, COOKIE_COLORS.dough)
-    g.addColorStop(1, COOKIE_COLORS.baked)
+    g.addColorStop(0, TREAT_COLORS.dough)
+    g.addColorStop(0.7, TREAT_COLORS.dough)
+    g.addColorStop(1, TREAT_COLORS.baked)
     ctx.fillStyle = g
     ctx.fillRect(0, 0, s, s)
 
@@ -22,8 +22,8 @@ export function createCookieTexture() {
       ctx.fill()
     }
 
-    ctx.fillStyle = COOKIE_COLORS.chip
-    for (let i = 0; i < COOKIE_CHIPS; i++) {
+    ctx.fillStyle = TREAT_COLORS.chip
+    for (let i = 0; i < TREAT_CHIPS; i++) {
       const a = Math.random() * Math.PI * 2
       const d = Math.sqrt(Math.random()) * r * 0.75
       const x = r + Math.cos(a) * d

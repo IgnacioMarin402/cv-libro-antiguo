@@ -1,4 +1,4 @@
-// Shourdo snapping a cookie out of the air. The bust has no lower jaw to
+// Shourdo snapping a treat out of the air. The bust has no lower jaw to
 // open: under the lips the surface runs straight back to the throat —
 // measured in sections down the muzzle at x = 0, 5 and 10, it faces down
 // from the lips' edge (z = 41, y = 55.5) back to z = 29, where it turns
@@ -48,7 +48,7 @@ export const MOUTH_STRETCH = [1.4, 2.5]
 export const MOUTH_COLOR = '#3c1214'
 export const MOUTH_ROUGHNESS = 0.8
 
-// Where in the open mouth a cookie goes: in the middle of the opening, a
+// Where in the open mouth a treat goes: in the middle of the opening, a
 // little inside the lips.
 export const MOUTH_TARGET = [5, 54.5, 38]
 

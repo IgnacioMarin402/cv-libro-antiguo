@@ -8,7 +8,7 @@ import { LoadingScreen, SceneWarmup } from '@/features/loader'
 import { LoveCounter, LoveHeartTip, useLove } from '@/features/love'
 import { BookReader } from '@/features/pageCurlBook'
 import { BOOK_PAGES, CvLink } from '@/features/cv'
-import { CookieButton, CookieCounter, useCookies } from '@/features/bust'
+import { TreatButton, TreatCounter, useTreats } from '@/features/bust'
 import BackButton from '@/shared/ui/BackButton'
 import { GpuNotice } from '@/features/gpuNotice'
 
@@ -16,7 +16,7 @@ import { GpuNotice } from '@/features/gpuNotice'
 // the book opens: an open book takes the keyboard and lets the lens much
 // closer in (see features/camera). In front of the portrait none of that
 // works — the camera is held there — and the only thing left is to go back.
-// In front of Shourdo's bust, that and his cookie; in front of the
+// In front of Shourdo's bust, that and his treat; in front of the
 // tankard, that and watching it fill.
 const HINTS = {
   closed: 'Arrastra para observar · Haz clic en la tapa para abrir el manuscrito',
@@ -77,12 +77,12 @@ export default function App() {
   const leaveView = useCallback(() => setView(null), [])
   const backRefs = { portrait: useRef(null), bust: useRef(null), mug: useRef(null) }
   const inBook = isOpen && !view
-  // Shourdo's cookies: given by the button beside him, which throws one in
-  // the room through `cookieThrow` (see features/bust), and counted in the
+  // Shourdo's treats: given by the button beside him, which throws one in
+  // the room through `treatThrow` (see features/bust), and counted in the
   // corner in the heart counter's place while he's looked at.
-  const cookies = useCookies()
-  const cookieButton = useRef(null)
-  const cookieThrow = useRef(null)
+  const treats = useTreats()
+  const treatButton = useRef(null)
+  const treatThrow = useRef(null)
 
   return (
     <div className="scene-wrap">
@@ -113,8 +113,8 @@ export default function App() {
           onViewBust={viewBust}
           portraitBackRef={backRefs.portrait}
           bustBackRef={backRefs.bust}
-          cookieRef={cookieButton}
-          cookieThrowRef={cookieThrow}
+          treatRef={treatButton}
+          treatThrowRef={treatThrow}
           onViewMug={viewMug}
           mugBackRef={backRefs.mug}
         />
@@ -127,7 +127,7 @@ export default function App() {
         <BookReader pages={BOOK_PAGES} page={page} onPageChange={setPage} open={inBook} />
         <CvLink open={inBook} />
         {view === 'bust' ? (
-          <CookieCounter count={cookies.count} />
+          <TreatCounter count={treats.count} />
         ) : (
           <LoveCounter count={love.count} loved={love.loved} />
         )}
@@ -139,7 +139,7 @@ export default function App() {
         onBack={leaveView}
         label="Volver al libro"
       />
-      <CookieButton ref={cookieButton} open={view === 'bust'} cookies={cookies} throwRef={cookieThrow} />
+      <TreatButton ref={treatButton} open={view === 'bust'} treats={treats} throwRef={treatThrow} />
       <GpuNotice glRef={renderer} revealed={revealed} />
       <LoadingScreen ready={ready} warmupRef={warmup} onReveal={() => setRevealed(true)} />
     </div>

@@ -68,7 +68,7 @@ referencia. No entra en el build.
 npm run dev             # Vite en $PORT (.env) o 5173
 npm run build
 npm run preview
-npm start               # producción: server/server.js sirve dist/, /api/love y /api/cookies (build antes)
+npm start               # producción: server/server.js sirve dist/, /api/love y /api/treats (build antes)
 node scripts/probe.mjs  # mide el libro sin navegador (ver Medir antes de tocar)
 node scripts/shrink-glb.mjs [archivo.glb ...]  # texturas de los GLB a 2048, rugosidad/metal a JPG; sin argumentos, todo public/models
 node scripts/pack-glb.mjs [archivo.glb ...]    # después del anterior: malla comprimida con meshopt; --ktx2 también las texturas
@@ -97,15 +97,19 @@ El sitio ya no es sólo estático: `features/love` (el corazón que flota junto 
 y el contador arriba a la derecha) cuenta contra `/api/love`, un corazón por IP
 (IPv6 por /64), guardado como HMAC de la IP en SQLite — `node:sqlite`, que trae Node
 desde 22.13, sin dependencias. Al lado, `features/bust` (las galletas para Shourdo)
-cuenta contra `/api/cookies`: hasta 3 galletas al día por IP, con el día según la hora
+cuenta contra `/api/treats`: hasta 3 galletas al día por IP, con el día según la hora
 local del servidor, y el total es la suma de todas. Son dos handlers, `server/love.js`
-y `server/cookies.js`, sobre el mismo archivo y la misma sal (el visitante sale igual
+y `server/treats.js`, sobre el mismo archivo y la misma sal (el visitante sale igual
 en los dos); los monta `server/server.js` en producción y Vite en `dev`/`preview`
 (plugin en `vite.config.js`), así que `npm run dev` ya cuenta.
 
 - La base es `data/love.db` (ignorada por git), con las dos tablas. En local todo es
   la misma IP: para volver a probar el corazón o pasar del límite de galletas, borrar
-  ese archivo (o sólo las galletas: `delete from cookies`).
+  ese archivo (o sólo las galletas: `delete from treats`).
+- **Nada que llegue al navegador lleva "cookie" en el nombre** (archivos, rutas de la API,
+  clases CSS): los bloqueadores de anuncios y de avisos de cookies bloquean esas URL y
+  esconden esas clases. Con `useCookies.js` bloqueado (`ERR_BLOCKED_BY_CLIENT`) la página
+  entera quedó en blanco: por eso las galletas son `treat` en el código.
 - En un host: `LOVE_DB` a un volumen persistente (si no, cada deploy vuelve a 0) y
   `TRUST_PROXY=1` si hay un proxy delante (si no, todos comparten la IP del proxy y el
   contador se queda en 1). Tiene que ser `1` exacto, y con él el servidor escucha sólo

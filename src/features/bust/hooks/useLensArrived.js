@@ -18,7 +18,7 @@ function standsSquare(root, camera, { eye, look, facing, turn }) {
 
 // When, in this visit to him, the lens first stood square in front of him
 // (the clock's seconds), or null while it hasn't yet: that's when the
-// visitor has arrived, and the cookie and the way back show. Clears when
+// visitor has arrived, and the treat and the way back show. Clears when
 // the visitor leaves (`focused` false). `root` is the bust's own group.
 export function useLensArrived(focused, root) {
   const since = useRef(null)

@@ -1,17 +1,17 @@
-// A cookie for Shourdo, thrown from the visitor's side of the lens into his
+// A treat for Shourdo, thrown from the visitor's side of the lens into his
 // mouth, and the two hearts he gives back for it. In metres and seconds:
-// the cookie flies in the room, not in the bust's units.
+// the treat flies in the room, not in the bust's units.
 
 // A round biscuit 6 cm across and 1.2 cm thick, its rim rounded: a dog
 // biscuit is 4 to 5 cm, and he's twice life-size. Its silhouette for the
 // lathe, [radius, height] from its middle underneath up to its middle on
 // top, centred on its own middle.
-export const COOKIE_RADIUS = 0.03
-const COOKIE_THICKNESS = 0.012
+export const TREAT_RADIUS = 0.03
+const TREAT_THICKNESS = 0.012
 const RIM = 0.005
-export const COOKIE_PROFILE = (() => {
-  const half = COOKIE_THICKNESS / 2
-  const flat = COOKIE_RADIUS - RIM
+export const TREAT_PROFILE = (() => {
+  const half = TREAT_THICKNESS / 2
+  const flat = TREAT_RADIUS - RIM
   const profile = [[0, -half]]
   // The rim, a half-round of the thickness's radius, in eight steps.
   for (let i = 0; i <= 8; i++) {
@@ -23,8 +23,8 @@ export const COOKIE_PROFILE = (() => {
 })()
 
 // Its colours: a baked biscuit, darker toward the rim, with chocolate chips.
-export const COOKIE_COLORS = { dough: '#c48a4a', baked: '#8a5626', chip: '#3b2314' }
-export const COOKIE_CHIPS = 9
+export const TREAT_COLORS = { dough: '#c48a4a', baked: '#8a5626', chip: '#3b2314' }
+export const TREAT_CHIPS = 9
 
 // Where it's thrown from, off the lens: 30 cm in front of it, 12 cm under
 // the middle of the screen and 8 cm to its right — the visitor's hand, low
@@ -32,12 +32,12 @@ export const COOKIE_CHIPS = 9
 export const THROW_FROM = { ahead: 0.3, down: 0.12, right: 0.08 }
 
 // The throw: 0.6 s, over an arc 12 cm higher than the straight line at its
-// top, the cookie turning over twice on the way.
+// top, the treat turning over twice on the way.
 export const FLIGHT = 0.6
 const ARC = 0.12
 export const SPINS = 2
 
-// Where the cookie is, `t` of the way through its flight (0..1), from
+// Where the treat is, `t` of the way through its flight (0..1), from
 // `from` to `to` ([x, y, z]): along the line, lifted by the arc.
 export function flightPoint(from, to, t) {
   const lift = 4 * ARC * t * (1 - t)

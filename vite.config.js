@@ -2,16 +2,16 @@ import { fileURLToPath, URL } from 'node:url'
 import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// The love counter's /api/love and the bust's /api/cookies, mounted in the
+// The love counter's /api/love and the bust's /api/treats, mounted in the
 // dev and preview servers too — the same handlers server/server.js runs in
 // production, over the same kind of SQLite file. Imported only once a
 // server starts, so `vite build` never opens a database.
 const loveApi = () => {
   const mount = async (server) => {
     const { loveApi } = await import('./server/love.js')
-    const { cookiesApi } = await import('./server/cookies.js')
+    const { treatsApi } = await import('./server/treats.js')
     server.middlewares.use(loveApi())
-    server.middlewares.use(cookiesApi())
+    server.middlewares.use(treatsApi())
   }
   return { name: 'love-api', configureServer: mount, configurePreviewServer: mount }
 }

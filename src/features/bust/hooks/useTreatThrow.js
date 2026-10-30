@@ -2,30 +2,30 @@ import { useMemo, useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { createHeartGeometry, createHeartTexture } from '@/features/love'
-import { createCookieGeometry } from '../geometry/cookieGeometry'
-import { createCookieTexture } from '../textures/cookieTexture'
+import { createTreatGeometry } from '../geometry/treatGeometry'
+import { createTreatTexture } from '../textures/treatTexture'
 import { headPose, HEAD_PIVOT } from '../domain/head'
 import { MOUTH_TARGET, SNAP_OPEN } from '../domain/jaw'
-import { THROW_FROM, FLIGHT, SPINS, flightPoint, HEARTS, HEART_SCALE, heartAt } from '../domain/cookie'
+import { THROW_FROM, FLIGHT, SPINS, flightPoint, HEARTS, HEART_SCALE, heartAt } from '../domain/treat'
 
-// A cookie thrown into Shourdo's mouth: it flies from just under the lens
+// A treat thrown into Shourdo's mouth: it flies from just under the lens
 // to the middle of his open mouth, which opens to meet it and snaps shut
 // on it, and two hearts rise off his head for it.
 //
-// The cookie and the hearts fly in the room, in metres, so they're drawn
+// The treat and the hearts fly in the room, in metres, so they're drawn
 // outside the bust's own group, which is in the model's units; `root` is
 // that group, to find his mouth in the room. `snap` is the jaw's (see
 // useBustMotion).
 //
-// throwCookie() throws one, and says false if one is still in the air.
-export function useCookieThrow({ root, snap }) {
+// throwTreat() throws one, and says false if one is still in the air.
+export function useTreatThrow({ root, snap }) {
   const camera = useThree((state) => state.camera)
   const clock = useThree((state) => state.clock)
-  const cookie = useRef()
+  const treat = useRef()
   const hearts = useRef([])
 
-  const cookieGeometry = useMemo(() => createCookieGeometry(), [])
-  const cookieMaterial = useMemo(() => new THREE.MeshStandardMaterial({ map: createCookieTexture(), roughness: 0.85 }), [])
+  const treatGeometry = useMemo(() => createTreatGeometry(), [])
+  const treatMaterial = useMemo(() => new THREE.MeshStandardMaterial({ map: createTreatTexture(), roughness: 0.85 }), [])
   // The love heart's shape and light, drawn as it draws them: unlit and out
   // of the tone mapping. One material each, to fade apart.
   const heartGeometry = useMemo(() => createHeartGeometry(), [])
@@ -59,7 +59,7 @@ export function useCookieThrow({ root, snap }) {
     return root.current.localToWorld(p).toArray()
   }
 
-  const throwCookie = () => {
+  const throwTreat = () => {
     if (flight.current || !root.current) return false
     const start = clock.elapsedTime
     const arrival = start + FLIGHT
@@ -80,7 +80,7 @@ export function useCookieThrow({ root, snap }) {
 
   useFrame(() => {
     const now = clock.elapsedTime
-    const mesh = cookie.current
+    const mesh = treat.current
     if (mesh) {
       const f = flight.current
       const t = f ? (now - f.start) / FLIGHT : 1
@@ -106,5 +106,5 @@ export function useCookieThrow({ root, snap }) {
     })
   })
 
-  return { cookie, cookieGeometry, cookieMaterial, hearts, heartGeometry, heartMaterials, throwCookie }
+  return { treat, treatGeometry, treatMaterial, hearts, heartGeometry, heartMaterials, throwTreat }
 }

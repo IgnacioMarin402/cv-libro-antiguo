@@ -78,8 +78,8 @@ const FOCUS = { portrait: PORTRAIT_FOCUS, bust: BUST_FOCUS, mug: MUG_FOCUS }
 // under the pointer (heartTipRef). And what the visitor is looking at up
 // close (`view`), the portrait, the bust or the tankard: a click on one
 // asks for it — while nothing else is — and the camera goes to it. The
-// portrait's names show; the bust is given cookies, by a button over the
-// canvas that throws them in here (cookieRef, cookieThrowRef); the tankard
+// portrait's names show; the bust is given treats, by a button over the
+// canvas that throws them in here (treatRef, treatThrowRef); the tankard
 // fills with beer. And the way back is a button over the canvas too, which
 // each places beside itself (portraitBackRef, bustBackRef, mugBackRef).
 //
@@ -100,8 +100,8 @@ export default function Scene({
   onViewBust,
   portraitBackRef,
   bustBackRef,
-  cookieRef,
-  cookieThrowRef,
+  treatRef,
+  treatThrowRef,
   onViewMug,
   mugBackRef,
 }) {
@@ -125,8 +125,8 @@ export default function Scene({
         focused={view === 'bust'}
         onFocus={view ? null : onViewBust}
         backRef={bustBackRef}
-        cookieRef={cookieRef}
-        throwRef={cookieThrowRef}
+        treatRef={treatRef}
+        throwRef={treatThrowRef}
       />
       <Fireplace position={FIREPLACE_POSITION} rotation={FIREPLACE_ROTATION} />
       <Cauldron position={CAULDRON_POSITION} rotation={CAULDRON_ROTATION} />

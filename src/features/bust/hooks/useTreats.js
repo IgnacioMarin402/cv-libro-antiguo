@@ -1,24 +1,24 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-// The cookies, as the server keeps them (see server/cookies.js): how many
+// The treats, as the server keeps them (see server/treats.js): how many
 // Shourdo has been given by everyone, and how many this visitor can still
 // give him today.
 //
 // Both stay null until the server answers — and for good with no server
 // behind the page: the counter then doesn't show, there's no limit to keep,
 // and the throw still plays.
-const COOKIES_URL = '/api/cookies'
+const TREATS_URL = '/api/treats'
 
 const isAnswer = (body) => typeof body?.count === 'number' && typeof body?.left === 'number'
 
 async function request(method) {
-  const response = await fetch(COOKIES_URL, { method })
+  const response = await fetch(TREATS_URL, { method })
   const body = response.ok ? await response.json() : null
-  if (!isAnswer(body)) throw new Error(`/api/cookies: ${response.status}`)
+  if (!isAnswer(body)) throw new Error(`/api/treats: ${response.status}`)
   return body
 }
 
-export function useCookies() {
+export function useTreats() {
   const [state, setState] = useState({ count: null, left: null })
   // Read by give() without waiting on a render, so quick clicks can't give
   // past the day's limit before the first answer is in.

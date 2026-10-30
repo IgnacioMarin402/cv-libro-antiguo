@@ -4,7 +4,7 @@ import { createHmac, randomBytes } from 'node:crypto'
 import { DatabaseSync } from 'node:sqlite'
 import { clientIp, visitorKey } from './love.js'
 
-// The cookies given to Shourdo's bust: how many in all, from everyone.
+// The treats given to Shourdo's bust: how many in all, from everyone.
 //
 // Unlike the heart, a visitor gives more than one — up to DAILY_LIMIT a day,
 // for a sane diet — so the total can grow without end, and it's SUM(n), not
@@ -20,7 +20,7 @@ function openStore(file) {
   mkdirSync(dirname(file), { recursive: true })
   const db = new DatabaseSync(file)
   db.exec(`
-    CREATE TABLE IF NOT EXISTS cookies (
+    CREATE TABLE IF NOT EXISTS treats (
       visitor TEXT NOT NULL,
       day TEXT NOT NULL,
       n INTEGER NOT NULL,
@@ -34,15 +34,15 @@ function openStore(file) {
   db.prepare(`INSERT OR IGNORE INTO meta (key, value) VALUES ('salt', ?)`).run(randomBytes(32).toString('hex'))
   const salt = db.prepare(`SELECT value FROM meta WHERE key = 'salt'`).get().value
 
-  // One statement, so two cookies sent at once can't both slip under the
+  // One statement, so two treats sent at once can't both slip under the
   // limit: the row only grows while it's under it, and when it doesn't,
   // nothing changed.
   const give = db.prepare(`
-    INSERT INTO cookies (visitor, day, n) VALUES (?, date('now', 'localtime'), 1)
+    INSERT INTO treats (visitor, day, n) VALUES (?, date('now', 'localtime'), 1)
     ON CONFLICT (visitor, day) DO UPDATE SET n = n + 1 WHERE n < ${DAILY_LIMIT}
   `)
-  const today = db.prepare(`SELECT n FROM cookies WHERE visitor = ? AND day = date('now', 'localtime')`)
-  const total = db.prepare('SELECT COALESCE(SUM(n), 0) AS n FROM cookies')
+  const today = db.prepare(`SELECT n FROM treats WHERE visitor = ? AND day = date('now', 'localtime')`)
+  const total = db.prepare('SELECT COALESCE(SUM(n), 0) AS n FROM treats')
 
   return {
     visitor: (ip) => createHmac('sha256', salt).update(visitorKey(ip)).digest('base64url'),
@@ -52,19 +52,19 @@ function openStore(file) {
   }
 }
 
-// GET  /api/cookies → { count, left }          left: what this visitor can
+// GET  /api/treats → { count, left }          left: what this visitor can
 //                                              still give today
-// POST /api/cookies → { count, left, given }   gives one; given is false
+// POST /api/treats → { count, left, given }   gives one; given is false
 //                                              when today's are all given
 //
 // Connect-style, mounted beside /api/love by server/server.js and by Vite,
 // with the same guards: only GET and POST, only from this site's own page,
 // only from an address.
-export function cookiesApi({ file = process.env.LOVE_DB || 'data/love.db', trustProxy = process.env.TRUST_PROXY === '1' } = {}) {
+export function treatsApi({ file = process.env.LOVE_DB || 'data/love.db', trustProxy = process.env.TRUST_PROXY === '1' } = {}) {
   const store = openStore(file)
 
   return (req, res, next) => {
-    if (req.url.split('?')[0] !== '/api/cookies') return next()
+    if (req.url.split('?')[0] !== '/api/treats') return next()
 
     if (req.method !== 'GET' && req.method !== 'POST') {
       res.writeHead(405, { Allow: 'GET, POST' })

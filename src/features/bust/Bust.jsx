@@ -2,9 +2,9 @@ import { Suspense, useEffect, useLayoutEffect, useRef } from 'react'
 import { useGLTF } from '@/shared/three/useGLTF'
 import HitBox from './components/HitBox'
 import { BUST_SCALE } from './domain/bust'
-import { HEART_SCALE, HEARTS } from './domain/cookie'
+import { HEART_SCALE, HEARTS } from './domain/treat'
 import { useBustMotion } from './hooks/useBustMotion'
-import { useCookieThrow } from './hooks/useCookieThrow'
+import { useTreatThrow } from './hooks/useTreatThrow'
 import { useLensArrived } from './hooks/useLensArrived'
 import { useBustOverlay } from './hooks/useBustOverlay'
 import { animateBust } from './shaders/bustMotion'
@@ -37,26 +37,26 @@ function BustModel({ uniforms }) {
 // A click on him calls onFocus: the visitor wants to look at him up close
 // (none while they're looking at something else). While they do
 // (`focused`), once the camera has come, the way back (`backRef`, see
-// shared/ui/BackButton) and the cookie (`cookieRef`, see CookieButton) show
-// beside him, over the canvas — and `throwRef` is how the cookie, out
+// shared/ui/BackButton) and the treat (`treatRef`, see TreatButton) show
+// beside him, over the canvas — and `throwRef` is how the treat, out
 // there, throws one in here: it holds a function that does, and says false
 // while one is still in the air.
-export default function Bust({ focused = false, onFocus, backRef, cookieRef, throwRef, ...props }) {
+export default function Bust({ focused = false, onFocus, backRef, treatRef, throwRef, ...props }) {
   const root = useRef()
   const motion = useBustMotion()
-  const cookie = useCookieThrow({ root, snap: motion.snap })
+  const treat = useTreatThrow({ root, snap: motion.snap })
   const arrivedSince = useLensArrived(focused, root)
-  useBustOverlay({ focused, root, arrivedSince, back: backRef, cookie: cookieRef })
+  useBustOverlay({ focused, root, arrivedSince, back: backRef, treat: treatRef })
 
   useEffect(() => {
     if (!throwRef) return
-    throwRef.current = cookie.throwCookie
+    throwRef.current = treat.throwTreat
     return () => {
       throwRef.current = null
     }
   })
 
-  // The cookie and the hearts fly in the room, outside his group: it's in
+  // The treat and the hearts fly in the room, outside his group: it's in
   // the model's units.
   return (
     <>
@@ -67,18 +67,18 @@ export default function Bust({ focused = false, onFocus, backRef, cookieRef, thr
         <HitBox focused={focused} onFocus={onFocus} />
       </group>
       <mesh
-        ref={cookie.cookie}
-        geometry={cookie.cookieGeometry}
-        material={cookie.cookieMaterial}
+        ref={treat.treat}
+        geometry={treat.treatGeometry}
+        material={treat.treatMaterial}
         visible={false}
         castShadow
       />
       {HEARTS.map((_, i) => (
         <mesh
           key={i}
-          ref={(el) => (cookie.hearts.current[i] = el)}
-          geometry={cookie.heartGeometry}
-          material={cookie.heartMaterials[i]}
+          ref={(el) => (treat.hearts.current[i] = el)}
+          geometry={treat.heartGeometry}
+          material={treat.heartMaterials[i]}
           scale={HEART_SCALE}
           visible={false}
         />
