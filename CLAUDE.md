@@ -67,8 +67,8 @@ referencia. No entra en el build.
 ```bash
 npm run dev             # Vite en $PORT (.env) o 5173
 npm run build
-npm run preview
-npm start               # producción: server/server.js sirve dist/, /api/love y /api/treats (build antes)
+npm run preview         # el build, con el Worker y la D1 local, como en Cloudflare
+npm run deploy          # build + wrangler deploy (normalmente lo hace GitHub Actions)
 node scripts/probe.mjs  # mide el libro sin navegador (ver Medir antes de tocar)
 node scripts/shrink-glb.mjs [archivo.glb ...]  # texturas de los GLB a 2048, rugosidad/metal a JPG; sin argumentos, todo public/models
 node scripts/pack-glb.mjs [archivo.glb ...]    # después del anterior: malla comprimida con meshopt; --ktx2 también las texturas
@@ -91,38 +91,44 @@ No hay tests, linter ni type-checking, y **`npm run build` no vale como verifica
 `features/book`, que ya no se monta — hoy no hace nada. La palanca de hojas es
 `PAGE_COUNT` en `pageCurlBook/domain/pageCurl.js`.
 
-### El servidor: corazones y galletas
+### El servidor: corazones y galletas (Cloudflare Workers)
 
 El sitio ya no es sólo estático: `features/love` (el corazón que flota junto a la vela
 y el contador arriba a la derecha) cuenta contra `/api/love`, un corazón por IP
-(IPv6 por /64), guardado como HMAC de la IP en SQLite — `node:sqlite`, que trae Node
-desde 22.13, sin dependencias. Al lado, `features/bust` (las galletas para Shourdo)
-cuenta contra `/api/treats`: hasta 3 galletas al día por IP, con el día según la hora
-local del servidor, y el total es la suma de todas. Son dos handlers, `server/love.js`
-y `server/treats.js`, sobre el mismo archivo y la misma sal (el visitante sale igual
-en los dos); los monta `server/server.js` en producción y Vite en `dev`/`preview`
-(plugin en `vite.config.js`), así que `npm run dev` ya cuenta.
+(IPv6 por /64), guardado como HMAC de la IP. Al lado, `features/bust` (las galletas para
+Shourdo) cuenta contra `/api/treats`: hasta 3 galletas al día por IP, con el día de Chile
+(`America/Santiago`; un Worker corre en UTC), y el total es la suma de todas.
 
-- La base es `data/love.db` (ignorada por git), con las dos tablas. En local todo es
-  la misma IP: para volver a probar el corazón o pasar del límite de galletas, borrar
-  ese archivo (o sólo las galletas: `delete from treats`).
+Producción es **Cloudflare Workers**: la escena se sirve como *static assets* y el Worker
+(`worker/`) sólo responde `/api/*`, sobre una base **D1** (SQLite) con las dos tablas y
+una sola sal (el visitante sale igual en los dos). `wrangler.jsonc` lo configura, el
+plugin de Cloudflare en `vite.config.js` corre el mismo Worker en `dev` y `preview` con
+una D1 local (así que `npm run dev` ya cuenta), y `.github/workflows/deploy.yml`
+despliega cada push a `master`. Pasos, cuentas y respaldos en `deploy/README.md`.
+
+- `worker/index.js` rutea y pone los guardias; `love.js` y `treats.js` son las consultas;
+  `store.js` crea las tablas y la sal la primera vez; `visitor.js`, la IP y el HMAC.
+- La D1 local vive en `.wrangler/state/` (ignorada por git). En local todo es la misma
+  IP: para volver a probar el corazón o pasar del límite de galletas, borrar esa carpeta.
+  Si se borra `.wrangler/` entera, hay que volver a hacer el build antes de `preview`
+  (ahí deja el build el puntero a su configuración).
+- La IP es `CF-Connecting-IP`, que pone Cloudflare y pisa la que mande el cliente.
+- **No renombrar una tabla sin traspasar sus filas.** El paso de `cookies` a `treats`
+  dejó las galletas dadas en la tabla vieja y el contador volvió a 0.
 - **Nada que llegue al navegador lleva "cookie" en el nombre** (archivos, rutas de la API,
   clases CSS): los bloqueadores de anuncios y de avisos de cookies bloquean esas URL y
   esconden esas clases. Con `useCookies.js` bloqueado (`ERR_BLOCKED_BY_CLIENT`) la página
   entera quedó en blanco: por eso las galletas son `treat` en el código.
-- En un host: `LOVE_DB` a un volumen persistente (si no, cada deploy vuelve a 0) y
-  `TRUST_PROXY=1` si hay un proxy delante (si no, todos comparten la IP del proxy y el
-  contador se queda en 1). Tiene que ser `1` exacto, y con él el servidor escucha sólo
-  en `127.0.0.1`, para que nadie se salte el proxy y escriba su propio
-  `X-Forwarded-For`: en una VPS, el proxy apunta a `127.0.0.1:PORT`. Si el proxy está
-  en otra máquina (Railway, Fly, Render), además `HOST=0.0.0.0`. Para ver la cuenta:
-  `node -e "console.log(new (require('node:sqlite').DatabaseSync)('data/love.db').prepare('select count(*) n from love').get())"`.
+- El `input` de las dos páginas (`index.html`, `cv/index.html`) va en
+  `environments.client` de `vite.config.js`, no en `build`: ahí el build del Worker
+  también lo tomaba como entrada y fallaba.
 - Sin servidor detrás (hosting estático), los contadores no aparecen, el corazón sólo
   anima y la galleta se lanza sin límite.
-- `server/server.js` manda en cada respuesta `frame-ancestors 'none'` + `X-Frame-Options`
-  (que nadie enmarque la página para robar clics al corazón o a la galleta), `nosniff` y
-  `Referrer-Policy`. No hay CSP de scripts: el decodificador de meshopt usa WebAssembly
-  y el de KTX2 workers en `blob:`; antes de añadirla, probarla con todos los modelos.
+- Cada respuesta lleva `frame-ancestors 'none'` + `X-Frame-Options` (que nadie enmarque
+  la página para robar clics al corazón o a la galleta), `nosniff` y `Referrer-Policy`:
+  `public/_headers` para los archivos y `worker/index.js` para la API. No hay CSP de
+  scripts: el decodificador de meshopt usa WebAssembly y el de KTX2 workers en `blob:`;
+  antes de añadirla, probarla con todos los modelos.
 
 ### El CV
 

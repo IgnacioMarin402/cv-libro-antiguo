@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-// The count, as the server keeps it (see server/love.js): how many hearts
+// The count, as the server keeps it (see worker/love.js): how many hearts
 // the project has, and whether this visitor already gave theirs.
 //
 // count stays null until the server answers — and for good if there's no

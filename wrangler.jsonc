@@ -1,0 +1,23 @@
+// The site on Cloudflare Workers: see deploy/README.md.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "cv-libro-antiguo",
+  "main": "worker/index.js",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    // Everything but the API is the built scene, served as static assets:
+    // free, and from Cloudflare's edge, without running the Worker.
+    // /cv/ is cv/index.html (html_handling's default).
+    "run_worker_first": ["/api/*"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "cv-libro-antiguo",
+      // From `npx wrangler d1 create cv-libro-antiguo`, once (deploy/README.md).
+      // `npm run dev` doesn't need it: its D1 is local, in .wrangler/.
+      "database_id": "00000000-0000-0000-0000-000000000000"
+    }
+  ],
+  "observability": { "enabled": true }
+}

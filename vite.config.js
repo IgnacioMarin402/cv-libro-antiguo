@@ -1,26 +1,18 @@
 import { fileURLToPath, URL } from 'node:url'
 import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
-
-// The love counter's /api/love and the bust's /api/treats, mounted in the
-// dev and preview servers too — the same handlers server/server.js runs in
-// production, over the same kind of SQLite file. Imported only once a
-// server starts, so `vite build` never opens a database.
-const loveApi = () => {
-  const mount = async (server) => {
-    const { loveApi } = await import('./server/love.js')
-    const { treatsApi } = await import('./server/treats.js')
-    server.middlewares.use(loveApi())
-    server.middlewares.use(treatsApi())
-  }
-  return { name: 'love-api', configureServer: mount, configurePreviewServer: mount }
-}
+import { cloudflare } from '@cloudflare/vite-plugin'
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
 
   return {
-    plugins: [react(), loveApi()],
+    // cloudflare() runs worker/index.js — the love counter's /api/love and
+    // the bust's /api/treats — in dev and preview too, in Cloudflare's own
+    // runtime and over a local D1 (.wrangler/), so `npm run dev` already
+    // counts. It builds the Worker beside the scene, and `wrangler deploy`
+    // takes both from dist/.
+    plugins: [react(), cloudflare()],
     resolve: {
       // '@' is the src root, so a feature is always imported by what it is
       // ('@/features/book') rather than by how far up the tree it happens
@@ -33,12 +25,18 @@ export default defineConfig(({ mode }) => {
       port: Number(env.PORT) || 5173,
     },
     // Two pages: the scene, and the CV as a page of its own (cv/index.html,
-    // at /cv/ — server/server.js serves a folder's index.html).
-    build: {
-      rollupOptions: {
-        input: {
-          main: fileURLToPath(new URL('./index.html', import.meta.url)),
-          cv: fileURLToPath(new URL('./cv/index.html', import.meta.url)),
+    // at /cv/ — Cloudflare's assets serve a folder's index.html). Set on the
+    // client alone: under build, the Worker's build took them as its entries
+    // too and failed.
+    environments: {
+      client: {
+        build: {
+          rollupOptions: {
+            input: {
+              main: fileURLToPath(new URL('./index.html', import.meta.url)),
+              cv: fileURLToPath(new URL('./cv/index.html', import.meta.url)),
+            },
+          },
         },
       },
     },

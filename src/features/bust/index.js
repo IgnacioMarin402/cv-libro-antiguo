@@ -6,7 +6,7 @@
 // Up close, he's given treats. Like the love counter, that straddles the
 // canvas: Bust goes inside it, and throws them; TreatButton and
 // TreatCounter go over it; the app holds useTreats, the count the server
-// keeps (server/treats.js), and hands each its part.
+// keeps (worker/treats.js), and hands each its part.
 //
 // "Treat", never "cookie", in anything the browser fetches or styles —
 // file names, the API's path, CSS classes: ad and cookie-banner blockers

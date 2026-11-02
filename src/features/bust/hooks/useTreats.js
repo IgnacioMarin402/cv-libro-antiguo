@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-// The treats, as the server keeps them (see server/treats.js): how many
+// The treats, as the server keeps them (see worker/treats.js): how many
 // Shourdo has been given by everyone, and how many this visitor can still
 // give him today.
 //

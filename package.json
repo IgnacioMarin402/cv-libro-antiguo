@@ -4,13 +4,13 @@
   "version": "0.0.1",
   "type": "module",
   "engines": {
-    "node": ">=22.13"
+    "node": ">=22"
   },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "start": "node --disable-warning=ExperimentalWarning server/server.js"
+    "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {
     "@react-three/fiber": "^9.7.0",
@@ -19,8 +19,10 @@
     "three": "^0.186.0"
   },
   "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.67.0",
     "@vitejs/plugin-react": "^6.1.1",
     "sharp": "^0.34.5",
-    "vite": "^8.3.0"
+    "vite": "^8.3.0",
+    "wrangler": "^4.156.2"
   }
 }

@@ -3,7 +3,7 @@ import { easeOutQuint } from '@/shared/math/easing'
 
 // The heart the visitor can give the project: it floats behind the book,
 // circling slowly by the candle, and a click on it counts one heart (see
-// server/love.js). Where it floats is the layout's call; how big it is,
+// worker/love.js). Where it floats is the layout's call; how big it is,
 // how it moves and what a click does to it are here.
 
 // --- the shape --------------------------------------------------------------

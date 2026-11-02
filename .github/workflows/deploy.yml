@@ -1,0 +1,49 @@
+# On every push to master: build the scene and the Worker, and deploy both
+# to Cloudflare (see deploy/README.md). The counts are in D1, which a deploy
+# doesn't touch.
+#
+# Off until the repository has the variable CLOUDFLARE_ACCOUNT_ID (Settings →
+# Secrets and variables → Actions → Variables): before there's an account to
+# deploy to, a push builds nothing.
+name: deploy
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+# One deploy at a time; a newer push waits for the one running.
+concurrency: deploy
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    if: ${{ vars.CLOUDFLARE_ACCOUNT_ID != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run build
+
+      # Takes what the build left in dist/ (the scene in dist/client, the
+      # Worker beside it), through .wrangler/deploy/config.json.
+      - run: npx wrangler deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+
+      # The site answers, counters included; a broken Worker fails the run.
+      # SITE_URL is the site's address (https://tudominio.cl, or the
+      # workers.dev one); without it, this is skipped.
+      - name: Check
+        if: ${{ vars.SITE_URL != '' }}
+        run: curl -fsS --retry 5 --retry-all-errors "${{ vars.SITE_URL }}/api/love"
