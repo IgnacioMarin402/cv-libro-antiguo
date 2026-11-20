@@ -1,0 +1,11 @@
+# Cloudflare Pages: the headers server/server.js sends, for the static files
+# (functions/api/ sets its own; see server/cloudflare.js).
+/*
+  Content-Security-Policy: frame-ancestors 'none'
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+
+# Vite hashes everything under assets/ into its name: it never changes.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable

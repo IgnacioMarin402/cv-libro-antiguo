@@ -3,6 +3,7 @@ import { dirname } from 'node:path'
 import { createHmac, randomBytes } from 'node:crypto'
 import { isIP } from 'node:net'
 import { DatabaseSync } from 'node:sqlite'
+import { visitorKey } from './visitor.js'
 
 // The love counter: how many visitors have clicked the heart, one each.
 //
@@ -16,20 +17,9 @@ import { DatabaseSync } from 'node:sqlite'
 // One file, one table, one row per visitor: the count is COUNT(*). SQLite is
 // node:sqlite, built into Node since 22.13 — no dependency to install.
 
-// An IPv6 connection is a /64, not one address: a home line gets the whole
-// block and the system rotates through it (privacy extensions hand out a
-// new temporary address every day). Counting full addresses would let the
-// same visitor give a new heart each morning without trying. IPv4 is kept
-// whole, and an IPv4 arriving as IPv6-mapped (::ffff:1.2.3.4) is IPv4.
-export function visitorKey(ip) {
-  const address = ip.replace(/^::ffff:(?=\d+\.)/, '').split('%')[0]
-  if (!address.includes(':')) return address
-  const [head, tail] = address.split('::')
-  const left = head ? head.split(':') : []
-  const right = tail ? tail.split(':') : []
-  const groups = address.includes('::') ? [...left, ...Array(8 - left.length - right.length).fill('0'), ...right] : left
-  return groups.slice(0, 4).map((g) => parseInt(g || '0', 16).toString(16)).join(':') + '::/64'
-}
+// visitorKey lives apart, with no Node imports, so the Cloudflare functions
+// (functions/api/) count visitors the same way.
+export { visitorKey }
 
 // Where the visit came from. Straight off the socket unless the server sits
 // behind a reverse proxy (Railway, Fly, Render, an nginx in front): there
