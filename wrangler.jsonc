@@ -1,0 +1,20 @@
+// The site on Cloudflare Workers, deployed by Workers Builds on every push to
+// master (`npm run build`, then `npx wrangler deploy`). See CLAUDE.md.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // Must be the Worker's name in the Cloudflare dashboard, or the build fails.
+  "name": "cv-libro-antiguo",
+  "main": "server/worker/index.js",
+  "compatibility_date": "2025-09-01",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    // The scene never wakes the Worker; only the counters do.
+    "run_worker_first": ["/api/*"]
+  },
+  // The hearts and treats. With no database_id, wrangler deploy finds the
+  // database by name, or creates it the first time.
+  "d1_databases": [{ "binding": "DB", "database_name": "libro-counters" }],
+  "vars": { "TREATS_TIME_ZONE": "America/Santiago" },
+  "observability": { "enabled": true }
+}

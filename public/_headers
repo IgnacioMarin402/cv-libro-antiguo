@@ -1,5 +1,5 @@
-# Cloudflare Pages: the headers server/server.js sends, for the static files
-# (functions/api/ sets its own; see server/cloudflare.js).
+# Cloudflare: the headers server/server.js sends, for the static files
+# (the API sets its own; see server/worker/counter.js).
 /*
   Content-Security-Policy: frame-ancestors 'none'
   X-Frame-Options: DENY

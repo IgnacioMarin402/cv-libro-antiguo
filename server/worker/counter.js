@@ -1,19 +1,16 @@
-import { visitorKey } from './visitor.js'
+import { visitorKey } from '../visitor.js'
 
-// The counters on Cloudflare Pages: what server/love.js and server/treats.js
-// do in Node, for functions/api/love.js and functions/api/treats.js. Same
-// routes, same answers, so the page can't tell which one it's talking to.
+// The counters on Cloudflare Workers: what server/love.js and server/treats.js
+// do in Node, for love.js and treats.js beside this file. Same routes, same
+// answers, so the page can't tell which one it's talking to.
 //
-// What changes is underneath. The SQLite file is a D1 database, bound to the
-// Pages project as DB (Settings → Bindings); with no binding the API answers
-// 503 and the page hides the counters, as it does on a static host. The
+// What changes is underneath. The SQLite file is a D1 database, bound as DB
+// in wrangler.jsonc; with no binding the API answers 503 and the page hides
+// the counters, as it does on a static host. The
 // address is CF-Connecting-IP, which Cloudflare writes itself on every
 // request and overwrites if the client sent one — there is no proxy to trust
 // or not. The HMAC is Web Crypto, keyed as createHmac keys it (the hex text
 // of the salt), so a love.db moved into D1 keeps telling visitors apart.
-//
-// This file lives outside functions/ because Pages turns every file in there
-// into a route.
 
 // The tables of love.js and treats.js, made the first time an isolate
 // answers, so a new D1 database needs no migration step: create it, bind it,

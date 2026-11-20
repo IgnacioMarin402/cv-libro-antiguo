@@ -119,17 +119,19 @@ en los dos); los monta `server/server.js` en producción y Vite en `dev`/`previe
   `node -e "console.log(new (require('node:sqlite').DatabaseSync)('data/love.db').prepare('select count(*) n from love').get())"`.
 - Sin servidor detrás (hosting estático), los contadores no aparecen, el corazón sólo
   anima y la galleta se lanza sin límite.
-- **En Cloudflare Pages (donde está publicado, conectado a GitHub)** no corre Node: la API
-  son `functions/api/love.js` y `functions/api/treats.js`, sobre `server/cloudflare.js`,
-  con D1 en vez de `data/love.db` — mismas rutas, mismas respuestas. Las tablas y la sal
-  se crean solas en la primera petición. Lo único a mano, una vez: crear una base D1 y
-  vincularla al proyecto de Pages como `DB` (Settings → Bindings, en Production; luego
-  redeploy). Sin ese vínculo la API responde 503 y la página esconde los contadores. La
+- **Publicado en Cloudflare Workers** (Workers Builds, conectado a GitHub: cada push a
+  master hace `npm run build` y `npx wrangler deploy`). No es Pages: `functions/` no
+  serviría. `wrangler.jsonc` sirve `dist/` como assets estáticos y manda sólo `/api/*`
+  al Worker, `server/worker/` — `love.js` y `treats.js` sobre `counter.js`, con D1 en vez
+  de `data/love.db`; mismas rutas, mismas respuestas. Las tablas y la sal se crean solas
+  en la primera petición, y la base `libro-counters` la crea el deploy si no existe (por
+  eso no hay `database_id`). El `name` del config tiene que ser el del Worker en el
+  panel. Sin el binding `DB` la API responde 503 y la página esconde los contadores. La
   IP es `CF-Connecting-IP` (no hay `TRUST_PROXY`), y el día de las galletas es el de
-  `America/Santiago` (variable `TREATS_TIME_ZONE`), porque un Worker no tiene hora local.
-  Las cabeceras de seguridad de los archivos estáticos van en `public/_headers`. Para
-  probarlo en local: `npm run build` y `npx wrangler pages dev dist --d1 DB=local`.
-  Si cambias un handler de `server/`, cambia también su gemelo de `functions/api/`.
+  `America/Santiago` (`TREATS_TIME_ZONE` en `vars`), porque un Worker no tiene hora
+  local. Las cabeceras de seguridad de los estáticos van en `public/_headers`. En local:
+  `npm run build` y `npx wrangler dev`. Si cambias un handler de `server/`, cambia
+  también su gemelo de `server/worker/`.
 - `server/server.js` manda en cada respuesta `frame-ancestors 'none'` + `X-Frame-Options`
   (que nadie enmarque la página para robar clics al corazón o a la galleta), `nosniff` y
   `Referrer-Policy`. No hay CSP de scripts: el decodificador de meshopt usa WebAssembly
