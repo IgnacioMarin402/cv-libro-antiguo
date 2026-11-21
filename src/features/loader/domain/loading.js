@@ -32,7 +32,7 @@ export const STAGE_LINES = {
   fetch: 'Desempolvando el manuscrito',
   parse: 'Ordenando la estancia',
   warmup: 'Encendiendo las velas',
-  ready: 'El libro te espera',
+  ready: 'Una experiencia te espera',
 }
 
 const fraction = (done, total) => (total > 0 ? Math.min(1, done / total) : 0)
