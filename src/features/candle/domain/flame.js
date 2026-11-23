@@ -23,14 +23,31 @@ export const FLAME = { width: 0.042, height: 0.08, sink: 0.012 }
 // the room move with the flame: the shadows sway as it does.
 export const LIGHT_LEAN = 0.6
 
-// The candle's light at rest. The room's exposure is tuned against it, so
-// the flicker only swings around it (the average over a visit stays within
-// 1% of it, measured). It was 7 at a true inverse square, which kept the
-// book as lit as at decay 1.8 with a directional key beside it; the
-// whiter LIGHT_COLOR is 12% brighter at the same intensity (luminance
-// 0.596 against 0.533), so it's 7 scaled back by that, to change the
-// colour and not the brightness.
+// A candle's light at rest: the sconces' flames burn at it (see
+// features/sconce), and the candle on the table at a fraction of it
+// (TABLE_CANDLE_INTENSITY, below). The flicker only swings around it (the
+// average over a visit stays within 1% of it, measured). It was 7 at a
+// true inverse square, which kept the book as lit as at decay 1.8 with a
+// directional key beside it; the whiter LIGHT_COLOR is 12% brighter at the
+// same intensity (luminance 0.596 against 0.533), so it's 7 scaled back by
+// that, to change the colour and not the brightness.
 export const BASE_INTENSITY = 6.3
+
+// The candle on the table burns at half that. The book lies right under
+// it, and the end of each page nearest the flame took 92% of its light
+// from it, five times what the page's near edge got: under the tone
+// mapping that strip came out all but white and its text washed out, and
+// it was reported. Halved, its paper went from (253,237,207) to
+// (250,230,193) and its text from 2.31:1 to 3.66 against it, leaning in to
+// half the distance — with the paper's PAPER_TONE raised from 0.5 to 0.65
+// at the same time (see pageCurlBook/hooks/usePageMaterials), so the rest of
+// the page stays as bright as it was (0.58 -> 0.56 in luminance). It
+// flattens because TABLE_GLOW stays as it was and lights the page evenly.
+// 0.4 made the strip 3.95:1 for another 8-10% of the light on the table.
+// What else is on the table loses the candle's share of its light — by
+// estimate the mug keeps 59% of it, the love heart 52%, the wizard 62%, the
+// cloth's front rim 70%.
+export const TABLE_CANDLE_INTENSITY = 0.5 * BASE_INTENSITY
 
 // The candle light's colour. It was 0xffb066, whose blue in linear terms
 // is 13% of its red: it turned the room orange, dark greys brown and

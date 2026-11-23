@@ -2,6 +2,7 @@ import { Suspense, useLayoutEffect } from 'react'
 import { useGLTF } from '@/shared/three/useGLTF'
 import Flame from './components/Flame'
 import { MODEL_SCALE, FLAME_Y, WICK_RADIUS_IN_SCENE } from './domain/candle'
+import { TABLE_CANDLE_INTENSITY } from './domain/flame'
 
 const MODEL_URL = '/models/candle-holder.glb'
 
@@ -34,7 +35,7 @@ export default function Candle({ position = [0, 0, 0] }) {
         <CandleModel />
       </Suspense>
 
-      <Flame position={[0, FLAME_Y, 0]} wickRadius={WICK_RADIUS_IN_SCENE} light castShadow />
+      <Flame position={[0, FLAME_Y, 0]} wickRadius={WICK_RADIUS_IN_SCENE} intensity={TABLE_CANDLE_INTENSITY} light castShadow />
     </group>
   )
 }
