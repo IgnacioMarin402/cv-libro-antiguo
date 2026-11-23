@@ -22,6 +22,8 @@ export function paintPaper(ctx, w, h) {
 
   // A shade under what it looks like: the page sits a hand from the candle
   // and the tone mapping lifts it, so a paler ground reads as plain white.
+  // In the book it is dimmer still (PAPER_TONE, see hooks/usePageMaterials);
+  // this is the paper as the magnifier shows it, unlit.
   ctx.fillStyle = '#e6d8b9'
   ctx.fillRect(0, 0, W, H)
 
