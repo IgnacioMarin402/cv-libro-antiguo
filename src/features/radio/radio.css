@@ -1,0 +1,400 @@
+/* The radio in the bottom-left corner, in the corner's colours: the heart
+   counter's parchment gold on its dark (see features/love/love.css).
+
+   Over everything on the canvas, the magnifier too: the magnifier is
+   z-index 20, but inside the top corner's stacking context (z-index 5 —
+   src/index.css), so among the scene's own children anything over 5 is
+   over it. 30 says "on top" without depending on that. The loading screen
+   (z-index 10) doesn't need beating: the radio isn't mounted until it
+   lifts.
+
+   It sits a line up from the corner, over the hint along the bottom
+   (.hint, src/index.css): measured with the dial open, the hint's longer
+   line (the open book's, 684 px) ran under the dial by 162 px on a
+   1280 px screen and by 82 on a 1440. They only clear from about 1640. */
+
+.radio {
+  --gold: 214, 190, 150;
+  position: absolute;
+  left: 20px;
+  bottom: 46px;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: calc(100vw - 40px);
+  color: rgba(var(--gold), 0.85);
+  font: 400 13px/1.2 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+  user-select: none;
+  animation: fadeIn 1.2s ease;
+}
+
+.radio__button {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 1px solid rgba(var(--gold), 0.3);
+  border-radius: 999px;
+  background: rgba(18, 11, 5, 0.6);
+  color: inherit;
+  cursor: pointer;
+  transition:
+    border-color 0.3s ease,
+    color 0.3s ease,
+    box-shadow 0.4s ease;
+}
+
+.radio__button:hover,
+.radio__button:focus-visible {
+  border-color: rgba(var(--gold), 0.65);
+  color: #f3dfb8;
+  outline: none;
+}
+
+/* On, the lyre is lit; playing, it glows like the lit heart. */
+.radio--on .radio__power {
+  border-color: rgba(var(--gold), 0.5);
+  color: #f3dfb8;
+}
+
+.radio--playing .radio__power {
+  border-color: rgba(var(--gold), 0.6);
+  box-shadow: 0 0 12px rgba(255, 180, 90, 0.35);
+}
+
+/* What each control is for, under the pointer: the heart counter's pill
+   (features/love/love.css, .love-tip), hung above the control, since the
+   radio sits at the bottom of the screen. */
+.radio__tipped {
+  position: relative;
+}
+
+.radio-tip {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  z-index: 1;
+  padding: 6px 13px 7px;
+  border: 1px solid rgba(var(--gold), 0.3);
+  border-radius: 999px;
+  background: rgba(18, 11, 5, 0.8);
+  color: rgba(var(--gold), 0.95);
+  font: italic 400 13px/1.2 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+  font-variant: normal;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateX(-50%);
+  transition: opacity 0.25s ease;
+}
+
+/* The lyre's starts at its left edge: centred, it would run off the
+   screen's. */
+.radio-tip--start {
+  left: 0;
+  transform: none;
+}
+
+/* The tuner's says the whole line the dial cuts short — a title can run
+   to ninety characters — so it may wrap, and starts at the tuner's left
+   edge to have the room. */
+.radio-tip--wide {
+  left: 0;
+  width: max-content;
+  max-width: min(340px, calc(100vw - 110px));
+  border-radius: 14px;
+  white-space: normal;
+  text-align: left;
+  transform: none;
+}
+
+.radio__tipped:hover > .radio-tip,
+.radio__tipped:focus-visible > .radio-tip {
+  opacity: 1;
+}
+
+.radio__icon {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* The speaker, inside the dial with the volume it silences: bare like
+   the arrows, and dimmed while the radio is at zero. */
+.radio__mute {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: rgba(var(--gold), 0.85);
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.radio__mute:hover,
+.radio__mute:focus-visible {
+  color: #f3dfb8;
+  outline: none;
+}
+
+.radio__mute--on {
+  color: rgba(var(--gold), 0.5);
+}
+
+.radio__mute .radio__icon {
+  width: 18px;
+  height: 18px;
+}
+
+/* The dial: one pill, the station between its two arrows, then the
+   volume. */
+.radio__dial {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  padding: 4px 12px 4px 4px;
+  border: 1px solid rgba(var(--gold), 0.22);
+  border-radius: 999px;
+  background: rgba(18, 11, 5, 0.6);
+  animation: fadeIn 0.4s ease;
+}
+
+.radio__step {
+  flex: none;
+  width: 26px;
+  height: 30px;
+  padding: 0 0 3px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: rgba(var(--gold), 0.7);
+  font: 400 22px/1 Georgia, serif;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.radio__step:hover,
+.radio__step:focus-visible {
+  color: #f3dfb8;
+  outline: none;
+}
+
+/* A fixed width, so the dial doesn't jump as titles come and go; what
+   doesn't fit is cut with an ellipsis, and whole under the pointer
+   (its title). */
+.radio__tuner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  width: 190px;
+  min-width: 0;
+  text-align: center;
+}
+
+.radio__station,
+.radio__line {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.radio__station {
+  color: #f3dfb8;
+  font-size: 12px;
+  font-variant: small-caps;
+  letter-spacing: 0.1em;
+}
+
+.radio__line {
+  color: rgba(var(--gold), 0.7);
+  font-size: 11.5px;
+  font-style: italic;
+}
+
+.radio__line--tuning {
+  animation: radio-tuning 1.4s ease-in-out infinite;
+}
+
+.radio__line--nosignal {
+  color: rgba(220, 140, 110, 0.8);
+}
+
+/* A tick for each station on the dial, the one playing lit. */
+.radio__ticks {
+  display: flex;
+  gap: 5px;
+  margin-top: 2px;
+}
+
+.radio__tick {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(var(--gold), 0.25);
+  transition:
+    background 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.radio__tick--on {
+  background: #f3dfb8;
+  box-shadow: 0 0 5px rgba(255, 190, 110, 0.8);
+}
+
+/* The volume, set off from the station by a hairline: the speaker, a
+   track gold up to the level, a knob big enough to find, and the level in
+   figures. The first version was a bare 2 px line, and easy to miss. */
+.radio__volume {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+  margin-left: 6px;
+  padding-left: 8px;
+  border-left: 1px solid rgba(var(--gold), 0.18);
+}
+
+.radio__volume input {
+  width: 96px;
+  height: 22px;
+  margin: 0;
+  background: none;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.radio__volume input:focus-visible {
+  outline: none;
+}
+
+.radio__volume input::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(
+    to right,
+    rgba(var(--gold), 0.85) var(--level),
+    rgba(var(--gold), 0.22) var(--level)
+  );
+}
+
+.radio__volume input::-moz-range-track {
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(var(--gold), 0.22);
+}
+
+.radio__volume input::-moz-range-progress {
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(var(--gold), 0.85);
+}
+
+.radio__volume input::-webkit-slider-thumb {
+  width: 14px;
+  height: 14px;
+  margin-top: -5px;
+  border: 1px solid #f3dfb8;
+  border-radius: 50%;
+  background: #3a2714;
+  box-shadow: 0 0 6px rgba(255, 190, 110, 0.35);
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.radio__volume input::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border: 1px solid #f3dfb8;
+  border-radius: 50%;
+  background: #3a2714;
+  box-shadow: 0 0 6px rgba(255, 190, 110, 0.35);
+}
+
+.radio__volume input:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 3px rgba(var(--gold), 0.3);
+}
+
+.radio__volume input:focus-visible::-moz-range-thumb {
+  box-shadow: 0 0 0 3px rgba(var(--gold), 0.3);
+}
+
+/* The loading screen's figures: lining and all one width, so the dial
+   doesn't twitch as it counts. */
+.radio__percent {
+  min-width: 3ch;
+  color: rgba(var(--gold), 0.85);
+  font-size: 12px;
+  font-variant-numeric: lining-nums tabular-nums;
+  letter-spacing: 0.06em;
+  text-align: right;
+}
+
+/* Narrower than the hint's longer line, the hint wraps to two lines, and
+   the radio goes up one more. */
+@media (max-width: 760px) {
+  .radio {
+    bottom: 62px;
+  }
+}
+
+/* A phone: the same dial, tighter. The figures go; the speaker and the
+   slider stay. */
+@media (max-width: 480px) {
+  .radio {
+    left: 12px;
+    gap: 6px;
+    max-width: calc(100vw - 24px);
+  }
+
+  .radio__tuner {
+    width: 118px;
+  }
+
+  .radio__volume {
+    margin-left: 2px;
+    padding-left: 4px;
+  }
+
+  .radio__volume input {
+    width: 64px;
+  }
+
+  .radio__percent {
+    display: none;
+  }
+}
+
+@keyframes radio-tuning {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .radio__line--tuning {
+    animation: none;
+  }
+}

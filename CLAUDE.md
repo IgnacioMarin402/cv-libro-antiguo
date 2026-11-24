@@ -156,6 +156,44 @@ Contacto sólo LinkedIn y GitHub (el sitio es público). Para cambiar el CV, edi
 `cv.js`; si una página del libro se llena, `pageTexture` la achica hasta `MIN_FIT` y avisa
 en consola: entonces hay que repartirla en `bookPages.js`.
 
+### La radio
+
+`features/radio`: un control abajo a la izquierda, sobre todo lo demás (también sobre la
+lupa), que no tiene nada en la sala. Es un dial de cuatro radios por internet, definidas
+en `domain/stations.js`: Radio Rivendell, Explorers Emporium, CeltCast y Early Music.
+Dentro del dial está el volumen: un parlante que silencia la radio o devuelve el último
+volumen, el deslizador (que también gira con la rueda) y la cifra. La lira lo pliega.
+Lo que hace cada control se dice al pasar el puntero con la misma píldora de "Likes
+totales" (`components/Tip.jsx`), no con `title`: en Windows el tooltip nativo sale como
+una caja gris del sistema.
+
+- **Son streams de terceros:** no hay ni un byte de música en el repo, y no son assets.
+  Cada stream tiene que responder **por HTTPS y con CORS**. Sin CORS, un `<audio>` pasado
+  por Web Audio suena en silencio, y por Web Audio pasan los fundidos y el volumen. Para comprobar una estación nueva, hazlo **en el navegador, no con
+  curl**: CeltCast manda CORS en el stream pero no en su "qué está sonando", y por eso no
+  muestra el tema. Las radios se buscan en Radio Browser (`api.radio-browser.info`, por
+  tag).
+- **Se probaron y se quitaron** tres ambientaciones sintetizadas en Web Audio (un arpa
+  en re dórico, una tormenta, una noche). El usuario prefirió sólo las radios. Están en
+  la historia de git, en el commit que añadió la radio.
+- **Cada estación suena al nivel que trae.** Medidas en LUFS (`ebur128` de ffmpeg) van de
+  −11,6 a −18,3, una diferencia que depende tanto del tema como de la estación
+  (`domain/mix.js`).
+- **Cada visita arranca encendida y en volumen 0** (es un CV: nadie recibe música que no
+  pidió). En 0 no se baja el stream ni se pregunta qué suena: la página no le manda nada
+  a las radios hasta que el visitante sube el volumen. Se recuerdan la estación y el
+  último volumen escuchado (el que devuelve el parlante), nunca el sonido.
+- `shared/audio/` tiene el único `AudioContext` de la página: el de three, que ya usan los
+  `AudioListener` del fuego. Hubo un silencio general que también apagaba el fuego; al
+  meter el parlante dentro de la radio pasó a ser sólo de la radio.
+- La rueda no cuenta como gesto: subida desde 0 antes de cualquier clic en la página, el
+  navegador rechaza el stream. El dial dice "Haz clic para escuchar" y arranca con el
+  siguiente clic o tecla, en cualquier parte.
+- Cada gesto (el parlante, el deslizador, cambiar de estación) llama al motor dentro de
+  su propio handler, no en un efecto: Safari sólo deja empezar un `<audio>` desde el handler del gesto.
+- Si algún día se añade una CSP, la radio necesita `media-src` y `connect-src` para los
+  hosts de `stations.js`.
+
 ## Arquitectura
 
 Tres capas, y una regla por capa:
@@ -318,3 +356,12 @@ raycast, así que no sirven para abrir el libro desde una prueba.
 > `Object.defineProperty(e, 'offsetX', { get: () => ox })`, con `ox`/`oy` relativos al
 > canvas. Y el `click` final es un `MouseEvent` aparte: sin él `onClick` no dispara,
 > porque los `pointer*` solos no abren el libro.
+
+**Sin GPU (el contenedor de Claude Code en la nube), la escena no llega a revelarse:** con
+WebGL por software el calentamiento del loader se quedó en "Encendiendo las velas" más de
+25 minutos. Para verificar algo HTML sobre el canvas (la radio, los contadores), se
+reescribe `App.jsx` al servirlo, sólo en la prueba: `page.route(/\/src\/app\/App\.jsx/)` y
+cambiar `shown: revealed` por `shown: true`. El resto de la `App` real queda montado
+debajo. Mientras la escena carga, el hilo principal tarda segundos por cuadro: los
+`page.click` necesitan `{ force: true, noWaitAfter: true }`, o vencen esperando dos
+cuadros estables.

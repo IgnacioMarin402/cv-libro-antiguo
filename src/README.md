@@ -20,6 +20,7 @@ features/book/
   components/     Sus piezas: Cover, Spine, PageLeaf, PageBlock.
   textures/       Sus materiales pintados a canvas.
   shaders/        Su GLSL, si lo tiene.
+  audio/          Su grafo de Web Audio, si suena (hoy, la radio).
 ```
 
 El reparto entre `domain/` y el resto es el que importa:
@@ -42,6 +43,10 @@ su propio objeto (`coverGeometry`, `spineGeometry`, `pageGeometry`).
 `shared/ui/` es lo mismo para la interfaz sobre el canvas: `BackButton`, el
 botón para volver de una vista que la cámara fija (hoy, el cuadro), no sabe de
 qué vista vuelve; quien lleva al visitante ahí lo coloca y lo muestra.
+
+`shared/audio/` es lo mismo para el sonido: el único `AudioContext` de la página
+(el de three, que usan el fuego de `features/candle` y la radio de
+`features/radio`) y cómo despertarlo desde un gesto del visitante.
 
 ## Importar
 
