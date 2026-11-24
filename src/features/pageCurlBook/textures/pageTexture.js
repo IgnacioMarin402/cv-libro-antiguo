@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 import { paintPaper } from './paperTexture'
 import { PAPER_WIDTH, PAPER_HEIGHT } from '../domain/pageCurl'
-import { TYPE, MARGIN, INK, MIN_FIT } from '../domain/typography'
+import { TYPE, MARGIN, SINK, INK, INK_SPREAD, MIN_FIT } from '../domain/typography'
 
 // A printed page: the paper (see paperTexture) with a page's blocks set on
 // it. The book doesn't know what it prints; a page is a list of blocks —
@@ -15,7 +15,8 @@ import { TYPE, MARGIN, INK, MIN_FIT } from '../domain/typography'
 //   pairs { items, align, large }     label + text, one per line
 //   signature · ornament · rule · space { mm }
 //
-// — plus `head` (the running head) and `valign: 'center'`.
+// — plus `head` (the running head) and `valign: 'center'`. A page that
+// isn't centred starts SINK below the top margin, if it has the room.
 //
 // Which face of a leaf a page lands on decides which side its gutter is
 // on: a right-hand page (a leaf's +z face) has the spine on its left, and a
@@ -55,7 +56,18 @@ function useStyle(ctx, style, s) {
   ctx.font = `${style.italic ? 'italic ' : ''}${style.caps ? 'small-caps ' : ''}${style.bold ? 600 : 400} ${px}px ${TYPE.font}`
   ctx.letterSpacing = `${(style.spacing || 0) * px}px`
   ctx.fillStyle = style.color
+  ctx.strokeStyle = style.color
+  ctx.lineWidth = INK_SPREAD * PX
+  ctx.lineJoin = 'round'
   return px
+}
+
+// Sets a run of type: the glyphs filled, then their outline inked over
+// with INK_SPREAD, which thickens every stroke by that much without moving
+// a letter — the line breaks and the fit are measured without it.
+function inkText(ctx, text, x, y) {
+  ctx.fillText(text, x, y)
+  ctx.strokeText(text, x, y)
 }
 
 // Runs of styled text into measured words. A long run with slashes (a
@@ -114,7 +126,7 @@ function paragraph(ctx, runs, s, x, y, width, opts, draw) {
   if (draw) {
     if (drop) {
       useStyle(ctx, drop.style, s)
-      ctx.fillText(drop.letter, x, y + lineHeight * (drop.lines - 1) + lineHeight * 0.78)
+      inkText(ctx, drop.letter, x, y + lineHeight * (drop.lines - 1) + lineHeight * 0.78)
     }
     lines.forEach((line, i) => {
       const indent = drop && i < drop.lines ? drop.w : 0
@@ -128,7 +140,7 @@ function paragraph(ctx, runs, s, x, y, width, opts, draw) {
       const baseline = y + i * lineHeight + lineHeight * 0.78
       line.words.forEach((word, j) => {
         useStyle(ctx, word.style, s)
-        ctx.fillText(word.text, cx, baseline)
+        inkText(ctx, word.text, cx, baseline)
         cx += word.w + (j < line.words.length - 1 && !word.glued ? word.space + extra : 0)
       })
     })
@@ -233,7 +245,7 @@ function setBlocks(ctx, blocks, s, x, top, width, draw) {
           const h = paragraph(ctx, [{ text: item, style: STYLE.body }], s, x + hang, y, width - hang, { justify: true }, draw)
           if (draw) {
             useStyle(ctx, STYLE.marker, s)
-            ctx.fillText('•', x + mark, y + TYPE.body * TYPE.leading * s * PX * 0.78)
+            inkText(ctx, '•', x + mark, y + TYPE.body * TYPE.leading * s * PX * 0.78)
           }
           y += h + gap(1.5)
         })
@@ -282,7 +294,10 @@ export function setPage(ctx, page, side, folio) {
     s *= 0.96
     used = setBlocks(ctx, page.blocks, s, inner, top, width, false)
   }
-  const offset = page.valign === 'center' ? Math.max(0, (room - used) / 2) : 0
+  // A centred page sits in the middle of its room; any other starts SINK
+  // lower, or as far as its room allows.
+  const free = Math.max(0, room - used)
+  const offset = page.valign === 'center' ? free / 2 : Math.min(SINK * PX, free)
   setBlocks(ctx, page.blocks, s, inner, top + offset, width, true)
 
   if (page.head) paragraph(ctx, [{ text: page.head, style: STYLE.head }], 1, inner, MARGIN.top * 0.42 * PX, width, { align: 'center' }, true)

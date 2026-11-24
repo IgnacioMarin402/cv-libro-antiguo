@@ -38,11 +38,40 @@ export const TYPE = {
 // almost on edge to the lens.
 export const MARGIN = { top: 46, bottom: 50, inner: 42, outer: 30 }
 
-// Iron-gall brown for the text, and red for what a rubricator would have
-// picked out: headings, initials, the marks before each item. The faded
-// ink (dates, notes, the running head) was #6a4f33, which on paper lit a
-// hand from the candle all but disappeared; it is a shade darker now.
-export const INK = { text: '#2a190c', rubric: '#8c2312', faded: '#4f3922' }
+// How far below the top margin a page's text starts, when the page has the
+// room: the sinkage of a chapter opening, on every page. A leaf's head lies
+// toward the candle, and that end of the open book is the brightest thing
+// on the table and the farthest from the lens. On the open book leaned
+// into, its paper measured 0.79 in luminance over the first 110 mm, 0.69 by
+// 200 mm and 0.58 by 330, and its text was reported washed out. 130 mm
+// starts the text about a third of the way down the leaf. A page with less
+// room below its text than that drops only as far as it can, never into its
+// folio and never set smaller: in DejaVu Serif, the fullest two, 12 and 13,
+// had 17 and 48 mm to give (Palatino sets narrower, so they have more).
+export const SINK = 130
+
+// Iron-gall ink for the text, near black, and red for what a rubricator
+// would have picked out: headings, initials, the marks before each item.
+// The faded ink (dates, notes, the running head) is a lighter shade of it.
+//
+// The text was a brown, #2a190c, and the faded ink #4f3922 (and #6a4f33
+// before that); the page was reported hard to read under the candle.
+// Darker ink doesn't help where a letter is solid — lit, #2a190c already
+// came out (62,15,2) — but at its edges: the canvas blends a glyph's edge
+// into the paper in sRGB, and at the distance the book is read a stroke is
+// mostly edge. On the open shot at 1080p, the darkest 1.5% of a body paragraph
+// against its paper: 1.97:1 -> 2.16 from where the camera stands, 4.05 ->
+// 4.80 leaning in to half the distance. The rest is INK_SPREAD, below, and
+// how bright the paper is lit (PAPER_TONE, see hooks/usePageMaterials).
+export const INK = { text: '#140b05', rubric: '#8c2312', faded: '#33251a' }
+
+// How far the ink spreads past each glyph's outline, in millimetres across:
+// the squeeze of a letterpress. Every stroke is that much thicker, which is
+// what type 8 px tall on screen needs — its hairlines are thinner than a
+// pixel there, and get averaged into the paper. Drawn as a stroke over the
+// filled glyph, so the line breaks and the fit are the same with it. 0.3
+// barely showed on the page; 0.6 began to read as bold.
+export const INK_SPREAD = 0.5
 
 // A page with more than its block holds is set smaller until it fits, but
 // no smaller than this: past it the page needs splitting, not shrinking.

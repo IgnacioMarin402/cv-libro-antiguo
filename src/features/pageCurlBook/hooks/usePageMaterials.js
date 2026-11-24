@@ -32,6 +32,25 @@ import { createDoublureTexture, createLeatherGrainTexture } from '../textures/do
 // exposed, darker than the face it bounds.
 const PAPER_EDGE_COLOR = 0xd8c59c
 const GUTTER_COLOR = 0x111111
+// How much of the candle's light the printed faces give back, against the
+// paper as it is painted — which is what the magnifier shows, flat and
+// unlit, so it keeps the painted paper. At 1 the faces sat deep in the tone
+// mapping's shoulder: the paper came out (252,236,205), all but white, and
+// was reported too bright to read. Up there the curve squashes every
+// difference: through three's ACES at the scene's exposure, a pixel 60%
+// covered by ink came out at only 1.36:1 against bare paper, whatever the
+// ink's colour. At 0.5 a body paragraph's darkest 1.5% against its paper,
+// with the ink as it is now (see domain/typography), went from 1.97:1 to
+// 2.98 from where the camera stands, and from 4.05 to 5.17 leaning in to
+// half the distance — but the strip nearest the candle stayed nearly white,
+// and 0.4 barely brought it down (0.82 -> 0.79 in luminance) while it
+// dimmed the rest of the page a lot (0.59 -> 0.52). What brought it down was
+// the candle itself, halved (TABLE_CANDLE_INTENSITY, features/candle), and
+// with it this went back up to 0.65, which keeps the page where 0.5 had it
+// (0.56 in luminance, against 0.58) and that strip's text at 3.66:1, from
+// 2.31. The cut edges take the same, so they stay darker than the faces
+// they bound.
+const PAPER_TONE = 0.65
 // The flat leather on the boards' cut edges. It has no map, so it has to be
 // the red the cover picture is — otherwise the four edges give the binding
 // away from every angle but straight on. Averaged in linear light over the
@@ -54,11 +73,21 @@ function loadCover(colorSpace) {
 // canvases of paper and type.
 export function usePageMaterials(pages = []) {
   return useMemo(() => {
-    const edge = new THREE.MeshStandardMaterial({ color: PAPER_EDGE_COLOR, roughness: 0.95 })
+    const edge = new THREE.MeshStandardMaterial({
+      color: new THREE.Color(PAPER_EDGE_COLOR).multiplyScalar(PAPER_TONE),
+      roughness: 0.95,
+    })
     const gutter = new THREE.MeshStandardMaterial({ color: GUTTER_COLOR })
     const paperBump = createPaperBumpTexture()
     const face = (map) =>
-      new THREE.MeshStandardMaterial({ map, bumpMap: paperBump, bumpScale: 0.002, roughness: 0.9, metalness: 0, color: 0xffffff })
+      new THREE.MeshStandardMaterial({
+        map,
+        bumpMap: paperBump,
+        bumpScale: 0.002,
+        roughness: 0.9,
+        metalness: 0,
+        color: new THREE.Color().setScalar(PAPER_TONE),
+      })
     const blank = face(createPaperTexture())
     // The pages, in reading order. The first lands on leaf 1's front — the
     // right-hand page opposite the front board — and its back is the next

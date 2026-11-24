@@ -42,8 +42,9 @@ const WICK_RADIUS = 1.0
 export const FLAME_POSITIONS = WICK_TIPS.map((tip) => tip.map((v) => v * SCONCE_SCALE))
 export const WICK_RADIUS_IN_SCENE = WICK_RADIUS * SCONCE_SCALE
 
-// One light for the three flames, the candle's light — its colour, its
-// intensity, its flicker — carried by the front one, on the sconce's axis
+// One light for the three flames, a candle's light — its colour, its
+// intensity (BASE_INTENSITY: the candle on the table burns at half of it
+// now), its flicker — carried by the front one, on the sconce's axis
 // and 23 cm out from the wall. Three would be three times the brightness:
 // the wall behind is already lit 2.1 times as strongly as the cloth right
 // under the candle.
@@ -53,7 +54,8 @@ export const WICK_RADIUS_IN_SCENE = WICK_RADIUS * SCONCE_SCALE
 // for it: its shadow camera sees nothing nearer than 50 cm — the sconce
 // itself and the wall behind it — and past that, the nearest thing to
 // cast one is the table's edge, 3 m off, where the light has fallen to
-// under 2% of the candle's (1.8% and 1.9% on the book, measured).
+// under 2% of the candle's (1.8% and 1.9% on the book, measured with the
+// table candle at BASE_INTENSITY; twice that against it now it's halved).
 export const LIT_FLAME = 2
 
 // Each flame reads the room's draft at its own moment (see
