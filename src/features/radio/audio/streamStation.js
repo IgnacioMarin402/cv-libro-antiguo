@@ -9,10 +9,16 @@ import { RECONNECT_AFTER, RECONNECT_TRIES, TUNING_TIMEOUT } from '../domain/mix'
 // plays, 'nosignal' when it won't, 'blocked' when the browser won't let it
 // without a gesture. A stream that drops after it played is
 // asked again a few times first (domain/mix).
-export function startStream(ctx, out, station, onStatus) {
+//
+// `muted` starts it muted: the only way a browser lets a stream play
+// before the visitor has done anything on the page. Muted, the element
+// hands the graph silence; `unmute()`, from inside the handler of a
+// gesture, lets it through — out of one, Chrome pauses it instead.
+export function startStream(ctx, out, station, onStatus, { muted = false } = {}) {
   const element = new Audio()
   element.crossOrigin = 'anonymous'
   element.preload = 'auto'
+  element.muted = muted
   const source = ctx.createMediaElementSource(element)
   source.connect(out)
 
@@ -78,6 +84,9 @@ export function startStream(ctx, out, station, onStatus) {
   connect()
 
   return {
+    unmute() {
+      element.muted = false
+    },
     stop() {
       stopped = true
       clearTimeout(timeout)

@@ -32,17 +32,24 @@ function listenedVolume() {
   return Number.isFinite(v) && v > 0 ? Math.min(1, v) : UNMUTED_VOLUME
 }
 
-// The radio's state, and the gestures that change it. A stream plays only
-// while the radio is on and its volume above zero; at zero it isn't even
-// fetched. Each gesture tells the engine itself, inside its handler:
-// Safari only lets a media element start playing from inside the handler
-// of what the visitor did, and an effect after the render is already
-// outside it.
+// The radio's state, and the gestures that change it. While it's on, its
+// station plays — from the moment the room is up (`shown`), at any volume:
+// at zero it's only not heard, so the dial can say what's on and turning
+// it up is heard at once, mid-song. Folding it away (the lyre) is what
+// stops the stream.
+//
+// Before the visitor has done anything on the page, the browser lets a
+// stream play only muted. Their first click or key, anywhere, unlocks it
+// (still at zero: nothing is heard that they didn't turn up). Each gesture
+// on the radio also tells the engine itself, inside its handler: Safari
+// only lets a media element start playing, or be unmuted, from inside the
+// handler of what the visitor did, and an effect after the render is
+// already outside it.
 //
 // The wheel isn't such a gesture. Turned up from zero before the visitor
-// has clicked anything on the page, the browser refuses the stream:
-// 'blocked', until their next click or key anywhere, which starts it.
-export function useRadio() {
+// has clicked anything on the page, the station is 'blocked', until their
+// next click or key anywhere.
+export function useRadio(shown = true) {
   const [on, setOn] = useState(true)
   const [index, setIndex] = useState(() => {
     const id = load(STATION_KEY)
@@ -51,10 +58,11 @@ export function useRadio() {
   const [volume, setVolumeState] = useState(0)
   const [status, setStatus] = useState('idle')
   const engine = useRef(null)
+  const unlocked = useRef(false)
   // The latest of each for the handlers, which a quick double click can
   // run before the render that would hand them the new ones.
-  const latest = useRef({ on, index, volume })
-  latest.current = { on, index, volume }
+  const latest = useRef({ on, index, volume, status })
+  latest.current = { on, index, volume, status }
 
   useEffect(
     () => () => {
@@ -65,13 +73,12 @@ export function useRadio() {
   )
 
   const getEngine = () => {
-    if (!engine.current) engine.current = createRadioEngine(setStatus)
+    if (!engine.current) engine.current = createRadioEngine(setStatus, { unlocked: unlocked.current })
     return engine.current
   }
 
   const start = () => {
     const { index: i, volume: v } = latest.current
-    wakeAudio()
     const radio = getEngine()
     radio.setVolume(v)
     radio.play(STATIONS[i])
@@ -82,54 +89,72 @@ export function useRadio() {
     setStatus('idle')
   }
 
+  // Inside a gesture's handler only. Without one behind it (the wheel,
+  // before any click) unmuting would make Chrome pause the stream.
+  const unlock = () => {
+    if (navigator.userActivation && !navigator.userActivation.hasBeenActive) return
+    wakeAudio()
+    unlocked.current = true
+    engine.current?.unlock()
+  }
+
+  // Tuned in once the room is up, not under the loading screen, where the
+  // stream would compete with the scene's own downloads.
   useEffect(() => {
-    if (status !== 'blocked') return
-    const retry = () => {
-      if (latest.current.on && latest.current.volume > 0) start()
-    }
+    if (shown && latest.current.on) start()
+    // start reads everything it needs from `latest`.
+  }, [shown])
+
+  // The first gesture anywhere unlocks the sound (and the engine asks again
+  // for a station the browser refused outright).
+  useEffect(() => {
+    if (unlocked.current && status !== 'blocked') return
+    const onGesture = () => unlock()
     const options = { capture: true, once: true }
-    window.addEventListener('pointerdown', retry, options)
-    window.addEventListener('keydown', retry, options)
+    window.addEventListener('pointerdown', onGesture, options)
+    window.addEventListener('keydown', onGesture, options)
     return () => {
-      window.removeEventListener('pointerdown', retry, options)
-      window.removeEventListener('keydown', retry, options)
+      window.removeEventListener('pointerdown', onGesture, options)
+      window.removeEventListener('keydown', onGesture, options)
     }
-    // start reads everything it needs from `latest`: status is the only dep.
   }, [status])
 
   const setVolume = (value) => {
-    const { on: isOn, volume: was } = latest.current
+    const { on: isOn } = latest.current
     latest.current.volume = value
     setVolumeState(value)
-    if (value > 0) save(VOLUME_KEY, value)
-    if (!isOn) return
-    if (value > 0 && was === 0) start()
-    else if (value === 0 && was > 0) silence()
-    else engine.current?.setVolume(value)
+    if (value > 0) {
+      save(VOLUME_KEY, value)
+      if (!unlocked.current) unlock()
+    }
+    if (isOn) engine.current?.setVolume(value)
   }
 
   // The speaker: to zero, or back to the last volume listened at.
   const toggleSound = () => setVolume(latest.current.volume > 0 ? 0 : listenedVolume())
 
   const tune = (step) => {
-    const { on: isOn, index: i, volume: v } = latest.current
+    const { on: isOn, index: i } = latest.current
     const next = stepStation(i, step)
     latest.current.index = next
     setIndex(next)
     save(STATION_KEY, STATIONS[next].id)
-    if (isOn && v > 0) getEngine().play(STATIONS[next])
+    if (isOn) getEngine().play(STATIONS[next])
   }
 
-  // The lyre folds the dial away, and the sound with it; unfolded, it's
-  // back as every visit starts: on, at zero.
+  // The lyre folds the dial away, and the stream with it; unfolded, it's
+  // back as every visit starts: on, playing, at zero.
   const power = () => {
-    if (latest.current.on) {
+    const wasOn = latest.current.on
+    latest.current.on = !wasOn
+    setOn(!wasOn)
+    if (wasOn) {
       silence()
       latest.current.volume = 0
       setVolumeState(0)
+    } else {
+      start()
     }
-    latest.current.on = !latest.current.on
-    setOn(latest.current.on)
   }
 
   return {

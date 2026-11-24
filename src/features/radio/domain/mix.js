@@ -1,8 +1,8 @@
 // How loud, and how one station gives way to the next.
 
-// Every visit starts silent: the radio on, its dial up, the volume at
-// zero, and no stream fetched until the visitor turns it up — this is a CV,
-// and nobody gets music they didn't ask for. The speaker brings back the
+// Every visit starts silent: the radio on, its station playing, the volume
+// at zero — this is a CV, and nobody gets music they didn't ask for. But
+// it's tuned in, so turning it up is heard at once (hooks/useRadio). The speaker brings back the
 // last volume they listened at, or, the first time, this one. The slider
 // is heard squared (volumeGain), the way loudness is heard: half-way is a
 // quarter of the gain, 12 dB down — music under the room, not over it.

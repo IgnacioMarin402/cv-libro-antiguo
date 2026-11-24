@@ -25,19 +25,18 @@ const SLIDER_KEYS = new Set(['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 
 
 // The radio, in the bottom-left corner over the canvas and over everything
 // else on it — the magnifier included — so it's always at hand. It comes
-// on with the room, at zero (domain/mix): the dial says what each station
-// is playing, and the speaker or the slider (or the wheel over it) lets it
-// be heard. The lyre folds it away.
+// on with the room, playing at zero (domain/mix): the dial says what each
+// station is playing, and the speaker or the slider (or the wheel over it)
+// lets it be heard, at once. The lyre folds it away.
 //
 // What each control is for, it says under the pointer the way the heart
 // counter does (Tip), not with the browser's own tooltip.
 //
 // Hidden until the loading screen has lifted (`shown`).
 export default function RadioControl({ shown }) {
-  const radio = useRadio()
-  // Asked only while it's heard: at zero the dial shows the genre, and the
-  // page sends nothing to the stations until the visitor turns one up.
-  const song = useNowPlaying(radio.station, radio.on && radio.volume > 0)
+  const radio = useRadio(shown)
+  // Asked while it's on, heard or not: at zero it still plays (hooks/useRadio).
+  const song = useNowPlaying(radio.station, shown && radio.on)
 
   if (!shown) return null
 

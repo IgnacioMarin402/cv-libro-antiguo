@@ -180,15 +180,19 @@ una caja gris del sistema.
   −11,6 a −18,3, una diferencia que depende tanto del tema como de la estación
   (`domain/mix.js`).
 - **Cada visita arranca encendida y en volumen 0** (es un CV: nadie recibe música que no
-  pidió). En 0 no se baja el stream ni se pregunta qué suena: la página no le manda nada
-  a las radios hasta que el visitante sube el volumen. Se recuerdan la estación y el
-  último volumen escuchado (el que devuelve el parlante), nunca el sonido.
+  pidió), **pero sintonizada**: al levantarse la carga, la estación ya suena en 0 y el dial
+  dice qué tema va. El 0 (y el parlante) sólo baja la ganancia, no corta el stream, así
+  que subir el volumen se oye al instante; sólo la lira lo corta. Antes de cualquier gesto
+  el navegador sólo deja sonar un `<audio>` en mute: arranca así, y el primer clic o tecla
+  en cualquier parte le quita el mute (con la ganancia aún en 0). Se recuerdan la estación
+  y el último volumen escuchado (el que devuelve el parlante), nunca el sonido. Costo: cada
+  visita baja el stream aunque no lo escuche.
 - `shared/audio/` tiene el único `AudioContext` de la página: el de three, que ya usan los
   `AudioListener` del fuego. Hubo un silencio general que también apagaba el fuego; al
   meter el parlante dentro de la radio pasó a ser sólo de la radio.
 - La rueda no cuenta como gesto: subida desde 0 antes de cualquier clic en la página, el
-  navegador rechaza el stream. El dial dice "Haz clic para escuchar" y arranca con el
-  siguiente clic o tecla, en cualquier parte.
+  stream sigue en mute (quitárselo sin gesto hace que Chrome lo pause). El dial dice "Haz
+  clic para escuchar" y se oye con el siguiente clic o tecla, en cualquier parte.
 - Cada gesto (el parlante, el deslizador, cambiar de estación) llama al motor dentro de
   su propio handler, no en un efecto: Safari sólo deja empezar un `<audio>` desde el handler del gesto.
 - Si algún día se añade una CSP, la radio necesita `media-src` y `connect-src` para los
