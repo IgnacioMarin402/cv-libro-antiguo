@@ -7,6 +7,12 @@ import './radio.css'
 
 const STATUS_LINE = { tuning: 'Sintonizando…', nosignal: 'Sin señal' }
 
+// The wheel over the volume: five points a notch, either way. Over the
+// radio the wheel is the radio's — the canvas's zoom only hears it over
+// the canvas.
+const wheelVolume = (volume, deltaY) =>
+  Math.round(Math.max(0, Math.min(1, volume - Math.sign(deltaY) * 0.05)) * 100) / 100
+
 // Keys the volume slider uses for itself. Kept from the window, where the
 // camera's WASD and arrows and the way back's Escape listen (see
 // features/camera, shared/ui/BackButton): turning the music down shouldn't
@@ -16,8 +22,9 @@ const SLIDER_KEYS = new Set(['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 
 // The radio, in the bottom-left corner over the canvas and over everything
 // else on it — the magnifier included — so it's always at hand. Off, it's
 // a lyre; on, it opens into a dial: the station, what's playing or what's
-// wrong, a tick for each station on the dial, and the volume. Beside it,
-// the speaker silences the whole page, fires and all (shared/audio/mute).
+// wrong, a tick for each station on the dial, and the volume, which the
+// wheel turns too. Beside it, the speaker silences the whole page, fires
+// and all (shared/audio/mute).
 //
 // Hidden until the loading screen has lifted (`shown`): nothing could play
 // before then anyway.
@@ -29,9 +36,8 @@ export default function RadioControl({ shown }) {
   if (!shown) return null
 
   const { station } = radio
-  const line =
-    STATUS_LINE[radio.status] ??
-    (station.kind === 'ambience' ? station.caption : song ?? station.genre)
+  const line = STATUS_LINE[radio.status] ?? song ?? station.genre
+  const percent = Math.round(radio.volume * 100)
 
   return (
     <div className={radio.on ? 'radio radio--on' : 'radio'} role="group" aria-label="Radio">
@@ -68,13 +74,7 @@ export default function RadioControl({ shown }) {
               {STATIONS.map((s, i) => (
                 <span
                   key={s.id}
-                  className={[
-                    'radio__tick',
-                    s.kind === 'ambience' && 'radio__tick--made',
-                    i === radio.index && 'radio__tick--on',
-                  ]
-                    .filter(Boolean)
-                    .join(' ')}
+                  className={i === radio.index ? 'radio__tick radio__tick--on' : 'radio__tick'}
                 />
               ))}
             </span>
@@ -87,20 +87,29 @@ export default function RadioControl({ shown }) {
           >
             ›
           </button>
-          <input
-            type="range"
+          <label
             className="radio__volume"
-            min="0"
-            max="1"
-            step="0.01"
-            value={radio.volume}
-            aria-label="Volumen de la radio"
-            onChange={(e) => radio.setVolume(parseFloat(e.target.value))}
-            onKeyDown={(e) => {
-              if (SLIDER_KEYS.has(e.key)) e.stopPropagation()
-            }}
-            style={{ '--level': `${radio.volume * 100}%` }}
-          />
+            title={`Volumen ${percent} %`}
+            onWheel={(e) => radio.setVolume(wheelVolume(radio.volume, e.deltaY))}
+          >
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.01"
+              value={radio.volume}
+              aria-label="Volumen de la radio"
+              aria-valuetext={`${percent} %`}
+              onChange={(e) => radio.setVolume(parseFloat(e.target.value))}
+              onKeyDown={(e) => {
+                if (SLIDER_KEYS.has(e.key)) e.stopPropagation()
+              }}
+              style={{ '--level': `${percent}%` }}
+            />
+            <span className="radio__percent" aria-hidden="true">
+              {percent}
+            </span>
+          </label>
         </div>
       )}
 

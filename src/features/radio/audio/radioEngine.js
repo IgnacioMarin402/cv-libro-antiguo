@@ -1,22 +1,17 @@
 import { getAudioContext } from '@/shared/audio/context'
 import { isMuted, subscribeMuted } from '@/shared/audio/mute'
-import { AMBIENCE_LEVEL, FADE_IN, FADE_OUT, STREAM_LEVEL, volumeGain } from '../domain/mix'
-import { startHarp } from './harpStation'
-import { startNight } from './nightStation'
-import { startStorm } from './stormStation'
+import { FADE_IN, FADE_OUT, volumeGain } from '../domain/mix'
 import { startStream } from './streamStation'
-
-const AMBIENCES = { harp: startHarp, storm: startStorm, night: startNight }
 
 // The radio's sound: one station at a time, each on its own gain, through
 // the visitor's volume and the page's silence into the speakers.
 //
 //   station → its level (fades) → volume → mute → speakers
 //
-// Changing station fades the old one out and the new one in (domain/mix):
-// a stream only once it actually plays, so its first second doesn't land
-// at full level. `onStatus` hears the playing station's 'tuning', 'live'
-// or 'nosignal'.
+// Changing station fades the old one out and the new one in (domain/mix),
+// the new one only once it actually plays, so its first second doesn't
+// land at full level. `onStatus` hears the playing station's 'tuning',
+// 'live' or 'nosignal'.
 export function createRadioEngine(onStatus) {
   const ctx = getAudioContext()
   const mute = ctx.createGain()
@@ -35,21 +30,13 @@ export function createRadioEngine(onStatus) {
     const level = ctx.createGain()
     level.gain.value = 0
     level.connect(volume)
-    const target = station.kind === 'stream' ? STREAM_LEVEL : AMBIENCE_LEVEL[station.id]
     const entry = { level, handle: null }
-    // Current before it starts: an ambience is live as soon as it's called.
     current = entry
-    const onStationStatus = (status) => {
+    entry.handle = startStream(ctx, level, station, (status) => {
       if (current !== entry) return
-      if (status === 'live') level.gain.setTargetAtTime(target, ctx.currentTime, FADE_IN / 3)
+      if (status === 'live') level.gain.setTargetAtTime(1, ctx.currentTime, FADE_IN / 3)
       onStatus(status)
-    }
-    if (station.kind === 'stream') {
-      entry.handle = startStream(ctx, level, station, onStationStatus)
-    } else {
-      entry.handle = AMBIENCES[station.id](ctx, level)
-      onStationStatus('live')
-    }
+    })
   }
 
   function stop() {

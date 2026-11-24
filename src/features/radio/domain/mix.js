@@ -2,33 +2,19 @@
 
 // Where the volume slider starts on a first visit. The slider is heard
 // squared (volumeGain), the way loudness is heard: half-way is a quarter of
-// the gain, about 12 dB down, under the candle's crackle up close.
+// the gain, 12 dB down — music under the room, not over it.
 export const DEFAULT_VOLUME = 0.5
 export const volumeGain = (volume) => volume * volume
 
-// Each station's level, so turning the dial doesn't jump in loudness.
-// Measured as integrated loudness (ffmpeg's ebur128) on 2026-11-24: 25 s
-// of each stream gave −11.6 (Explorers), −13.1 (Early Music), −16.6
-// (Rivendell) and −18.3 LUFS (CeltCast) — a median near −15, and a spread
-// that's as much the song as the station, so they share one level. Taken
-// down 3 dB, to about −18.
-export const STREAM_LEVEL = 0.7
-
-// The stations made here, rendered offline for 45 s through their real
-// modules, came out at −23.3 (harp), −17.1 (storm) and −35.0 LUFS (night).
-// These bring the harp to about the streams' −18 — it's music too — and
-// the other two under it: an ambience is a backdrop, the storm at about
-// −21 and the night, which is quiet by nature, at about −26. Their peaks
-// stayed under −2 dBFS. Re-measure if a recipe changes (audio/).
-export const AMBIENCE_LEVEL = {
-  harp: 1.7,
-  storm: 0.62,
-  night: 2.8,
-}
+// Every station plays at the level it comes at. Measured as integrated
+// loudness (ffmpeg's ebur128) on 2026-11-24, 25 s of each gave −11.6
+// (Explorers), −13.1 (Early Music), −16.6 (Rivendell) and −18.3 LUFS
+// (CeltCast): a spread that's as much the song playing as the station, so
+// evening them out by station would only be right half the time.
 
 // Seconds. The old station drops away quickly, so two never talk over
 // each other for long; the new one rises slower, the way a tuning needle
-// settles. A stream only starts rising once it's actually playing.
+// settles — and only once it's actually playing.
 export const FADE_OUT = 0.6
 export const FADE_IN = 1.4
 

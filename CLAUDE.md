@@ -159,31 +159,23 @@ en consola: entonces hay que repartirla en `bookPages.js`.
 ### La radio
 
 `features/radio`: un control abajo a la izquierda, sobre todo lo demás (también sobre la
-lupa), que no tiene nada en la sala. Es un dial con dos clases de estación, definidas en
-`domain/stations.js`:
+lupa), que no tiene nada en la sala. Es un dial de cuatro radios por internet, definidas
+en `domain/stations.js`: Radio Rivendell, Explorers Emporium, CeltCast y Early Music.
+Tiene su volumen (el deslizador, que también gira con la rueda) y, al lado, un parlante.
 
-- **Radios por internet** (Radio Rivendell, Explorers Emporium, CeltCast, Early Music):
-  streams de terceros. No hay ni un byte de música en el repo, y no son assets. Cada
-  stream tiene que responder **por HTTPS y con CORS**. Sin CORS, un `<audio>` pasado por
-  Web Audio suena en silencio, y por Web Audio pasan los fundidos y el silencio general.
-  Para comprobar una estación nueva, **en el navegador, no con curl**: CeltCast manda CORS
-  en el stream pero no en su "qué está sonando", y por eso no muestra el tema. Las
-  radios se buscan en Radio Browser (`api.radio-browser.info`, por tag).
-- **Ambientaciones hechas aquí** (Arpa del mago, Tormenta, Noche): síntesis en Web Audio,
-  sin archivos. Las reglas (el compositor del arpa en re dórico, cuándo cae un trueno, los
-  grillos, el búho) están en `domain/`, y son puras. Cómo suena cada una está en `audio/`,
-  que hace con el sonido lo que `textures/` hace con los materiales. La cuerda del arpa es
-  Karplus–Strong, renderizada en JS y afinada con un all-pass: medida en Node, cada nota
-  queda a menos de 0,7 cents.
-
-Los niveles de `domain/mix.js` están medidos en LUFS con el filtro `ebur128` de ffmpeg:
-25 s de cada stream, y 45 s de cada ambientación renderizada offline con su módulo real
-(`startScheduler` reserva todo el render de una vez si el contexto es un
-`OfflineAudioContext`). Si cambias la receta de una ambientación, vuelve a medir.
-El render offline **no** mide lo que cuesta en vivo: agenda el minuto entero de una vez
-(la tormenta, unas 960 gotas conectadas desde el principio) y salió a sólo 2,9× tiempo
-real. En vivo, cada ambientación gasta del 8 al 11 % de un núcleo (medido desde `/proc`).
-
+- **Son streams de terceros:** no hay ni un byte de música en el repo, y no son assets.
+  Cada stream tiene que responder **por HTTPS y con CORS**. Sin CORS, un `<audio>` pasado
+  por Web Audio suena en silencio, y por Web Audio pasan los fundidos, el volumen y el
+  silencio general. Para comprobar una estación nueva, hazlo **en el navegador, no con
+  curl**: CeltCast manda CORS en el stream pero no en su "qué está sonando", y por eso no
+  muestra el tema. Las radios se buscan en Radio Browser (`api.radio-browser.info`, por
+  tag).
+- **Se probaron y se quitaron** tres ambientaciones sintetizadas en Web Audio (un arpa
+  en re dórico, una tormenta, una noche). El usuario prefirió sólo las radios. Están en
+  la historia de git, en el commit que añadió la radio.
+- **Cada estación suena al nivel que trae.** Medidas en LUFS (`ebur128` de ffmpeg) van de
+  −11,6 a −18,3, una diferencia que depende tanto del tema como de la estación
+  (`domain/mix.js`).
 - La radio **siempre arranca apagada** (es un CV). Se recuerdan la estación y el volumen,
   nunca el encendido.
 - `shared/audio/` tiene el único `AudioContext` de la página (el de three, que ya usan los

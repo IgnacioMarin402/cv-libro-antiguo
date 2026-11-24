@@ -162,8 +162,7 @@
   color: rgba(220, 140, 110, 0.8);
 }
 
-/* A tick for each station on the dial: round for the radios, a diamond
-   for the stations made here; the one playing lit. */
+/* A tick for each station on the dial, the one playing lit. */
 .radio__ticks {
   display: flex;
   gap: 5px;
@@ -180,76 +179,99 @@
     box-shadow 0.3s ease;
 }
 
-.radio__tick--made {
-  border-radius: 0;
-  transform: rotate(45deg) scale(0.9);
-}
-
 .radio__tick--on {
   background: #f3dfb8;
   box-shadow: 0 0 5px rgba(255, 190, 110, 0.8);
 }
 
-/* The volume: a hairline track, gold up to the level, and a small round
-   knob. */
+/* The volume, set off from the station by a hairline: a track gold up to
+   the level, a knob big enough to find, and the level in figures. The
+   first version was a bare 2 px line, and easy to miss. */
 .radio__volume {
+  display: flex;
   flex: none;
-  width: 76px;
-  height: 18px;
-  margin: 0 0 0 6px;
+  align-items: center;
+  gap: 8px;
+  margin-left: 6px;
+  padding-left: 12px;
+  border-left: 1px solid rgba(var(--gold), 0.18);
+  cursor: pointer;
+}
+
+.radio__volume input {
+  width: 96px;
+  height: 22px;
+  margin: 0;
   background: none;
   cursor: pointer;
   appearance: none;
   -webkit-appearance: none;
 }
 
-.radio__volume:focus-visible {
+.radio__volume input:focus-visible {
   outline: none;
 }
 
-.radio__volume::-webkit-slider-runnable-track {
-  height: 2px;
-  border-radius: 1px;
+.radio__volume input::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
   background: linear-gradient(
     to right,
-    rgba(var(--gold), 0.75) var(--level),
-    rgba(var(--gold), 0.2) var(--level)
+    rgba(var(--gold), 0.85) var(--level),
+    rgba(var(--gold), 0.22) var(--level)
   );
 }
 
-.radio__volume::-moz-range-track {
-  height: 2px;
-  border-radius: 1px;
-  background: rgba(var(--gold), 0.2);
+.radio__volume input::-moz-range-track {
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(var(--gold), 0.22);
 }
 
-.radio__volume::-moz-range-progress {
-  height: 2px;
-  border-radius: 1px;
-  background: rgba(var(--gold), 0.75);
+.radio__volume input::-moz-range-progress {
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(var(--gold), 0.85);
 }
 
-.radio__volume::-webkit-slider-thumb {
-  width: 11px;
-  height: 11px;
-  margin-top: -4.5px;
-  border: 1px solid rgba(var(--gold), 0.8);
+.radio__volume input::-webkit-slider-thumb {
+  width: 14px;
+  height: 14px;
+  margin-top: -5px;
+  border: 1px solid #f3dfb8;
   border-radius: 50%;
-  background: #2a1c0e;
+  background: #3a2714;
+  box-shadow: 0 0 6px rgba(255, 190, 110, 0.35);
   appearance: none;
   -webkit-appearance: none;
 }
 
-.radio__volume::-moz-range-thumb {
-  width: 9px;
-  height: 9px;
-  border: 1px solid rgba(var(--gold), 0.8);
+.radio__volume input::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border: 1px solid #f3dfb8;
   border-radius: 50%;
-  background: #2a1c0e;
+  background: #3a2714;
+  box-shadow: 0 0 6px rgba(255, 190, 110, 0.35);
 }
 
-.radio__volume:focus-visible::-webkit-slider-thumb {
-  box-shadow: 0 0 0 3px rgba(var(--gold), 0.25);
+.radio__volume input:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 3px rgba(var(--gold), 0.3);
+}
+
+.radio__volume input:focus-visible::-moz-range-thumb {
+  box-shadow: 0 0 0 3px rgba(var(--gold), 0.3);
+}
+
+/* The loading screen's figures: lining and all one width, so the dial
+   doesn't twitch as it counts. */
+.radio__percent {
+  min-width: 3ch;
+  color: rgba(var(--gold), 0.85);
+  font-size: 12px;
+  font-variant-numeric: lining-nums tabular-nums;
+  letter-spacing: 0.06em;
+  text-align: right;
 }
 
 /* Narrower than the hint's longer line, the hint wraps to two lines, and
@@ -260,20 +282,29 @@
   }
 }
 
-/* A phone has its own volume buttons: the slider would only crowd the
-   dial. */
+/* A phone: the same dial, tighter. The figures go; the slider stays. */
 @media (max-width: 480px) {
   .radio {
     left: 12px;
+    gap: 6px;
     max-width: calc(100vw - 24px);
   }
 
-  .radio__volume {
-    display: none;
+  .radio__tuner {
+    width: 118px;
   }
 
-  .radio__tuner {
-    width: 150px;
+  .radio__volume {
+    margin-left: 2px;
+    padding-left: 8px;
+  }
+
+  .radio__volume input {
+    width: 64px;
+  }
+
+  .radio__percent {
+    display: none;
   }
 }
 

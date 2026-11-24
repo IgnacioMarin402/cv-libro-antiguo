@@ -20,7 +20,7 @@ features/book/
   components/     Sus piezas: Cover, Spine, PageLeaf, PageBlock.
   textures/       Sus materiales pintados a canvas.
   shaders/        Su GLSL, si lo tiene.
-  audio/          Su sonido sintetizado en Web Audio, si lo tiene (hoy, la radio).
+  audio/          Su grafo de Web Audio, si suena (hoy, la radio).
 ```
 
 El reparto entre `domain/` y el resto es el que importa:
