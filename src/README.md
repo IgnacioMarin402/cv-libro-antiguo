@@ -45,8 +45,8 @@ botón para volver de una vista que la cámara fija (hoy, el cuadro), no sabe de
 qué vista vuelve; quien lleva al visitante ahí lo coloca y lo muestra.
 
 `shared/audio/` es lo mismo para el sonido: el único `AudioContext` de la página
-(el de three) y el silencio general, que escucha todo lo que suena sin saber qué
-es (el fuego de `features/candle`, la radio de `features/radio`).
+(el de three, que usan el fuego de `features/candle` y la radio de
+`features/radio`) y cómo despertarlo desde un gesto del visitante.
 
 ## Importar
 

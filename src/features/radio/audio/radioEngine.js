@@ -1,12 +1,11 @@
 import { getAudioContext } from '@/shared/audio/context'
-import { isMuted, subscribeMuted } from '@/shared/audio/mute'
 import { FADE_IN, FADE_OUT, volumeGain } from '../domain/mix'
 import { startStream } from './streamStation'
 
 // The radio's sound: one station at a time, each on its own gain, through
-// the visitor's volume and the page's silence into the speakers.
+// the visitor's volume into the speakers.
 //
-//   station → its level (fades) → volume → mute → speakers
+//   station → its level (fades) → volume → speakers
 //
 // Changing station fades the old one out and the new one in (domain/mix),
 // the new one only once it actually plays, so its first second doesn't
@@ -14,14 +13,8 @@ import { startStream } from './streamStation'
 // 'live' or 'nosignal'.
 export function createRadioEngine(onStatus) {
   const ctx = getAudioContext()
-  const mute = ctx.createGain()
-  mute.gain.value = isMuted() ? 0 : 1
-  mute.connect(ctx.destination)
   const volume = ctx.createGain()
-  volume.connect(mute)
-  const unsubscribe = subscribeMuted((muted) => {
-    mute.gain.setTargetAtTime(muted ? 0 : 1, ctx.currentTime, 0.05)
-  })
+  volume.connect(ctx.destination)
 
   let current = null
 
@@ -35,7 +28,9 @@ export function createRadioEngine(onStatus) {
     entry.handle = startStream(ctx, level, station, (status) => {
       if (current !== entry) return
       if (status === 'live') level.gain.setTargetAtTime(1, ctx.currentTime, FADE_IN / 3)
-      onStatus(status)
+      // A browser may let the stream play and still hold the page's audio
+      // suspended (no gesture yet): it would read as playing, and be mute.
+      onStatus(status === 'live' && ctx.state !== 'running' ? 'blocked' : status)
     })
   }
 
@@ -63,8 +58,7 @@ export function createRadioEngine(onStatus) {
     },
     dispose() {
       stop()
-      unsubscribe()
-      setTimeout(() => mute.disconnect(), FADE_OUT * 1000 + 200)
+      setTimeout(() => volume.disconnect(), FADE_OUT * 1000 + 200)
     },
   }
 }

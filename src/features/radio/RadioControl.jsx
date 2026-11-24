@@ -1,11 +1,15 @@
-import { setMuted, useMuted } from '@/shared/audio/mute'
 import { STATIONS } from './domain/stations'
 import { useRadio } from './hooks/useRadio'
 import { useNowPlaying } from './hooks/useNowPlaying'
 import { LyreIcon, SpeakerIcon } from './components/RadioIcons'
+import Tip from './components/Tip'
 import './radio.css'
 
-const STATUS_LINE = { tuning: 'Sintonizando…', nosignal: 'Sin señal' }
+const STATUS_LINE = {
+  tuning: 'Sintonizando…',
+  nosignal: 'Sin señal',
+  blocked: 'Haz clic para escuchar',
+}
 
 // The wheel over the volume: five points a notch, either way. Over the
 // radio the wheel is the radio's — the canvas's zoom only hears it over
@@ -20,54 +24,59 @@ const wheelVolume = (volume, deltaY) =>
 const SLIDER_KEYS = new Set(['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End', 'PageUp', 'PageDown'])
 
 // The radio, in the bottom-left corner over the canvas and over everything
-// else on it — the magnifier included — so it's always at hand. Off, it's
-// a lyre; on, it opens into a dial: the station, what's playing or what's
-// wrong, a tick for each station on the dial, and the volume, which the
-// wheel turns too. Beside it, the speaker silences the whole page, fires
-// and all (shared/audio/mute).
+// else on it — the magnifier included — so it's always at hand. It comes
+// on with the room, at zero (domain/mix): the dial says what each station
+// is playing, and the speaker or the slider (or the wheel over it) lets it
+// be heard. The lyre folds it away.
 //
-// Hidden until the loading screen has lifted (`shown`): nothing could play
-// before then anyway.
+// What each control is for, it says under the pointer the way the heart
+// counter does (Tip), not with the browser's own tooltip.
+//
+// Hidden until the loading screen has lifted (`shown`).
 export default function RadioControl({ shown }) {
   const radio = useRadio()
-  const muted = useMuted()
-  const song = useNowPlaying(radio.station, radio.on && radio.status === 'live')
+  // Asked only while it's heard: at zero the dial shows the genre, and the
+  // page sends nothing to the stations until the visitor turns one up.
+  const song = useNowPlaying(radio.station, radio.on && radio.volume > 0)
 
   if (!shown) return null
 
-  const { station } = radio
+  const { station, volume } = radio
   const line = STATUS_LINE[radio.status] ?? song ?? station.genre
-  const percent = Math.round(radio.volume * 100)
+  const percent = Math.round(volume * 100)
+  const silent = volume === 0
+  const playing = radio.on && !silent && radio.status === 'live'
 
   return (
-    <div className={radio.on ? 'radio radio--on' : 'radio'} role="group" aria-label="Radio">
+    <div
+      className={['radio', radio.on && 'radio--on', playing && 'radio--playing'].filter(Boolean).join(' ')}
+      role="group"
+      aria-label="Radio"
+    >
       <button
         type="button"
-        className="radio__button radio__power"
+        className="radio__button radio__power radio__tipped"
         aria-pressed={radio.on}
         aria-label={radio.on ? 'Apagar la radio' : 'Encender la radio'}
-        title={radio.on ? 'Apagar la radio' : 'Encender la radio'}
         onClick={radio.power}
       >
         <LyreIcon />
+        <Tip align="start">{radio.on ? 'Apagar la radio' : 'Encender la radio'}</Tip>
       </button>
 
       {radio.on && (
         <div className="radio__dial">
           <button
             type="button"
-            className="radio__step"
+            className="radio__step radio__tipped"
             aria-label="Estación anterior"
             onClick={() => radio.tune(-1)}
           >
-            ‹
+            ‹<Tip>Estación anterior</Tip>
           </button>
-          <div className="radio__tuner" title={`${station.name} · ${line}`}>
+          <div className="radio__tuner radio__tipped">
             <span className="radio__station">{station.name}</span>
-            <span
-              className={`radio__line radio__line--${radio.status}`}
-              aria-live="polite"
-            >
+            <span className={`radio__line radio__line--${radio.status}`} aria-live="polite">
               {line}
             </span>
             <span className="radio__ticks" aria-hidden="true">
@@ -78,26 +87,37 @@ export default function RadioControl({ shown }) {
                 />
               ))}
             </span>
+            <Tip align="wide">{`${station.name} · ${line}`}</Tip>
           </div>
           <button
             type="button"
-            className="radio__step"
+            className="radio__step radio__tipped"
             aria-label="Estación siguiente"
             onClick={() => radio.tune(1)}
           >
-            ›
+            ›<Tip>Estación siguiente</Tip>
           </button>
-          <label
+
+          <div
             className="radio__volume"
-            title={`Volumen ${percent} %`}
-            onWheel={(e) => radio.setVolume(wheelVolume(radio.volume, e.deltaY))}
+            onWheel={(e) => radio.setVolume(wheelVolume(volume, e.deltaY))}
           >
+            <button
+              type="button"
+              className={silent ? 'radio__mute radio__mute--on radio__tipped' : 'radio__mute radio__tipped'}
+              aria-pressed={silent}
+              aria-label={silent ? 'Escuchar la radio' : 'Silenciar la radio'}
+              onClick={radio.toggleSound}
+            >
+              <SpeakerIcon muted={silent} />
+              <Tip>{silent ? 'Escuchar la radio' : 'Silenciar la radio'}</Tip>
+            </button>
             <input
               type="range"
               min="0"
               max="1"
               step="0.01"
-              value={radio.volume}
+              value={volume}
               aria-label="Volumen de la radio"
               aria-valuetext={`${percent} %`}
               onChange={(e) => radio.setVolume(parseFloat(e.target.value))}
@@ -109,20 +129,9 @@ export default function RadioControl({ shown }) {
             <span className="radio__percent" aria-hidden="true">
               {percent}
             </span>
-          </label>
+          </div>
         </div>
       )}
-
-      <button
-        type="button"
-        className={muted ? 'radio__button radio__mute radio__mute--on' : 'radio__button radio__mute'}
-        aria-pressed={muted}
-        aria-label={muted ? 'Activar el sonido' : 'Silenciar todo'}
-        title={muted ? 'Activar el sonido' : 'Silenciar todo'}
-        onClick={() => setMuted(!muted)}
-      >
-        <SpeakerIcon muted={muted} />
-      </button>
     </div>
   )
 }

@@ -3,10 +3,11 @@ import { RECONNECT_AFTER, RECONNECT_TRIES, TUNING_TIMEOUT } from '../domain/mix'
 // An internet radio, through the page's audio graph: an <audio> element
 // fetched with CORS (crossOrigin before src, or the browser fetches it
 // without and the graph hears silence — see domain/stations) and handed
-// to Web Audio, so it fades and mutes like the stations made here.
+// to Web Audio, where the engine fades it in and out and sets its volume.
 //
 // `onStatus` hears 'tuning' while it connects or buffers, 'live' once it
-// plays, 'nosignal' when it won't. A stream that drops after it played is
+// plays, 'nosignal' when it won't, 'blocked' when the browser won't let it
+// without a gesture. A stream that drops after it played is
 // asked again a few times first (domain/mix).
 export function startStream(ctx, out, station, onStatus) {
   const element = new Audio()
@@ -38,10 +39,14 @@ export function startStream(ctx, out, station, onStatus) {
     status('tuning')
     armTimeout()
     element.src = station.url
-    element.play().catch(() => {
-      // AbortError when it's stopped before it starts, NotAllowedError if
-      // the gesture didn't carry: either way 'error' or the timeout says
-      // the rest.
+    element.play().catch((error) => {
+      // NotAllowedError: no gesture behind this play (the wheel, before
+      // any click). The radio waits for one (hooks/useRadio). Anything
+      // else — AbortError when it's stopped first — 'error' or the timeout
+      // will tell.
+      if (error?.name !== 'NotAllowedError') return
+      clearTimeout(timeout)
+      status('blocked')
     })
   }
   function lost() {
