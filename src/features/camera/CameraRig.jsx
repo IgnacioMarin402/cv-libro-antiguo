@@ -8,7 +8,8 @@ import { SHOTS, shotFor, INTRO_DURATION, OPEN_ZOOM_DURATION, ORBIT_LIMITS } from
 import { focusShot, FOCUS_DURATION, routeHeight } from './domain/focus'
 
 // Orbits the book once idle. Opens on a slow dolly-in from a wide shot, then
-// dollies to a closer, frontal framing whenever the book is opened, and back
+// dollies to where the spread is read (see readingShot) whenever the book
+// is opened, and back
 // out again when it's closed.
 //
 // An open book also hands the visitor the keyboard: WASD slides the frame
@@ -98,7 +99,7 @@ export default function CameraRig({ open = false, ready = true, focus = null }) 
       if (focusRef.current) {
         aimAt(focusRef.current, state, anim)
       } else {
-        const shot = shotFor(open)
+        const shot = shotFor(open, state.size.width / state.size.height, camera.fov)
         anim.toPos.copy(shot.position)
         anim.toTarget.copy(shot.target)
       }
@@ -108,7 +109,7 @@ export default function CameraRig({ open = false, ready = true, focus = null }) 
     } else if (requestedOpen.current !== null && !focusRef.current) {
       // Always re-aims from wherever the visitor left the camera, not from
       // the shot it nominally sat at.
-      const shot = shotFor(requestedOpen.current)
+      const shot = shotFor(requestedOpen.current, state.size.width / state.size.height, camera.fov)
       requestedOpen.current = null
       zoomAnim.current = {
         fromPos: camera.position.clone(),

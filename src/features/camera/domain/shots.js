@@ -34,18 +34,71 @@ export const SHOTS = {
     position: new THREE.Vector3(0.35, 0.62, 0.95),
     target: new THREE.Vector3(PAGE_WIDTH / 2, topSurfaceY, -PAGE_HEIGHT * 0.05),
   },
-  // Open book: closer and more frontal, centred on the spine — which IS
-  // the open spread's middle: the two boards are bound either side of it
-  // and every other leaf reaches less far than the board under it (see
-  // pageCurlBook/domain/pile). Measured on the settled pose, the spread
-  // spans x [-0.349, +0.349] at every page.
-  open: {
-    position: new THREE.Vector3(0.05, 0.78, 1.05),
-    target: new THREE.Vector3(0, topSurfaceY + 0.05, 0.03),
-  },
 }
 
-export const shotFor = (open) => (open ? SHOTS.open : SHOTS.rest)
+// Open book: the lens goes straight to where the spread is read, not to a
+// nearer look at the table — clicking the book is asking to read it. It
+// looks down on the book almost square, READING_TILT off the vertical
+// towards the reader, so the page's head is up and the lines run level
+// across the screen: at 20 deg the perspective and the leaves' rise towards
+// the spine sloped them visibly. Not 0: straight down, lookAt has no way to
+// tell which way is up. And it
+// stands as close as lets the whole spread fit READING_FILL of the screen in
+// whichever dimension is tighter, so a phone held upright backs off rather
+// than cropping a page.
+//
+// The spread, centred on the spine — which IS its middle: the two boards
+// are bound either side of it and every other leaf reaches less far than
+// the board under it (see pageCurlBook/domain/pile). Measured on the
+// settled pose, it spans x [-0.349, +0.349] at every page; z is the board's
+// height; and y leaves room for the leaves' rise towards the spine.
+export const READING_TILT = 0.06
+export const READING_FILL = 0.9
+const SPREAD = new THREE.Box3(
+  new THREE.Vector3(-0.35, 0, -PAGE_HEIGHT / 2),
+  new THREE.Vector3(0.35, topSurfaceY + 0.05, PAGE_HEIGHT / 2),
+)
+
+export function readingShot(aspect, fovDegrees) {
+  const target = new THREE.Vector3(0, topSurfaceY, 0)
+  const toward = new THREE.Vector3(0, Math.cos(READING_TILT), Math.sin(READING_TILT))
+  const lens = new THREE.PerspectiveCamera(fovDegrees, aspect, 0.01, 50)
+  const corner = new THREE.Vector3()
+  const fits = (distance) => {
+    lens.position.copy(target).addScaledVector(toward, distance)
+    lens.lookAt(target)
+    lens.updateMatrixWorld()
+    for (let i = 0; i < 8; i++) {
+      corner.set(i & 1 ? SPREAD.max.x : SPREAD.min.x, i & 2 ? SPREAD.max.y : SPREAD.min.y, i & 4 ? SPREAD.max.z : SPREAD.min.z)
+      corner.project(lens)
+      if (Math.abs(corner.x) > READING_FILL || Math.abs(corner.y) > READING_FILL) return false
+    }
+    return true
+  }
+  // Fitting only gets easier backing off, so halve the gap to the nearest
+  // distance that fits.
+  let near = 0.2
+  let far = 6
+  for (let i = 0; i < 30; i++) {
+    const mid = (near + far) / 2
+    if (fits(mid)) far = mid
+    else near = mid
+  }
+  return { position: target.clone().addScaledVector(toward, far), target }
+}
+
+// Closing the book backs off further than the rest shot the visit settles
+// on: the reader is done with it and wants the room back. Same line of
+// sight, CLOSE_BACKOFF times as far from the book: 1.50 m against 1.15.
+// Measured live, the nearest thing to the lens there (a throne's bounding
+// box) is 34.6 cm away.
+export const CLOSE_BACKOFF = 1.3
+const CLOSED = {
+  position: SHOTS.rest.target.clone().lerp(SHOTS.rest.position, CLOSE_BACKOFF),
+  target: SHOTS.rest.target,
+}
+
+export const shotFor = (open, aspect, fovDegrees) => (open ? readingShot(aspect, fovDegrees) : CLOSED)
 
 export const INTRO_DURATION = 2000
 export const OPEN_ZOOM_DURATION = 1700
