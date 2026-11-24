@@ -11,6 +11,7 @@ import { BOOK_PAGES, CvLink } from '@/features/cv'
 import { TreatButton, TreatCounter, useTreats } from '@/features/bust'
 import BackButton from '@/shared/ui/BackButton'
 import { GpuNotice } from '@/features/gpuNotice'
+import { RadioControl } from '@/features/radio'
 
 // What the visitor can do right now, which is not the same before and after
 // the book opens: an open book takes the keyboard and lets the lens much
@@ -141,6 +142,7 @@ export default function App() {
       />
       <TreatButton ref={treatButton} open={view === 'bust'} treats={treats} throwRef={treatThrow} />
       <GpuNotice glRef={renderer} revealed={revealed} />
+      <RadioControl shown={revealed} />
       <LoadingScreen ready={ready} warmupRef={warmup} onReveal={() => setRevealed(true)} />
     </div>
   )

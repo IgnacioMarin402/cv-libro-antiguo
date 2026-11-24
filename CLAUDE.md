@@ -156,6 +156,42 @@ Contacto sólo LinkedIn y GitHub (el sitio es público). Para cambiar el CV, edi
 `cv.js`; si una página del libro se llena, `pageTexture` la achica hasta `MIN_FIT` y avisa
 en consola: entonces hay que repartirla en `bookPages.js`.
 
+### La radio
+
+`features/radio`: un control abajo a la izquierda, sobre todo lo demás (también sobre la
+lupa), que no tiene nada en la sala. Es un dial con dos clases de estación, definidas en
+`domain/stations.js`:
+
+- **Radios por internet** (Radio Rivendell, Explorers Emporium, CeltCast, Early Music):
+  streams de terceros. No hay ni un byte de música en el repo, y no son assets. Cada
+  stream tiene que responder **por HTTPS y con CORS**. Sin CORS, un `<audio>` pasado por
+  Web Audio suena en silencio, y por Web Audio pasan los fundidos y el silencio general.
+  Para comprobar una estación nueva, **en el navegador, no con curl**: CeltCast manda CORS
+  en el stream pero no en su "qué está sonando", y por eso no muestra el tema. Las
+  radios se buscan en Radio Browser (`api.radio-browser.info`, por tag).
+- **Ambientaciones hechas aquí** (Arpa del mago, Tormenta, Noche): síntesis en Web Audio,
+  sin archivos. Las reglas (el compositor del arpa en re dórico, cuándo cae un trueno, los
+  grillos, el búho) están en `domain/`, y son puras. Cómo suena cada una está en `audio/`,
+  que hace con el sonido lo que `textures/` hace con los materiales. La cuerda del arpa es
+  Karplus–Strong, renderizada en JS y afinada con un all-pass: medida en Node, cada nota
+  queda a menos de 0,7 cents.
+
+Los niveles de `domain/mix.js` están medidos en LUFS con el filtro `ebur128` de ffmpeg:
+25 s de cada stream, y 45 s de cada ambientación renderizada offline con su módulo real
+(`startScheduler` reserva todo el render de una vez si el contexto es un
+`OfflineAudioContext`). Si cambias la receta de una ambientación, vuelve a medir.
+
+- La radio **siempre arranca apagada** (es un CV). Se recuerdan la estación y el volumen,
+  nunca el encendido.
+- `shared/audio/` tiene el único `AudioContext` de la página (el de three, que ya usan los
+  `AudioListener` del fuego) y el **silencio general**. El parlante junto a la radio
+  silencia también las velas y la chimenea (`FireAudio` lo escucha), y el silencio se
+  recuerda entre visitas.
+- Cada gesto (encender, cambiar de estación) llama al motor dentro del propio clic, no
+  en un efecto: Safari sólo deja empezar un `<audio>` desde el handler del gesto.
+- Si algún día se añade una CSP, la radio necesita `media-src` y `connect-src` para los
+  hosts de `stations.js`.
+
 ## Arquitectura
 
 Tres capas, y una regla por capa:

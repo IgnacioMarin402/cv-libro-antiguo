@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { useThree } from '@react-three/fiber'
 import * as THREE from 'three'
+import { isMuted, subscribeMuted } from '@/shared/audio/mute'
 
 // Loops a crackling-fire ambience anchored at the flame. Loads immediately,
 // but only calls .play() after the visitor's first pointer interaction —
@@ -11,6 +12,9 @@ import * as THREE from 'three'
 // fall, and `maxDistance` where it stops falling. `offset` is where in the
 // loop it starts, as a fraction of it, so two fires playing the one file
 // from the same click don't crackle in unison.
+//
+// It goes quiet with the rest of the page when the visitor silences it from
+// the corner (shared/audio/mute, set by features/radio).
 export default function FireAudio({
   position = [0, 0, 0],
   url = '/audio/fire-ambience.mp3',
@@ -25,6 +29,8 @@ export default function FireAudio({
   useEffect(() => {
     const listener = new THREE.AudioListener()
     camera.add(listener)
+    listener.setMasterVolume(isMuted() ? 0 : 1)
+    const unsubscribe = subscribeMuted((muted) => listener.setMasterVolume(muted ? 0 : 1))
 
     const sound = new THREE.PositionalAudio(listener)
     sound.setRefDistance(refDistance)
@@ -47,6 +53,7 @@ export default function FireAudio({
     canvas.addEventListener('pointerdown', start, { once: true })
 
     return () => {
+      unsubscribe()
       canvas.removeEventListener('pointerdown', start)
       if (sound.isPlaying) sound.stop()
       anchorRef.current?.remove(sound)
