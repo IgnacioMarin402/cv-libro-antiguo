@@ -38,6 +38,18 @@ export const TYPE = {
 // almost on edge to the lens.
 export const MARGIN = { top: 46, bottom: 50, inner: 42, outer: 30 }
 
+// How far below the top margin a page's text starts, when the page has the
+// room: the sinkage of a chapter opening, on every page. A leaf's head lies
+// toward the candle, and that end of the open book is the brightest thing
+// on the table and the farthest from the lens. On the open book leaned
+// into, its paper measured 0.79 in luminance over the first 110 mm, 0.69 by
+// 200 mm and 0.58 by 330, and its text was reported washed out. 130 mm
+// starts the text about a third of the way down the leaf. A page with less
+// room below its text than that drops only as far as it can, never into its
+// folio and never set smaller: in DejaVu Serif, the fullest two, 12 and 13,
+// had 17 and 48 mm to give (Palatino sets narrower, so they have more).
+export const SINK = 130
+
 // Iron-gall ink for the text, near black, and red for what a rubricator
 // would have picked out: headings, initials, the marks before each item.
 // The faded ink (dates, notes, the running head) is a lighter shade of it.

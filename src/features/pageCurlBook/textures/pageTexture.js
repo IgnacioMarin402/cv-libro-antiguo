@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 import { paintPaper } from './paperTexture'
 import { PAPER_WIDTH, PAPER_HEIGHT } from '../domain/pageCurl'
-import { TYPE, MARGIN, INK, INK_SPREAD, MIN_FIT } from '../domain/typography'
+import { TYPE, MARGIN, SINK, INK, INK_SPREAD, MIN_FIT } from '../domain/typography'
 
 // A printed page: the paper (see paperTexture) with a page's blocks set on
 // it. The book doesn't know what it prints; a page is a list of blocks —
@@ -15,7 +15,8 @@ import { TYPE, MARGIN, INK, INK_SPREAD, MIN_FIT } from '../domain/typography'
 //   pairs { items, align, large }     label + text, one per line
 //   signature · ornament · rule · space { mm }
 //
-// — plus `head` (the running head) and `valign: 'center'`.
+// — plus `head` (the running head) and `valign: 'center'`. A page that
+// isn't centred starts SINK below the top margin, if it has the room.
 //
 // Which face of a leaf a page lands on decides which side its gutter is
 // on: a right-hand page (a leaf's +z face) has the spine on its left, and a
@@ -293,7 +294,10 @@ export function setPage(ctx, page, side, folio) {
     s *= 0.96
     used = setBlocks(ctx, page.blocks, s, inner, top, width, false)
   }
-  const offset = page.valign === 'center' ? Math.max(0, (room - used) / 2) : 0
+  // A centred page sits in the middle of its room; any other starts SINK
+  // lower, or as far as its room allows.
+  const free = Math.max(0, room - used)
+  const offset = page.valign === 'center' ? free / 2 : Math.min(SINK * PX, free)
   setBlocks(ctx, page.blocks, s, inner, top + offset, width, true)
 
   if (page.head) paragraph(ctx, [{ text: page.head, style: STYLE.head }], 1, inner, MARGIN.top * 0.42 * PX, width, { align: 'center' }, true)
