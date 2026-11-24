@@ -180,6 +180,9 @@ Los niveles de `domain/mix.js` están medidos en LUFS con el filtro `ebur128` de
 25 s de cada stream, y 45 s de cada ambientación renderizada offline con su módulo real
 (`startScheduler` reserva todo el render de una vez si el contexto es un
 `OfflineAudioContext`). Si cambias la receta de una ambientación, vuelve a medir.
+El render offline **no** mide lo que cuesta en vivo: agenda el minuto entero de una vez
+(la tormenta, unas 960 gotas conectadas desde el principio) y salió a sólo 2,9× tiempo
+real. En vivo, cada ambientación gasta del 8 al 11 % de un núcleo (medido desde `/proc`).
 
 - La radio **siempre arranca apagada** (es un CV). Se recuerdan la estación y el volumen,
   nunca el encendido.
@@ -354,3 +357,12 @@ raycast, así que no sirven para abrir el libro desde una prueba.
 > `Object.defineProperty(e, 'offsetX', { get: () => ox })`, con `ox`/`oy` relativos al
 > canvas. Y el `click` final es un `MouseEvent` aparte: sin él `onClick` no dispara,
 > porque los `pointer*` solos no abren el libro.
+
+**Sin GPU (el contenedor de Claude Code en la nube), la escena no llega a revelarse:** con
+WebGL por software el calentamiento del loader se quedó en "Encendiendo las velas" más de
+25 minutos. Para verificar algo HTML sobre el canvas (la radio, los contadores), se
+reescribe `App.jsx` al servirlo, sólo en la prueba: `page.route(/\/src\/app\/App\.jsx/)` y
+cambiar `shown: revealed` por `shown: true`. El resto de la `App` real queda montado
+debajo. Mientras la escena carga, el hilo principal tarda segundos por cuadro: los
+`page.click` necesitan `{ force: true, noWaitAfter: true }`, o vencen esperando dos
+cuadros estables.
