@@ -3,8 +3,6 @@ import { Canvas } from '@react-three/fiber'
 import Scene from './Scene'
 import { configureScene } from './scene/renderer'
 import AdaptiveResolution from './scene/AdaptiveResolution'
-import { readDevice, textureBudget } from './scene/textureBudget'
-import { setMaxTextureSize } from '@/shared/three/useGLTF'
 import { CAMERA, SHOTS } from '@/features/camera'
 import { LoadingScreen, SceneWarmup } from '@/features/loader'
 import { LoveCounter, LoveHeartTip, useLove } from '@/features/love'
@@ -28,10 +26,6 @@ const HINTS = {
   bust: 'Dale una galleta a Shourdo · Flecha o Esc para volver al libro',
   mug: 'Flecha o Esc para volver al libro',
 }
-
-// Before the canvas mounts, when the models start loading: on a phone the
-// room as made doesn't fit in memory (see scene/textureBudget).
-setMaxTextureSize(textureBudget(readDevice(navigator)))
 
 export default function App() {
   // Whether the book is open is the scene's one piece of shared state: the

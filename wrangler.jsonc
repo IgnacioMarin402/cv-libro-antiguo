@@ -16,5 +16,9 @@
   // database by name, or creates it the first time.
   "d1_databases": [{ "binding": "DB", "database_name": "libro-counters" }],
   "vars": { "TREATS_TIME_ZONE": "America/Santiago" },
+  // Every other branch Workers Builds builds as a preview, with `wrangler
+  // preview`, which won't take the vars above for it: without this block it
+  // failed on every pull request, asking for each var again here.
+  "previews": { "vars": { "TREATS_TIME_ZONE": "America/Santiago" } },
   "observability": { "enabled": true }
 }
