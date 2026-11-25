@@ -278,16 +278,6 @@ que estableció esta estructura.
   huesos), `MOTE_COUNT`, `DUST_COUNT`, el `shadow-mapSize` de la vela, el `dpr` del
   canvas — que `app/scene/resolution.js` baja solo, de a 0,25 y nunca bajo 1, si la
   mediana del frame pasa de 22 ms; en una máquina rápida no hace nada.
-- **En el celular, las texturas de los GLB se decodifican a 1024** (512 si Chrome dice
-  ≤ 2 GB de memoria; computadores con ≤ 4 GB, también a 1024): `app/scene/textureBudget.js`
-  decide el tamaño y `useGLTF` lo aplica con el plugin de `shared/three/cappedTextures.js`,
-  que las achica al decodificarlas, una por una. A 2048 son 61 mapas, 1,26 GB en la GPU
-  con mipmaps más casi otro tanto en bitmaps: emulando un iPhone 13 en Chromium la página
-  llegó a 3,5 GB y Safari en un iPhone mata la pestaña mucho antes — la sala no se veía en
-  los celulares. Con el tope, 1,8 GB; en el computador no cambia nada. Un GLB nuevo suma
-  ~21 MB por mapa de 2048 en el computador; en el celular, la cuarta parte. Para medir: sumar
-  el RSS de los procesos de Chromium (`ps`) con `devices['iPhone 13']`; con WebGL por
-  software, la GPU es un proceso más.
 - **Qué GPU dibuja no lo decide la página:** R3F ya pide `powerPreference:
   'high-performance'`, pero en Windows el navegador usa la gráfica que Windows le dio, y
   en un portátil con dos suele ser la integrada. `features/gpuNotice` lo detecta
