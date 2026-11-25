@@ -129,7 +129,9 @@ en los dos); los monta `server/server.js` en producción y Vite en `dev`/`previe
   panel. Sin el binding `DB` la API responde 503 y la página esconde los contadores. La
   IP es `CF-Connecting-IP` (no hay `TRUST_PROXY`), y el día de las galletas es el de
   `America/Santiago` (`TREATS_TIME_ZONE` en `vars`), porque un Worker no tiene hora
-  local. Las cabeceras de seguridad de los estáticos van en `public/_headers`. En local:
+  local. Las demás ramas (los PR) se compilan con `wrangler preview`, que no toma esas
+  `vars`: las pide otra vez en `previews.vars`, y sin ellas la verificación falla en cada
+  PR. Una var nueva va en los dos lugares. Las cabeceras de seguridad de los estáticos van en `public/_headers`. En local:
   `npm run build` y `npx wrangler dev`. Si cambias un handler de `server/`, cambia
   también su gemelo de `server/worker/`.
 - `server/server.js` manda en cada respuesta `frame-ancestors 'none'` + `X-Frame-Options`
@@ -278,6 +280,18 @@ que estableció esta estructura.
   huesos), `MOTE_COUNT`, `DUST_COUNT`, el `shadow-mapSize` de la vela, el `dpr` del
   canvas — que `app/scene/resolution.js` baja solo, de a 0,25 y nunca bajo 1, si la
   mediana del frame pasa de 22 ms; en una máquina rápida no hace nada.
+- **Celulares y tablets no cargan la sala:** `main.jsx` monta `features/mobileNotice` en
+  vez de `App` (un aviso para abrirla en computador y un enlace a `/cv/`). No cabe en su
+  memoria: los GLB traen 61 mapas de 2048, 1,26 GB en la GPU con mipmaps más casi otro
+  tanto en bitmaps; emulando un iPhone 13 en Chromium la página llegó a 3,5 GB, y Safari
+  en un iPhone cerraba la pestaña ("Ocurrió un problema varias veces"). **Se probó y se
+  revirtió** decodificar los mapas a 1024 en el celular (un plugin de `GLTFLoader` en
+  `useGLTF`; está en la historia de git): la emulación bajó a 1,8 GB y el iPhone, con ese
+  código ya publicado, la siguió cerrando. Volver a abrirle la sala al celular pide
+  bastante menos memoria (texturas KTX2, menos modelos o los modelos simplificados), y
+  medirlo en un iPhone real, no en la emulación. Medir: sumar el RSS de los procesos de
+  Chromium (`ps`) con `devices['iPhone 13']`; con WebGL por software, la GPU es un proceso
+  más.
 - **Qué GPU dibuja no lo decide la página:** R3F ya pide `powerPreference:
   'high-performance'`, pero en Windows el navegador usa la gráfica que Windows le dio, y
   en un portátil con dos suele ser la integrada. `features/gpuNotice` lo detecta
